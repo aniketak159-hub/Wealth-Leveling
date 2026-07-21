@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -5,11 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { Dashboard } from "@workspace/api-client-react";
 import { Terminal, Shield, Zap, Target } from "lucide-react";
 import { useListQuests, useListSkills, useListBuilds } from "@workspace/api-client-react";
+import EvaluationModal from "./EvaluationModal";
 
 export default function OverviewTab({ dashboard }: { dashboard: Dashboard }) {
   const { data: quests } = useListQuests();
   const { data: skills } = useListSkills();
   const { data: builds } = useListBuilds();
+  const [evalOpen, setEvalOpen] = useState(false);
 
   const activeQuests = quests?.filter(q => !q.completed) || [];
   const topSkills = skills?.sort((a, b) => b.level - a.level).slice(0, 3) || [];
@@ -82,11 +85,13 @@ export default function OverviewTab({ dashboard }: { dashboard: Dashboard }) {
               <h3 className="font-heading text-lg text-primary tracking-widest font-bold">MONTHLY EVALUATION</h3>
               <p className="text-xs text-muted-foreground mt-1 max-w-sm">Submit your financial data for the month to calculate XP gains, level ups, and stat improvements.</p>
             </div>
-            <Button size="lg" className="shrink-0 w-full md:w-auto">
+            <Button size="lg" className="shrink-0 w-full md:w-auto" onClick={() => setEvalOpen(true)}>
               INITIATE SCAN
             </Button>
           </CardContent>
         </Card>
+
+        <EvaluationModal open={evalOpen} onClose={() => setEvalOpen(false)} />
 
         {/* ACTIVE QUESTS */}
         <Card className="flex-1">
