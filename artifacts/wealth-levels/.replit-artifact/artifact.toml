@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "Wealth Levels"
+version = "1.0.0"
+id = "artifacts/wealth-levels"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23656
+
+[services.development]
+run = "pnpm --filter @workspace/wealth-levels run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/wealth-levels", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/wealth-levels/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23656"
+BASE_PATH = "/"
