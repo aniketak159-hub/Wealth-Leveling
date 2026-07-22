@@ -9,6 +9,7 @@ import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import Home from "@/pages/Home";
 import DashboardPage from "@/pages/Dashboard";
 import AdminPage from "@/pages/Admin";
+import ProfilePage from "@/pages/Profile";
 import NotFound from "@/pages/not-found";
 
 const clerkPubKey = publishableKeyFromHost(
@@ -126,6 +127,19 @@ function AdminProtect() {
   );
 }
 
+function ProfileProtect() {
+  return (
+    <>
+      <Show when="signed-in">
+        <ProfilePage />
+      </Show>
+      <Show when="signed-out">
+        <Redirect to="/" />
+      </Show>
+    </>
+  );
+}
+
 function ClerkQueryClientCacheInvalidator() {
   const { addListener } = useClerk();
   const qc = useQueryClient();
@@ -183,6 +197,7 @@ function ClerkProviderWithRoutes() {
           <Route path="/sign-up/*?" component={SignUpPage} />
           <Route path="/dashboard" component={DashboardProtect} />
           <Route path="/admin" component={AdminProtect} />
+          <Route path="/profile" component={ProfileProtect} />
           <Route component={NotFound} />
         </Switch>
       </QueryClientProvider>

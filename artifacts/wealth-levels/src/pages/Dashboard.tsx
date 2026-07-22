@@ -6,7 +6,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { LogOut, LayoutDashboard, Database, Target, BookOpen, User, Settings, ShieldAlert, Cpu, BarChart } from "lucide-react";
+import { LogOut, LayoutDashboard, Database, Target, BookOpen, User, ShieldAlert, Cpu, BarChart } from "lucide-react";
 import { useClerk } from "@clerk/react";
 
 import OverviewTab from "@/components/dashboard/OverviewTab";
@@ -88,6 +88,9 @@ export default function DashboardPage() {
               <div className="text-xl font-mono text-primary hud-glow">₹{dashboard.netWorth.toLocaleString('en-IN')}</div>
             </div>
             <div className="flex gap-2 border-l border-primary/30 pl-4">
+              <Button variant="outline" size="icon" onClick={() => setLocation("/profile")} title="My Profile">
+                <User className="w-4 h-4" />
+              </Button>
               {me?.isAdmin && (
                 <Button variant="outline" size="icon" onClick={() => setLocation("/admin")} title="Admin Panel">
                   <ShieldAlert className="w-4 h-4" />
