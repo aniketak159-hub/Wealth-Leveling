@@ -125,7 +125,7 @@ router.post("/auth/pin-login", async (req, res): Promise<void> => {
     }
 
     // Issue a Clerk sign-in token (valid for 2 minutes)
-    const tokenObj = await clerk.signInTokens.create({
+    const tokenObj = await clerk.signInTokens.createSignInToken({
       userId: clerkUser.id,
       expiresInSeconds: 120,
     });
