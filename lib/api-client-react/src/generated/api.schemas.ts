@@ -437,3 +437,84 @@ export interface LeaderboardEntry {
   xp: number;
 }
 
+
+// ─── Badge ────────────────────────────────────────────────────────────────────
+export type BadgeRarity = 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY';
+export type BadgeTriggerType = 'QUEST_COUNT' | 'SKILL_COUNT' | 'BUILD_COUNT' | 'NET_WORTH' | 'LEVEL' | 'DAYS_ACTIVE' | 'MANUAL';
+
+export interface AdminBadgeResponse {
+  id: number;
+  name: string;
+  description: string;
+  icon: string;
+  rarity: BadgeRarity;
+  triggerType: BadgeTriggerType;
+  triggerValue: number;
+  createdAt: string;
+}
+
+export interface AdminCreateBadgeBody {
+  name: string;
+  description?: string;
+  icon?: string;
+  rarity?: BadgeRarity;
+  triggerType?: BadgeTriggerType;
+  triggerValue?: number;
+}
+
+export interface AdminUpdateBadgeBody {
+  name?: string;
+  description?: string;
+  icon?: string;
+  rarity?: BadgeRarity;
+  triggerType?: BadgeTriggerType;
+  triggerValue?: number;
+}
+
+// ─── Milestone ────────────────────────────────────────────────────────────────
+export type MilestoneCategory = 'QUEST' | 'SKILL' | 'BUILD' | 'WEALTH' | 'CHARACTER';
+
+export interface AdminMilestoneResponse {
+  id: number;
+  name: string;
+  description: string;
+  icon: string;
+  category: MilestoneCategory;
+  threshold: number;
+  xpReward: number;
+  createdAt: string;
+}
+
+export interface AdminCreateMilestoneBody {
+  name: string;
+  description?: string;
+  icon?: string;
+  category?: MilestoneCategory;
+  threshold?: number;
+  xpReward?: number;
+}
+
+export interface AdminUpdateMilestoneBody {
+  name?: string;
+  description?: string;
+  icon?: string;
+  category?: MilestoneCategory;
+  threshold?: number;
+  xpReward?: number;
+}
+
+// ─── Quest Push ───────────────────────────────────────────────────────────────
+export interface AdminPushQuestBody {
+  userId?: number;
+  title: string;
+  description?: string;
+  category?: 'SYSTEM' | 'SELF';
+  targetAmount?: number;
+  xpReward?: number;
+  frequency?: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'ONGOING';
+}
+
+export interface AdminPushQuestResponse {
+  pushed: number;
+  message: string;
+}

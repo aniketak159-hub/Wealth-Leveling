@@ -20,7 +20,15 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AdminBadgeResponse,
+  AdminCreateBadgeBody,
+  AdminCreateMilestoneBody,
+  AdminMilestoneResponse,
+  AdminPushQuestBody,
+  AdminPushQuestResponse,
   AdminStats,
+  AdminUpdateBadgeBody,
+  AdminUpdateMilestoneBody,
   AdminUser,
   AdminUserDetail,
   AdminUserUpdate,
@@ -2361,3 +2369,190 @@ export function useAdminGetLeaderboard<TData = Awaited<ReturnType<typeof adminGe
 
 
 
+
+
+// ─── Badges ───────────────────────────────────────────────────────────────────
+
+export const getAdminListBadgesUrl = () => `/api/admin/badges`;
+
+export const adminListBadges = async (options?: RequestInit): Promise<AdminBadgeResponse[]> =>
+  customFetch<AdminBadgeResponse[]>(getAdminListBadgesUrl(), { ...options, method: 'GET' });
+
+export const getAdminListBadgesQueryKey = () => ['/api/admin/badges'] as const;
+
+export const getAdminListBadgesQueryOptions = <TData = Awaited<ReturnType<typeof adminListBadges>>, TError = ErrorType<void>>(
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof adminListBadges>>, TError, TData>; request?: SecondParameter<typeof customFetch> }
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+  const queryKey = queryOptions?.queryKey ?? getAdminListBadgesQueryKey();
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof adminListBadges>>> = ({ signal }) => adminListBadges({ signal, ...requestOptions });
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<Awaited<ReturnType<typeof adminListBadges>>, TError, TData> & { queryKey: QueryKey };
+};
+
+export function useAdminListBadges<TData = Awaited<ReturnType<typeof adminListBadges>>, TError = ErrorType<void>>(
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof adminListBadges>>, TError, TData>; request?: SecondParameter<typeof customFetch> }
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getAdminListBadgesQueryOptions(options);
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const adminCreateBadge = async (body: AdminCreateBadgeBody, options?: RequestInit): Promise<AdminBadgeResponse> =>
+  customFetch<AdminBadgeResponse>(getAdminListBadgesUrl(), {
+    ...options, method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(body),
+  });
+
+export const getAdminCreateBadgeMutationOptions = <TError = ErrorType<void>, TContext = unknown>(
+  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminCreateBadge>>, TError, { data: AdminCreateBadgeBody }, TContext>; request?: SecondParameter<typeof customFetch> }
+): UseMutationOptions<Awaited<ReturnType<typeof adminCreateBadge>>, TError, { data: AdminCreateBadgeBody }, TContext> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+  const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCreateBadge>>, { data: AdminCreateBadgeBody }> = ({ data }) => adminCreateBadge(data, requestOptions);
+  return { mutationFn, ...mutationOptions };
+};
+
+export const useAdminCreateBadge = <TError = ErrorType<void>, TContext = unknown>(
+  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminCreateBadge>>, TError, { data: AdminCreateBadgeBody }, TContext>; request?: SecondParameter<typeof customFetch> }
+): UseMutationResult<Awaited<ReturnType<typeof adminCreateBadge>>, TError, { data: AdminCreateBadgeBody }, TContext> =>
+  useMutation(getAdminCreateBadgeMutationOptions(options));
+
+export const adminUpdateBadge = async (id: string, body: AdminUpdateBadgeBody, options?: RequestInit): Promise<AdminBadgeResponse> =>
+  customFetch<AdminBadgeResponse>(`/api/admin/badges/${id}`, {
+    ...options, method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(body),
+  });
+
+export const getAdminUpdateBadgeMutationOptions = <TError = ErrorType<void>, TContext = unknown>(
+  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminUpdateBadge>>, TError, { id: string; data: AdminUpdateBadgeBody }, TContext>; request?: SecondParameter<typeof customFetch> }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateBadge>>, TError, { id: string; data: AdminUpdateBadgeBody }, TContext> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+  const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateBadge>>, { id: string; data: AdminUpdateBadgeBody }> = ({ id, data }) => adminUpdateBadge(id, data, requestOptions);
+  return { mutationFn, ...mutationOptions };
+};
+
+export const useAdminUpdateBadge = <TError = ErrorType<void>, TContext = unknown>(
+  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminUpdateBadge>>, TError, { id: string; data: AdminUpdateBadgeBody }, TContext>; request?: SecondParameter<typeof customFetch> }
+): UseMutationResult<Awaited<ReturnType<typeof adminUpdateBadge>>, TError, { id: string; data: AdminUpdateBadgeBody }, TContext> =>
+  useMutation(getAdminUpdateBadgeMutationOptions(options));
+
+export const adminDeleteBadge = async (id: string, options?: RequestInit): Promise<void> =>
+  customFetch<void>(`/api/admin/badges/${id}`, { ...options, method: 'DELETE' });
+
+export const getAdminDeleteBadgeMutationOptions = <TError = ErrorType<void>, TContext = unknown>(
+  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminDeleteBadge>>, TError, { id: string }, TContext>; request?: SecondParameter<typeof customFetch> }
+): UseMutationOptions<Awaited<ReturnType<typeof adminDeleteBadge>>, TError, { id: string }, TContext> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+  const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminDeleteBadge>>, { id: string }> = ({ id }) => adminDeleteBadge(id, requestOptions);
+  return { mutationFn, ...mutationOptions };
+};
+
+export const useAdminDeleteBadge = <TError = ErrorType<void>, TContext = unknown>(
+  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminDeleteBadge>>, TError, { id: string }, TContext>; request?: SecondParameter<typeof customFetch> }
+): UseMutationResult<Awaited<ReturnType<typeof adminDeleteBadge>>, TError, { id: string }, TContext> =>
+  useMutation(getAdminDeleteBadgeMutationOptions(options));
+
+// ─── Milestones ───────────────────────────────────────────────────────────────
+
+export const getAdminListMilestonesUrl = () => `/api/admin/milestones`;
+
+export const adminListMilestones = async (options?: RequestInit): Promise<AdminMilestoneResponse[]> =>
+  customFetch<AdminMilestoneResponse[]>(getAdminListMilestonesUrl(), { ...options, method: 'GET' });
+
+export const getAdminListMilestonesQueryKey = () => ['/api/admin/milestones'] as const;
+
+export const getAdminListMilestonesQueryOptions = <TData = Awaited<ReturnType<typeof adminListMilestones>>, TError = ErrorType<void>>(
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof adminListMilestones>>, TError, TData>; request?: SecondParameter<typeof customFetch> }
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+  const queryKey = queryOptions?.queryKey ?? getAdminListMilestonesQueryKey();
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof adminListMilestones>>> = ({ signal }) => adminListMilestones({ signal, ...requestOptions });
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<Awaited<ReturnType<typeof adminListMilestones>>, TError, TData> & { queryKey: QueryKey };
+};
+
+export function useAdminListMilestones<TData = Awaited<ReturnType<typeof adminListMilestones>>, TError = ErrorType<void>>(
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof adminListMilestones>>, TError, TData>; request?: SecondParameter<typeof customFetch> }
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getAdminListMilestonesQueryOptions(options);
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const adminCreateMilestone = async (body: AdminCreateMilestoneBody, options?: RequestInit): Promise<AdminMilestoneResponse> =>
+  customFetch<AdminMilestoneResponse>(getAdminListMilestonesUrl(), {
+    ...options, method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(body),
+  });
+
+export const getAdminCreateMilestoneMutationOptions = <TError = ErrorType<void>, TContext = unknown>(
+  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminCreateMilestone>>, TError, { data: AdminCreateMilestoneBody }, TContext>; request?: SecondParameter<typeof customFetch> }
+): UseMutationOptions<Awaited<ReturnType<typeof adminCreateMilestone>>, TError, { data: AdminCreateMilestoneBody }, TContext> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+  const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCreateMilestone>>, { data: AdminCreateMilestoneBody }> = ({ data }) => adminCreateMilestone(data, requestOptions);
+  return { mutationFn, ...mutationOptions };
+};
+
+export const useAdminCreateMilestone = <TError = ErrorType<void>, TContext = unknown>(
+  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminCreateMilestone>>, TError, { data: AdminCreateMilestoneBody }, TContext>; request?: SecondParameter<typeof customFetch> }
+): UseMutationResult<Awaited<ReturnType<typeof adminCreateMilestone>>, TError, { data: AdminCreateMilestoneBody }, TContext> =>
+  useMutation(getAdminCreateMilestoneMutationOptions(options));
+
+export const adminUpdateMilestone = async (id: string, body: AdminUpdateMilestoneBody, options?: RequestInit): Promise<AdminMilestoneResponse> =>
+  customFetch<AdminMilestoneResponse>(`/api/admin/milestones/${id}`, {
+    ...options, method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(body),
+  });
+
+export const getAdminUpdateMilestoneMutationOptions = <TError = ErrorType<void>, TContext = unknown>(
+  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminUpdateMilestone>>, TError, { id: string; data: AdminUpdateMilestoneBody }, TContext>; request?: SecondParameter<typeof customFetch> }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateMilestone>>, TError, { id: string; data: AdminUpdateMilestoneBody }, TContext> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+  const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateMilestone>>, { id: string; data: AdminUpdateMilestoneBody }> = ({ id, data }) => adminUpdateMilestone(id, data, requestOptions);
+  return { mutationFn, ...mutationOptions };
+};
+
+export const useAdminUpdateMilestone = <TError = ErrorType<void>, TContext = unknown>(
+  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminUpdateMilestone>>, TError, { id: string; data: AdminUpdateMilestoneBody }, TContext>; request?: SecondParameter<typeof customFetch> }
+): UseMutationResult<Awaited<ReturnType<typeof adminUpdateMilestone>>, TError, { id: string; data: AdminUpdateMilestoneBody }, TContext> =>
+  useMutation(getAdminUpdateMilestoneMutationOptions(options));
+
+export const adminDeleteMilestone = async (id: string, options?: RequestInit): Promise<void> =>
+  customFetch<void>(`/api/admin/milestones/${id}`, { ...options, method: 'DELETE' });
+
+export const getAdminDeleteMilestoneMutationOptions = <TError = ErrorType<void>, TContext = unknown>(
+  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminDeleteMilestone>>, TError, { id: string }, TContext>; request?: SecondParameter<typeof customFetch> }
+): UseMutationOptions<Awaited<ReturnType<typeof adminDeleteMilestone>>, TError, { id: string }, TContext> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+  const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminDeleteMilestone>>, { id: string }> = ({ id }) => adminDeleteMilestone(id, requestOptions);
+  return { mutationFn, ...mutationOptions };
+};
+
+export const useAdminDeleteMilestone = <TError = ErrorType<void>, TContext = unknown>(
+  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminDeleteMilestone>>, TError, { id: string }, TContext>; request?: SecondParameter<typeof customFetch> }
+): UseMutationResult<Awaited<ReturnType<typeof adminDeleteMilestone>>, TError, { id: string }, TContext> =>
+  useMutation(getAdminDeleteMilestoneMutationOptions(options));
+
+// ─── Quest Push ───────────────────────────────────────────────────────────────
+
+export const adminPushQuest = async (body: AdminPushQuestBody, options?: RequestInit): Promise<AdminPushQuestResponse> =>
+  customFetch<AdminPushQuestResponse>('/api/admin/quests/push', {
+    ...options, method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(body),
+  });
+
+export const getAdminPushQuestMutationOptions = <TError = ErrorType<void>, TContext = unknown>(
+  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminPushQuest>>, TError, { data: AdminPushQuestBody }, TContext>; request?: SecondParameter<typeof customFetch> }
+): UseMutationOptions<Awaited<ReturnType<typeof adminPushQuest>>, TError, { data: AdminPushQuestBody }, TContext> => {
+  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+  const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminPushQuest>>, { data: AdminPushQuestBody }> = ({ data }) => adminPushQuest(data, requestOptions);
+  return { mutationFn, ...mutationOptions };
+};
+
+export const useAdminPushQuest = <TError = ErrorType<void>, TContext = unknown>(
+  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminPushQuest>>, TError, { data: AdminPushQuestBody }, TContext>; request?: SecondParameter<typeof customFetch> }
+): UseMutationResult<Awaited<ReturnType<typeof adminPushQuest>>, TError, { data: AdminPushQuestBody }, TContext> =>
+  useMutation(getAdminPushQuestMutationOptions(options));

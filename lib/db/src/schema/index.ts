@@ -5,3 +5,5 @@ export * from "./skills";
 export * from "./builds";
 export * from "./budgets";
 export * from "./wealth";
+export * from "./badges";
+export * from "./milestones";
