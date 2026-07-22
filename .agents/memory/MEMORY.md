@@ -1,0 +1,1 @@
+- [Generated client sync](generated-client-sync.md) — frontend API hook types can drift from the current OpenAPI-generated client and should be regenerated before typechecking.

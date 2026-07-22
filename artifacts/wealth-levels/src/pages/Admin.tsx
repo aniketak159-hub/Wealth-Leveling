@@ -42,7 +42,7 @@ import {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const TABS = ["OVERVIEW", "HUNTERS", "QUEST DISPATCH", "BADGES", "MILESTONES"] as const;
+const TABS = ["OVERVIEW", "PLAYERS", "QUEST DISPATCH", "BADGES", "MILESTONES"] as const;
 type Tab = typeof TABS[number];
 
 const RARITY_COLORS: Record<BadgeRarity, string> = {
@@ -98,7 +98,7 @@ function OverviewTab() {
     <div className="space-y-6">
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
         {[
-          { label: "TOTAL HUNTERS", val: stats?.totalUsers ?? 0, icon: Users },
+          { label: "TOTAL PLAYERS", val: stats?.totalUsers ?? 0, icon: Users },
           { label: "ACTIVE", val: stats?.activeUsers ?? 0, icon: Shield },
           { label: "AVG LEVEL", val: stats?.avgLevel?.toFixed(1) ?? "0", icon: Star },
           { label: "AVG NET WORTH", val: `₹${(stats?.avgNetWorth ?? 0).toLocaleString("en-IN")}`, icon: Zap },
@@ -127,7 +127,7 @@ function OverviewTab() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-8 text-[10px]">#</TableHead>
-                  <TableHead className="text-[10px]">HUNTER</TableHead>
+                  <TableHead className="text-[10px]">PLAYER</TableHead>
                   <TableHead className="text-right text-[10px]">LVL</TableHead>
                 </TableRow>
               </TableHeader>
@@ -150,14 +150,14 @@ function OverviewTab() {
         <Card className="xl:col-span-2 border-primary/20">
           <CardHeader className="pb-2">
             <CardTitle className="text-xs font-mono flex items-center gap-2">
-              <Database className="w-3 h-3" /> HUNTER DATABASE
+              <Database className="w-3 h-3" /> PLAYER DATABASE
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-[10px]">HUNTER</TableHead>
+                  <TableHead className="text-[10px]">PLAYER</TableHead>
                   <TableHead className="text-[10px]">RANK</TableHead>
                   <TableHead className="text-right text-[10px]">NET WORTH</TableHead>
                   <TableHead className="text-right text-[10px]">Q/S/B</TableHead>
@@ -195,9 +195,9 @@ function OverviewTab() {
   );
 }
 
-// ─── Hunters Tab ──────────────────────────────────────────────────────────────
+// ─── Players Tab ──────────────────────────────────────────────────────────────
 
-function HuntersTab() {
+function PlayersTab() {
   const qc = useQueryClient();
   const { data: users = [] } = useAdminListUsers();
   const updateUser = useAdminUpdateUser();
@@ -263,11 +263,11 @@ function HuntersTab() {
           <Input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Search hunters..."
+            placeholder="Search players..."
             className="pl-9 h-8 text-xs font-mono"
           />
         </div>
-        <div className="text-xs font-mono text-muted-foreground">{filtered.length} hunters</div>
+        <div className="text-xs font-mono text-muted-foreground">{filtered.length} players</div>
       </div>
 
       <div className="border border-primary/20 rounded overflow-hidden">
@@ -275,7 +275,7 @@ function HuntersTab() {
           <TableHeader>
             <TableRow className="border-primary/20">
               <TableHead className="text-[10px] w-8"></TableHead>
-              <TableHead className="text-[10px]">HUNTER</TableHead>
+              <TableHead className="text-[10px]">PLAYER</TableHead>
               <TableHead className="text-[10px]">RANK</TableHead>
               <TableHead className="text-right text-[10px]">NET WORTH</TableHead>
               <TableHead className="text-right text-[10px]">Q / S / B</TableHead>
@@ -338,7 +338,7 @@ function HuntersTab() {
                         {/* Edit form */}
                         {editingId === u.id && (
                           <div className="border border-primary/30 bg-primary/5 rounded p-4 space-y-3">
-                            <div className="text-xs font-mono text-primary mb-2">// EDIT HUNTER</div>
+                            <div className="text-xs font-mono text-primary mb-2">// EDIT PLAYER</div>
                             <div className="flex items-center gap-3 flex-wrap">
                               <div className="flex-1 min-w-[180px]">
                                 <label className="text-[10px] font-mono text-muted-foreground block mb-1">DISPLAY NAME</label>
@@ -496,7 +496,7 @@ function QuestDispatchTab() {
   return (
     <div className="max-w-3xl space-y-6">
       <div className="text-xs font-mono text-muted-foreground border-b border-primary/20 pb-2">
-        // Craft a quest and push it directly to hunters. System quests appear in their quest log automatically.
+        // Craft a quest and push it directly to players. System quests appear in their quest log automatically.
       </div>
 
       {result && (
@@ -564,7 +564,7 @@ function QuestDispatchTab() {
 
         <div className="space-y-4">
           <div>
-            <label className="text-[10px] font-mono text-muted-foreground block mb-2">TARGET HUNTERS</label>
+            <label className="text-[10px] font-mono text-muted-foreground block mb-2">TARGET PLAYERS</label>
             <div className="space-y-2">
               {(["ALL", "SPECIFIC"] as const).map(mode => (
                 <label key={mode} className={`flex items-center gap-3 p-3 rounded border cursor-pointer transition-colors ${targetMode === mode ? "border-primary/50 bg-primary/10" : "border-primary/20 hover:bg-primary/5"}`}>
@@ -573,9 +573,9 @@ function QuestDispatchTab() {
                   </div>
                   <input type="radio" value={mode} checked={targetMode === mode} onChange={() => setTargetMode(mode)} className="sr-only" />
                   <div>
-                    <div className="text-xs font-mono font-bold">{mode === "ALL" ? "ALL HUNTERS" : "SPECIFIC HUNTER"}</div>
+                    <div className="text-xs font-mono font-bold">{mode === "ALL" ? "ALL PLAYERS" : "SPECIFIC PLAYER"}</div>
                     <div className="text-[10px] font-mono text-muted-foreground">
-                      {mode === "ALL" ? `Push to ${users.length} registered hunters` : "Select a single user to target"}
+                      {mode === "ALL" ? `Push to ${users.length} registered players` : "Select a single player to target"}
                     </div>
                   </div>
                 </label>
@@ -585,7 +585,7 @@ function QuestDispatchTab() {
 
           {targetMode === "SPECIFIC" && (
             <div>
-              <label className="text-[10px] font-mono text-muted-foreground block mb-1.5">SELECT HUNTER</label>
+              <label className="text-[10px] font-mono text-muted-foreground block mb-1.5">SELECT PLAYER</label>
               <select value={targetUserId} onChange={e => setTargetUserId(e.target.value)}
                 className="w-full h-9 rounded border border-input bg-background px-2 text-sm font-mono">
                 <option value="">-- select --</option>
@@ -606,7 +606,7 @@ function QuestDispatchTab() {
               {targetAmount && <span className="text-muted-foreground">₹{parseFloat(targetAmount).toLocaleString("en-IN")}</span>}
             </div>
             <div className="text-[10px] font-mono text-muted-foreground border-t border-primary/20 pt-2">
-              → Sending to <span className="text-primary font-bold">{targetCount}</span> {targetCount === 1 ? "hunter" : "hunters"}
+              → Sending to <span className="text-primary font-bold">{targetCount}</span> {targetCount === 1 ? "player" : "players"}
             </div>
           </div>
 
@@ -616,7 +616,7 @@ function QuestDispatchTab() {
             disabled={pushQuest.isPending || !title.trim() || (targetMode === "SPECIFIC" && !targetUserId)}
           >
             <Send className="w-4 h-4 mr-2" />
-            {pushQuest.isPending ? "DISPATCHING..." : `DISPATCH TO ${targetCount === users.length ? "ALL" : "1"} HUNTER${targetCount !== 1 ? "S" : ""}`}
+            {pushQuest.isPending ? "DISPATCHING..." : `DISPATCH TO ${targetCount === users.length ? "ALL" : "1"} PLAYER${targetCount !== 1 ? "S" : ""}`}
           </Button>
         </div>
       </div>
@@ -1054,7 +1054,7 @@ export default function AdminPage() {
       {/* Content */}
       <main className="flex-1 p-6 overflow-auto">
         {activeTab === "OVERVIEW" && <OverviewTab />}
-        {activeTab === "HUNTERS" && <HuntersTab />}
+        {activeTab === "PLAYERS" && <PlayersTab />}
         {activeTab === "QUEST DISPATCH" && <QuestDispatchTab />}
         {activeTab === "BADGES" && <BadgesTab />}
         {activeTab === "MILESTONES" && <MilestonesTab />}

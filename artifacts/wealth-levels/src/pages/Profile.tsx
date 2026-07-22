@@ -98,7 +98,7 @@ function buildAchievements(params: {
     {
       id: "system_online",
       label: "System Online",
-      description: "Initialized your Hunter account",
+      description: "Initialized your Player account",
       Icon: Zap,
       earned: true,
       rarity: "common",
@@ -113,7 +113,7 @@ function buildAchievements(params: {
     },
     {
       id: "month_one",
-      label: "Seasoned Hunter",
+      label: "Seasoned Player",
       description: "Active for 30+ days",
       Icon: Calendar,
       earned: daysActive >= 30,
@@ -208,8 +208,8 @@ function buildAchievements(params: {
       rarity: "uncommon",
     },
     {
-      id: "elite_hunter",
-      label: "Elite Hunter",
+      id: "elite_player",
+      label: "Elite Player",
       description: "Reached Level 10",
       Icon: Award,
       earned: level >= 10,
@@ -225,7 +225,7 @@ function buildAchievements(params: {
     },
     {
       id: "net_worth_1m",
-      label: "Millionaire Hunter",
+      label: "Millionaire Player",
       description: "Net worth crossed ₹10,00,000",
       Icon: Gem,
       earned: netWorth >= 1_000_000,
@@ -608,7 +608,7 @@ export default function ProfilePage() {
   const phone = user?.primaryPhoneNumber?.phoneNumber ?? "Not set";
   const passwordEnabled = !!user?.passwordEnabled;
   const imageUrl = user?.imageUrl ?? me?.avatarUrl ?? null;
-  const displayName = me?.displayName ?? user?.fullName ?? "Hunter";
+  const displayName = me?.displayName ?? user?.fullName ?? "Player";
 
   // Dashboard stats
   const level = dashboard?.level ?? 1;
@@ -687,7 +687,7 @@ export default function ProfilePage() {
           <Link href="/dashboard" className="text-primary/60 hover:text-primary transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </Link>
-          <div className="text-xs font-mono tracking-[0.3em] text-muted-foreground">HUNTER PROFILE</div>
+          <div className="text-xs font-mono tracking-[0.3em] text-muted-foreground">PLAYER PROFILE</div>
         </div>
         <div className="flex items-center gap-2">
           <Badge className={`text-xs font-heading ${rankClass}`}>{rank}-RANK</Badge>
@@ -711,9 +711,9 @@ export default function ProfilePage() {
             uploading={avatarUploading}
           />
           <div className="flex-1 text-center sm:text-left">
-            <div className="text-[10px] font-mono tracking-[0.3em] text-primary/50 mb-1">HUNTER DESIGNATION</div>
+            <div className="text-[10px] font-mono tracking-[0.3em] text-primary/50 mb-1">PLAYER DESIGNATION</div>
             <h1 className="text-3xl font-heading font-bold text-primary hud-glow tracking-wider mb-1">{displayName}</h1>
-            <div className="text-sm font-mono text-muted-foreground mb-4">{dashboard?.title ?? "Novice Wealth Hunter"}</div>
+            <div className="text-sm font-mono text-muted-foreground mb-4">{dashboard?.title ?? "Novice Wealth Player"}</div>
             <div className="flex flex-wrap justify-center sm:justify-start gap-4">
               <div className="text-center">
                 <div className="text-lg font-heading font-bold text-primary">{level}</div>
@@ -784,7 +784,7 @@ export default function ProfilePage() {
                 icon={Flame}
               />
               <FieldRow
-                label="Hunter ID"
+                label="Player ID"
                 value={`#${String(me.id).padStart(6, "0")}`}
                 icon={Hash}
               />

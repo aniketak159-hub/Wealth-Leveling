@@ -1,4 +1,4 @@
-# Wealth Levels
+# Wealth Leveling
 
 A gamified personal finance web app. Track your net worth like a power level — complete savings quests, allocate stats, and rise through the ranks from E-Tier Novice to S-Rank Titan.
 

@@ -34,11 +34,11 @@ export default function Home() {
       <nav className="w-full flex items-center justify-between p-6 border-b border-primary/20 bg-background/50 backdrop-blur-md sticky top-0 z-50">
         <div className="flex items-center gap-3">
           <img src="/logo.svg" alt="Logo" className="w-8 h-8" />
-          <span className="font-heading text-xl font-bold tracking-widest text-primary hud-glow">WEALTH LEVELS</span>
+          <span className="font-heading text-xl font-bold tracking-widest text-primary hud-glow">WEALTH LEVELING</span>
         </div>
         <div className="flex gap-4">
           <Link href="/sign-in" className="inline-flex items-center justify-center whitespace-nowrap text-sm font-heading font-medium uppercase tracking-widest border border-primary/30 bg-transparent hover:bg-primary/10 text-primary h-9 px-4 py-2 transition-all">Sign In</Link>
-          <Link href="/sign-up" className="inline-flex items-center justify-center whitespace-nowrap text-sm font-heading font-medium uppercase tracking-widest hud-button h-9 px-4 py-2">Initialize Hunter</Link>
+          <Link href="/sign-up" className="inline-flex items-center justify-center whitespace-nowrap text-sm font-heading font-medium uppercase tracking-widest hud-button h-9 px-4 py-2">Initialize Player</Link>
         </div>
       </nav>
 
@@ -87,7 +87,7 @@ export default function Home() {
       <section className="w-full py-16 bg-primary/5 border-y border-primary/20 overflow-hidden relative">
         <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
           {[
-            { label: "Total Hunters", val: "14,204" },
+            { label: "Total Players", val: "14,204" },
             { label: "Active Quests", val: "89,112" },
             { label: "Avg Net Worth", val: "₹1.4M" },
             { label: "System Status", val: "OPTIMAL" },
@@ -138,7 +138,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="w-full mt-auto border-t border-primary/20 py-8 bg-black/40 text-center">
         <p className="text-primary/50 text-xs font-mono tracking-widest">
-          © {new Date().getFullYear()} WEALTH LEVELS // ENCRYPTED CONNECTION
+          © {new Date().getFullYear()} WEALTH LEVELING // ENCRYPTED CONNECTION
         </p>
       </footer>
     </div>

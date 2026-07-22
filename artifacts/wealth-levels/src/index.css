@@ -211,6 +211,26 @@
     content: '_';
     animation: blink 1s step-end infinite;
   }
+
+  .boot-scanline {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.16;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 3px,
+      rgba(0, 200, 255, 0.08) 4px,
+      transparent 5px
+    );
+    animation: scanline-drift 8s linear infinite;
+  }
+
+  @keyframes scanline-drift {
+    from { transform: translateY(-16px); }
+    to { transform: translateY(16px); }
+  }
   
   @keyframes blink {
     0%, 100% { opacity: 1; }
