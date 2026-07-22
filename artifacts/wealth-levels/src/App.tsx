@@ -1,16 +1,19 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ClerkProvider, SignIn, SignUp, Show, useClerk } from '@clerk/react';
 import { publishableKeyFromHost } from '@clerk/react/internal';
 import { dark } from '@clerk/themes'; 
 import { Switch, Route, Redirect, useLocation, Router as WouterRouter } from 'wouter';
 import { queryClient } from "@/lib/queryClient";
 import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { KeyRound } from "lucide-react";
 
 import Home from "@/pages/Home";
 import DashboardPage from "@/pages/Dashboard";
 import AdminPage from "@/pages/Admin";
 import ProfilePage from "@/pages/Profile";
 import NotFound from "@/pages/not-found";
+import PinLoginFlow from "@/components/PinLoginFlow";
+import PinSetupModal from "@/components/PinSetupModal";
 
 const clerkPubKey = publishableKeyFromHost(
   window.location.hostname,
@@ -71,10 +74,27 @@ const clerkAppearance = {
 };
 
 function SignInPage() {
+  const [pinMode, setPinMode] = useState(false);
+
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4 relative hud-grid-bg">
       <div className="absolute top-4 left-4 text-[#00c8ff]/30 font-mono text-xs tracking-widest">SECURE LOGIN PROTOCOL // INITIATED</div>
-      <SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} />
+      {pinMode ? (
+        <div className="flex flex-col items-center gap-4 w-full">
+          <PinLoginFlow onCancel={() => setPinMode(false)} />
+        </div>
+      ) : (
+        <div className="flex flex-col items-center gap-4 w-full">
+          <SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} />
+          <button
+            onClick={() => setPinMode(true)}
+            className="flex items-center gap-2 text-[#00c8ff]/60 hover:text-[#00c8ff] font-mono text-[11px] tracking-widest uppercase transition-colors mt-1 group"
+          >
+            <KeyRound className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+            Login with Secret PIN
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -200,6 +220,7 @@ function ClerkProviderWithRoutes() {
           <Route path="/profile" component={ProfileProtect} />
           <Route component={NotFound} />
         </Switch>
+        <PinSetupModal />
       </QueryClientProvider>
     </ClerkProvider>
   );

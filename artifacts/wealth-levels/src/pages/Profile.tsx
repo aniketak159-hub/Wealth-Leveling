@@ -22,6 +22,7 @@ import {
   ChevronRight,
   Eye,
   EyeOff,
+  KeyRound,
   Lock,
   Mail,
   Pencil,
@@ -484,6 +485,248 @@ function PasswordCard({ passwordEnabled }: { passwordEnabled: boolean }) {
   );
 }
 
+// ─── PIN Management Card ─────────────────────────────────────────────────────
+
+const BASE_URL = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+type PinAction = "set" | "change" | "remove";
+
+function PinCard() {
+  const [hasPinSet, setHasPinSet] = useState<boolean | null>(null);
+  const [open, setOpen] = useState(false);
+  const [action, setAction] = useState<PinAction>("set");
+  const [currentPin, setCurrentPin] = useState("");
+  const [newPin, setNewPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
+  const [showPin, setShowPin] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+
+  // Fetch PIN status on mount
+  const fetchStatus = useCallback(async () => {
+    try {
+      const res = await fetch(`${BASE_URL}/api/users/me/pin-status`, { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        setHasPinSet(data.hasPinSet);
+      }
+    } catch { /* silent */ }
+  }, []);
+
+  useState(() => { fetchStatus(); });
+
+  const reset = () => {
+    setCurrentPin(""); setNewPin(""); setConfirmPin("");
+    setError(""); setSuccess(false); setOpen(false);
+  };
+
+  const openAction = (a: PinAction) => {
+    setAction(a);
+    setCurrentPin(""); setNewPin(""); setConfirmPin("");
+    setError(""); setSuccess(false);
+    setOpen(true);
+  };
+
+  const handleSubmit = async () => {
+    setError("");
+    const pinRx = /^\d{4,6}$/;
+
+    if (action === "set") {
+      if (!pinRx.test(newPin)) { setError("PIN must be 4–6 digits."); return; }
+      if (newPin !== confirmPin) { setError("PINs do not match."); return; }
+      setLoading(true);
+      try {
+        const res = await fetch(`${BASE_URL}/api/users/me/pin`, {
+          method: "POST", credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pin: newPin }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) { setError(data.error ?? "Failed to set PIN."); return; }
+        setSuccess(true);
+        setHasPinSet(true);
+        setTimeout(reset, 2000);
+      } finally { setLoading(false); }
+
+    } else if (action === "change") {
+      if (!pinRx.test(newPin)) { setError("New PIN must be 4–6 digits."); return; }
+      if (newPin !== confirmPin) { setError("PINs do not match."); return; }
+      setLoading(true);
+      try {
+        const res = await fetch(`${BASE_URL}/api/users/me/pin`, {
+          method: "PUT", credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ currentPin, newPin }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) { setError(data.error ?? "Failed to change PIN."); return; }
+        setSuccess(true);
+        setTimeout(reset, 2000);
+      } finally { setLoading(false); }
+
+    } else if (action === "remove") {
+      setLoading(true);
+      try {
+        const res = await fetch(`${BASE_URL}/api/users/me/pin`, {
+          method: "DELETE", credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pin: currentPin }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) { setError(data.error ?? "Failed to remove PIN."); return; }
+        setSuccess(true);
+        setHasPinSet(false);
+        setTimeout(reset, 2000);
+      } finally { setLoading(false); }
+    }
+  };
+
+  if (hasPinSet === null) return null; // loading
+
+  return (
+    <div className="hud-panel p-4 mt-4">
+      <SectionLabel>Secret PIN</SectionLabel>
+
+      {!open ? (
+        <div className="space-y-1">
+          <div className="flex items-center justify-between py-2.5 border-b border-primary/10">
+            <div className="flex items-center gap-3">
+              <KeyRound className="w-4 h-4 text-primary/50" />
+              <div>
+                <div className="text-[10px] tracking-widest text-muted-foreground uppercase">Quick-Login PIN</div>
+                <div className="text-sm font-mono">{hasPinSet ? "Active — ••••••" : "Not set"}</div>
+              </div>
+            </div>
+            {hasPinSet ? (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => openAction("change")}
+                  className="text-[10px] font-mono tracking-wider text-primary/60 hover:text-primary flex items-center gap-1 transition-colors"
+                >
+                  CHANGE <ChevronRight className="w-3 h-3" />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => openAction("set")}
+                className="text-[10px] font-mono tracking-wider text-primary/60 hover:text-primary flex items-center gap-1 transition-colors"
+              >
+                SET PIN <ChevronRight className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+
+          {hasPinSet && (
+            <button
+              onClick={() => openAction("remove")}
+              className="w-full text-left py-2 text-[10px] font-mono tracking-widest text-destructive/60 hover:text-destructive uppercase transition-colors"
+            >
+              Remove PIN
+            </button>
+          )}
+
+          <div className="pt-1 text-[10px] font-mono text-muted-foreground/60 tracking-wider">
+            {hasPinSet
+              ? "Your PIN lets you skip password login. Keep it secret."
+              : "Set a 4–6 digit PIN for faster login — no OTP needed."}
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {success ? (
+            <div className="flex items-center gap-2 text-green-400 text-sm font-mono py-2">
+              <Check className="w-4 h-4" />
+              {action === "set" && "PIN SET SUCCESSFULLY"}
+              {action === "change" && "PIN CHANGED SUCCESSFULLY"}
+              {action === "remove" && "PIN REMOVED"}
+            </div>
+          ) : (
+            <>
+              {/* Current PIN (for change/remove) */}
+              {(action === "change" || action === "remove") && (
+                <div className="relative">
+                  <Input
+                    type={showPin ? "text" : "password"}
+                    inputMode="numeric"
+                    maxLength={6}
+                    placeholder={action === "remove" ? "Current PIN to confirm removal" : "Current PIN"}
+                    value={currentPin}
+                    onChange={e => setCurrentPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    className="font-mono text-sm pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPin(v => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary"
+                  >
+                    {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              )}
+
+              {/* New PIN (for set/change) */}
+              {(action === "set" || action === "change") && (
+                <>
+                  <div className="relative">
+                    <Input
+                      type={showPin ? "text" : "password"}
+                      inputMode="numeric"
+                      maxLength={6}
+                      placeholder="New PIN (4–6 digits)"
+                      value={newPin}
+                      onChange={e => setNewPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                      className="font-mono text-sm pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPin(v => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary"
+                    >
+                      {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  <Input
+                    type="password"
+                    inputMode="numeric"
+                    maxLength={6}
+                    placeholder="Confirm new PIN"
+                    value={confirmPin}
+                    onChange={e => setConfirmPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    className="font-mono text-sm"
+                  />
+                </>
+              )}
+
+              {error && <div className="text-destructive text-xs font-mono">{error}</div>}
+
+              <div className="flex gap-2 pt-1">
+                <Button
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  size="sm"
+                  variant={action === "remove" ? "destructive" : "default"}
+                  className={action !== "remove" ? "hud-button flex-1 h-8 text-xs" : "flex-1 h-8 text-xs"}
+                >
+                  {loading ? "PROCESSING…" : action === "set" ? "CONFIRM PIN" : action === "change" ? "UPDATE PIN" : "REMOVE PIN"}
+                </Button>
+                <Button
+                  onClick={reset}
+                  variant="outline"
+                  size="sm"
+                  className="h-8 w-8 p-0 border-primary/30"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Display Name Editor ─────────────────────────────────────────────────────
 
 function DisplayNameEditor({
@@ -763,6 +1006,7 @@ export default function ProfilePage() {
               transition={{ duration: 0.4, delay: 0.1 }}
             >
               <PasswordCard passwordEnabled={passwordEnabled} />
+              <PinCard />
             </motion.div>
 
             {/* Account info */}

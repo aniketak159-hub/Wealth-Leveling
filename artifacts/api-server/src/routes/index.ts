@@ -8,11 +8,13 @@ import buildsRouter from "./builds";
 import budgetRouter from "./budget";
 import wealthRouter from "./wealth";
 import adminRouter from "./admin";
+import pinRouter from "./pin";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
 router.use(usersRouter);
+router.use(pinRouter);
 router.use(dashboardRouter);
 router.use(questsRouter);
 router.use(skillsRouter);
