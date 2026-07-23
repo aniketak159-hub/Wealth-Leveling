@@ -4,14 +4,13 @@ import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { createClerkClient } from "@clerk/express";
 import { requireAuth } from "../middlewares/auth";
+import { SetPinBody, ChangePinBody, DeletePinBody, PinLoginBody } from "@workspace/api-zod";
 
 const router: IRouter = Router();
 
 function clerkClient() {
   return createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY! });
 }
-
-const PIN_REGEX = /^\d{4,6}$/;
 
 // ── GET /api/users/me/pin-status ─────────────────────────────────────────────
 router.get("/users/me/pin-status", requireAuth, (req, res): void => {
@@ -26,12 +25,14 @@ router.post("/users/me/pin", requireAuth, async (req, res): Promise<void> => {
     res.status(409).json({ error: "PIN already set. Use PUT to change it." });
     return;
   }
-  const { pin } = req.body;
-  if (!pin || !PIN_REGEX.test(String(pin))) {
-    res.status(400).json({ error: "PIN must be 4–6 digits." });
+
+  const parsed = SetPinBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.errors[0]?.message ?? "Invalid request." });
     return;
   }
-  const pinHash = await bcrypt.hash(String(pin), 12);
+
+  const pinHash = await bcrypt.hash(parsed.data.pin, 12);
   await db.update(usersTable).set({ pinHash }).where(eq(usersTable.id, user.id));
   res.json({ success: true });
 });
@@ -39,25 +40,24 @@ router.post("/users/me/pin", requireAuth, async (req, res): Promise<void> => {
 // ── PUT /api/users/me/pin — change PIN ──────────────────────────────────────
 router.put("/users/me/pin", requireAuth, async (req, res): Promise<void> => {
   const user = (req as any).dbUser;
-  const { currentPin, newPin } = req.body;
   if (!user.pinHash) {
     res.status(400).json({ error: "No PIN set. Use POST to set one first." });
     return;
   }
-  if (!currentPin || !newPin) {
-    res.status(400).json({ error: "currentPin and newPin are required." });
+
+  const parsed = ChangePinBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.errors[0]?.message ?? "Invalid request." });
     return;
   }
-  if (!PIN_REGEX.test(String(newPin))) {
-    res.status(400).json({ error: "New PIN must be 4–6 digits." });
-    return;
-  }
-  const match = await bcrypt.compare(String(currentPin), user.pinHash);
+
+  const match = await bcrypt.compare(parsed.data.currentPin, user.pinHash);
   if (!match) {
     res.status(401).json({ error: "Current PIN is incorrect." });
     return;
   }
-  const pinHash = await bcrypt.hash(String(newPin), 12);
+
+  const pinHash = await bcrypt.hash(parsed.data.newPin, 12);
   await db.update(usersTable).set({ pinHash }).where(eq(usersTable.id, user.id));
   res.json({ success: true });
 });
@@ -65,20 +65,23 @@ router.put("/users/me/pin", requireAuth, async (req, res): Promise<void> => {
 // ── DELETE /api/users/me/pin — remove PIN ───────────────────────────────────
 router.delete("/users/me/pin", requireAuth, async (req, res): Promise<void> => {
   const user = (req as any).dbUser;
-  const { pin } = req.body;
   if (!user.pinHash) {
     res.status(400).json({ error: "No PIN is set." });
     return;
   }
-  if (!pin) {
-    res.status(400).json({ error: "Current PIN is required to remove it." });
+
+  const parsed = DeletePinBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.errors[0]?.message ?? "Invalid request." });
     return;
   }
-  const match = await bcrypt.compare(String(pin), user.pinHash);
+
+  const match = await bcrypt.compare(parsed.data.pin, user.pinHash);
   if (!match) {
     res.status(401).json({ error: "PIN is incorrect." });
     return;
   }
+
   await db.update(usersTable).set({ pinHash: null }).where(eq(usersTable.id, user.id));
   res.json({ success: true });
 });
@@ -86,9 +89,9 @@ router.delete("/users/me/pin", requireAuth, async (req, res): Promise<void> => {
 // ── POST /api/auth/pin-login — verify PIN and return Clerk sign-in token ────
 // No auth required — this is the login endpoint
 router.post("/auth/pin-login", async (req, res): Promise<void> => {
-  const { email, pin } = req.body;
-  if (!email || !pin) {
-    res.status(400).json({ error: "email and pin are required." });
+  const parsed = PinLoginBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.errors[0]?.message ?? "Invalid request." });
     return;
   }
 
@@ -96,7 +99,7 @@ router.post("/auth/pin-login", async (req, res): Promise<void> => {
     // Find the Clerk user by email address
     const clerk = clerkClient();
     const { data: clerkUsers } = await clerk.users.getUserList({
-      emailAddress: [String(email)],
+      emailAddress: [parsed.data.email],
       limit: 1,
     });
 
@@ -118,7 +121,7 @@ router.post("/auth/pin-login", async (req, res): Promise<void> => {
       return;
     }
 
-    const match = await bcrypt.compare(String(pin), dbUser.pinHash);
+    const match = await bcrypt.compare(parsed.data.pin, dbUser.pinHash);
     if (!match) {
       res.status(401).json({ error: "Invalid email or PIN." });
       return;
