@@ -96,7 +96,7 @@ function OverviewTab() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3">
         {[
           { label: "TOTAL PLAYERS", val: stats?.totalUsers ?? 0, icon: Users },
           { label: "ACTIVE", val: stats?.activeUsers ?? 0, icon: Shield },
@@ -123,6 +123,7 @@ function OverviewTab() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
+            <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -144,6 +145,7 @@ function OverviewTab() {
                 ))}
               </TableBody>
             </Table>
+            </div>
           </CardContent>
         </Card>
 
@@ -154,13 +156,14 @@ function OverviewTab() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
+            <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-[10px]">PLAYER</TableHead>
                   <TableHead className="text-[10px]">RANK</TableHead>
-                  <TableHead className="text-right text-[10px]">NET WORTH</TableHead>
-                  <TableHead className="text-right text-[10px]">Q/S/B</TableHead>
+                  <TableHead className="text-right text-[10px] hidden sm:table-cell">NET WORTH</TableHead>
+                  <TableHead className="text-right text-[10px] hidden sm:table-cell">Q/S/B</TableHead>
                   <TableHead className="text-[10px]">ROLE</TableHead>
                 </TableRow>
               </TableHeader>
@@ -177,8 +180,8 @@ function OverviewTab() {
                         <span className="font-mono text-xs">Lv.{u.level}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-right font-mono text-xs text-primary/80">₹{u.netWorth.toLocaleString("en-IN")}</TableCell>
-                    <TableCell className="text-right font-mono text-xs">{u.questCount}/{u.skillCount}/{u.buildCount}</TableCell>
+                    <TableCell className="text-right font-mono text-xs text-primary/80 hidden sm:table-cell">₹{u.netWorth.toLocaleString("en-IN")}</TableCell>
+                    <TableCell className="text-right font-mono text-xs hidden sm:table-cell">{u.questCount}/{u.skillCount}/{u.buildCount}</TableCell>
                     <TableCell>
                       {u.isAdmin
                         ? <Badge variant="destructive" className="text-[10px] px-1">ADMIN</Badge>
@@ -188,6 +191,7 @@ function OverviewTab() {
                 ))}
               </TableBody>
             </Table>
+            </div>
           </CardContent>
         </Card>
       </div>

@@ -31,14 +31,14 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center">
       {/* Navbar */}
-      <nav className="w-full flex items-center justify-between p-6 border-b border-primary/20 bg-background/50 backdrop-blur-md sticky top-0 z-50">
+      <nav className="w-full flex items-center justify-between px-4 sm:px-6 py-4 border-b border-primary/20 bg-background/50 backdrop-blur-md sticky top-0 z-50">
         <div className="flex items-center gap-3">
           <img src="/logo.svg" alt="Logo" className="w-8 h-8" />
-          <span className="font-heading text-xl font-bold tracking-widest text-primary hud-glow">WEALTH LEVELING</span>
+          <span className="font-heading text-base sm:text-xl font-bold tracking-widest text-primary hud-glow">WEALTH LEVELING</span>
         </div>
-        <div className="flex gap-4">
-          <Link href="/sign-in" className="inline-flex items-center justify-center whitespace-nowrap text-sm font-heading font-medium uppercase tracking-widest border border-primary/30 bg-transparent hover:bg-primary/10 text-primary h-9 px-4 py-2 transition-all">Sign In</Link>
-          <Link href="/sign-up" className="inline-flex items-center justify-center whitespace-nowrap text-sm font-heading font-medium uppercase tracking-widest hud-button h-9 px-4 py-2">Initialize Player</Link>
+        <div className="flex gap-2 sm:gap-4">
+          <Link href="/sign-in" className="inline-flex items-center justify-center whitespace-nowrap text-xs sm:text-sm font-heading font-medium uppercase tracking-widest border border-primary/30 bg-transparent hover:bg-primary/10 text-primary h-9 px-3 sm:px-4 py-2 transition-all">Sign In</Link>
+          <Link href="/sign-up" className="inline-flex items-center justify-center whitespace-nowrap text-xs sm:text-sm font-heading font-medium uppercase tracking-widest hud-button h-9 px-3 sm:px-4 py-2">Initialize</Link>
         </div>
       </nav>
 
@@ -57,7 +57,7 @@ export default function Home() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.7, delay: 0.1 }}
-          className="text-5xl md:text-7xl font-heading font-bold mb-6 max-w-4xl"
+          className="text-4xl sm:text-5xl md:text-7xl font-heading font-bold mb-6 max-w-4xl"
         >
           TREAT YOUR NET WORTH LIKE A <span className="text-primary hud-glow">POWER LEVEL</span>
         </motion.h1>
@@ -66,7 +66,7 @@ export default function Home() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="text-muted-foreground text-lg md:text-xl max-w-2xl mb-10 leading-relaxed font-mono"
+          className="text-muted-foreground text-sm md:text-lg md:text-xl max-w-2xl mb-10 leading-relaxed font-mono"
         >
           A gamified financial command center. Track your assets, complete savings quests, allocate stats, and rise through the ranks from E-Tier Novice to S-Rank Titan.
         </motion.p>
@@ -84,8 +84,8 @@ export default function Home() {
       </section>
 
       {/* Stats Preview */}
-      <section className="w-full py-16 bg-primary/5 border-y border-primary/20 overflow-hidden relative">
-        <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
+      <section className="w-full py-12 bg-primary/5 border-y border-primary/20 overflow-hidden relative">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8">
           {[
             { label: "Total Players", val: "14,204" },
             { label: "Active Quests", val: "89,112" },

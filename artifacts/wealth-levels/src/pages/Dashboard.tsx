@@ -54,51 +54,62 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Top HUD Header */}
-      <header className="w-full border-b border-primary/30 bg-black/40 backdrop-blur-md sticky top-0 z-50 p-4">
-        <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 border-2 border-primary hud-glow-box bg-primary/10 flex items-center justify-center p-1">
-              {me?.avatarUrl ? (
-                <img src={me.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-              ) : (
-                <User className="text-primary w-8 h-8" />
-              )}
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-heading font-bold text-primary tracking-widest">{dashboard.displayName}</h1>
-                <Badge variant={dashboard.rank?.toLowerCase() as any} className={rankClass}>{dashboard.rank}-RANK</Badge>
+      <header className="w-full border-b border-primary/30 bg-black/40 backdrop-blur-md sticky top-0 z-50 px-4 py-3">
+        <div className="max-w-[1400px] mx-auto flex flex-col gap-2">
+          {/* Row 1: avatar + name + actions */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 shrink-0 border-2 border-primary hud-glow-box bg-primary/10 flex items-center justify-center p-0.5">
+                {me?.avatarUrl ? (
+                  <img src={me.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <User className="text-primary w-6 h-6" />
+                )}
               </div>
-              <div className="text-xs font-mono tracking-widest text-muted-foreground">{dashboard.title}</div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h1 className="text-base sm:text-xl font-heading font-bold text-primary tracking-widest truncate">{dashboard.displayName}</h1>
+                  <Badge variant={dashboard.rank?.toLowerCase() as any} className={rankClass}>{dashboard.rank}-RANK</Badge>
+                </div>
+                <div className="text-[10px] sm:text-xs font-mono tracking-widest text-muted-foreground truncate">{dashboard.title}</div>
+              </div>
             </div>
-          </div>
 
-          <div className="flex-1 w-full max-w-md mx-8 flex flex-col gap-1">
-            <div className="flex justify-between text-xs font-mono tracking-widest">
-              <span className="text-primary">LVL {dashboard.level}</span>
-              <span className="text-primary/70">{dashboard.xp} / {dashboard.xpToNext} XP</span>
-            </div>
-            <Progress value={xpPercent} className="h-3" />
-          </div>
-
-          <div className="flex items-center gap-6">
-            <div className="text-right">
-              <div className="text-xs font-mono text-muted-foreground tracking-widest">NET WORTH</div>
-              <div className="text-xl font-mono text-primary hud-glow">₹{dashboard.netWorth.toLocaleString('en-IN')}</div>
-            </div>
-            <div className="flex gap-2 border-l border-primary/30 pl-4">
-              <Button variant="outline" size="icon" onClick={() => setLocation("/profile")} title="My Profile">
-                <User className="w-4 h-4" />
-              </Button>
-              {me?.isAdmin && (
-                <Button variant="outline" size="icon" onClick={() => setLocation("/admin")} title="Admin Panel">
-                  <ShieldAlert className="w-4 h-4" />
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Net worth — hidden on xs, shown sm+ */}
+              <div className="hidden sm:block text-right mr-2">
+                <div className="text-[10px] font-mono text-muted-foreground tracking-widest">NET WORTH</div>
+                <div className="text-base font-mono text-primary hud-glow">₹{dashboard.netWorth.toLocaleString('en-IN')}</div>
+              </div>
+              <div className="flex gap-1.5 border-l border-primary/30 pl-3">
+                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setLocation("/profile")} title="My Profile">
+                  <User className="w-3.5 h-3.5" />
                 </Button>
-              )}
-              <Button variant="outline" size="icon" onClick={() => signOut({ redirectUrl: "/" })} title="Logout">
-                <LogOut className="w-4 h-4 text-destructive" />
-              </Button>
+                {me?.isAdmin && (
+                  <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setLocation("/admin")} title="Admin Panel">
+                    <ShieldAlert className="w-3.5 h-3.5" />
+                  </Button>
+                )}
+                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => signOut({ redirectUrl: "/" })} title="Logout">
+                  <LogOut className="w-3.5 h-3.5 text-destructive" />
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Row 2: XP bar + net worth on xs */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 flex flex-col gap-0.5">
+              <div className="flex justify-between text-[10px] sm:text-xs font-mono tracking-widest">
+                <span className="text-primary">LVL {dashboard.level}</span>
+                <span className="text-primary/70">{dashboard.xp} / {dashboard.xpToNext} XP</span>
+              </div>
+              <Progress value={xpPercent} className="h-2" />
+            </div>
+            {/* Net worth inline on xs only */}
+            <div className="sm:hidden text-right shrink-0">
+              <div className="text-[10px] font-mono text-muted-foreground">NET WORTH</div>
+              <div className="text-sm font-mono text-primary hud-glow">₹{dashboard.netWorth.toLocaleString('en-IN')}</div>
             </div>
           </div>
         </div>
@@ -107,13 +118,20 @@ export default function DashboardPage() {
       {/* Main Content */}
       <main className="flex-1 w-full max-w-[1400px] mx-auto p-4 md:p-6 overflow-hidden">
         <Tabs defaultValue="overview" className="w-full h-full flex flex-col">
-          <TabsList className="grid grid-cols-3 md:grid-cols-6 mb-6 bg-transparent border-0 h-auto p-0 gap-2">
-            <TabsTrigger value="overview" className="h-10 data-[state=active]:bg-primary/20 border border-primary/20"><LayoutDashboard className="w-4 h-4 mr-2 hidden md:block" /> OVERVIEW</TabsTrigger>
-            <TabsTrigger value="stats" className="h-10 data-[state=active]:bg-primary/20 border border-primary/20"><Cpu className="w-4 h-4 mr-2 hidden md:block" /> STATS</TabsTrigger>
-            <TabsTrigger value="wealth" className="h-10 data-[state=active]:bg-primary/20 border border-primary/20"><Database className="w-4 h-4 mr-2 hidden md:block" /> WEALTH</TabsTrigger>
-            <TabsTrigger value="quests" className="h-10 data-[state=active]:bg-primary/20 border border-primary/20"><Target className="w-4 h-4 mr-2 hidden md:block" /> QUESTS</TabsTrigger>
-            <TabsTrigger value="budget" className="h-10 data-[state=active]:bg-primary/20 border border-primary/20"><BarChart className="w-4 h-4 mr-2 hidden md:block" /> BUDGET</TabsTrigger>
-            <TabsTrigger value="skills" className="h-10 data-[state=active]:bg-primary/20 border border-primary/20"><BookOpen className="w-4 h-4 mr-2 hidden md:block" /> SKILLS</TabsTrigger>
+          <TabsList className="flex overflow-x-auto mb-4 sm:mb-6 bg-transparent border-0 h-auto p-0 gap-1.5 sm:gap-2 scrollbar-none">
+            {[
+              { value: "overview", icon: LayoutDashboard, label: "OVERVIEW" },
+              { value: "stats",    icon: Cpu,             label: "STATS" },
+              { value: "wealth",   icon: Database,        label: "WEALTH" },
+              { value: "quests",   icon: Target,          label: "QUESTS" },
+              { value: "budget",   icon: BarChart,        label: "BUDGET" },
+              { value: "skills",   icon: BookOpen,        label: "SKILLS" },
+            ].map(({ value, icon: Icon, label }) => (
+              <TabsTrigger key={value} value={value}
+                className="shrink-0 flex items-center gap-1.5 h-9 px-3 sm:px-4 text-[10px] sm:text-xs data-[state=active]:bg-primary/20 border border-primary/20 whitespace-nowrap">
+                <Icon className="w-3.5 h-3.5" /> {label}
+              </TabsTrigger>
+            ))}
           </TabsList>
 
           <div className="flex-1 w-full relative">

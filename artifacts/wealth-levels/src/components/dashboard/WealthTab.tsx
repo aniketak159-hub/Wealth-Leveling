@@ -51,6 +51,7 @@ export default function WealthTab() {
             <Button size="sm" variant="outline" className="h-8"><Plus className="w-4 h-4 mr-1"/> ADD ASSET</Button>
           </CardHeader>
           <CardContent className="p-0 pt-4">
+            <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -77,6 +78,7 @@ export default function WealthTab() {
                 )}
               </TableBody>
             </Table>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -87,7 +89,7 @@ export default function WealthTab() {
             <CardTitle className="text-sm">TOTAL NET WORTH</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-mono font-bold text-primary hud-glow break-all">
+            <div className="text-2xl sm:text-4xl font-mono font-bold text-primary hud-glow break-all">
               ₹{wealth.netWorth.toLocaleString('en-IN')}
             </div>
           </CardContent>
