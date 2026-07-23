@@ -9,6 +9,7 @@ import budgetRouter from "./budget";
 import wealthRouter from "./wealth";
 import adminRouter from "./admin";
 import pinRouter from "./pin";
+import skillTreeRouter from "./skill-tree";
 
 const router: IRouter = Router();
 
