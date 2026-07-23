@@ -1,11 +1,15 @@
+import { useState } from "react";
 import { useGetBudget } from "@workspace/api-client-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { BarChart, Edit2 } from "lucide-react";
+import { BarChart, Edit2, Upload } from "lucide-react";
+import ImportStatementModal from "@/components/import/ImportStatementModal";
+import BankConnectPanel from "@/components/import/BankConnectPanel";
 
 export default function BudgetTab() {
+  const [importOpen, setImportOpen] = useState(false);
   const { data: budget, isLoading } = useGetBudget();
 
   if (isLoading) {
@@ -50,7 +54,12 @@ export default function BudgetTab() {
           <CardTitle className="text-sm flex items-center gap-2">
             <BarChart className="w-4 h-4" /> ALLOCATION MATRIX
           </CardTitle>
-          <Button size="sm" variant="outline"><Edit2 className="w-4 h-4 mr-2"/> EDIT MATRIX</Button>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => setImportOpen(true)}>
+              <Upload className="w-4 h-4 mr-1.5"/> IMPORT
+            </Button>
+            <Button size="sm" variant="outline"><Edit2 className="w-4 h-4 mr-2"/> EDIT</Button>
+          </div>
         </CardHeader>
         <CardContent className="p-0 pt-4">
           <div className="px-4 pb-6 space-y-2 border-b border-primary/20 mb-4">
@@ -106,6 +115,11 @@ export default function BudgetTab() {
           </Table>
         </CardContent>
       </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <BankConnectPanel />
+      </div>
+
+      <ImportStatementModal open={importOpen} onClose={() => setImportOpen(false)} />
     </div>
   );
 }

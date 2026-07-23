@@ -10,6 +10,8 @@ import wealthRouter from "./wealth";
 import adminRouter from "./admin";
 import pinRouter from "./pin";
 import skillTreeRouter from "./skill-tree";
+import importRouter from "./import";
+import aaRouter from "./aa";
 
 const router: IRouter = Router();
 
@@ -23,5 +25,7 @@ router.use(buildsRouter);
 router.use(budgetRouter);
 router.use(wealthRouter);
 router.use(adminRouter);
+router.use(importRouter);
+router.use(aaRouter);
 
 export default router;

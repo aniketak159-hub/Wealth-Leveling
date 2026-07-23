@@ -2,13 +2,14 @@ import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRunEvaluation, useGetDashboard } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { getGetDashboardQueryKey, getGetDashboardSummaryQueryKey } from "@workspace/api-client-react";
+import { getGetDashboardQueryKey, getGetDashboardSummaryQueryKey, getGetBudgetQueryKey, getGetWealthQueryKey } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload, ClipboardList, X, ArrowLeft, CheckCircle, Zap, TrendingUp, ChevronRight } from "lucide-react";
+import { Upload, ClipboardList, X, ArrowLeft, CheckCircle, Zap, TrendingUp, ChevronRight, Loader2 } from "lucide-react";
+import ParsePreview, { type ParseResult } from "@/components/import/ParsePreview";
 
-type Screen = "method" | "upload" | "manual" | "result";
+type Screen = "method" | "upload" | "preview" | "manual" | "result";
 
 interface ResultData {
   xpGained: number;
@@ -41,6 +42,9 @@ export default function EvaluationModal({ open, onClose }: Props) {
   const [isDragging, setIsDragging] = useState(false);
   const [result, setResult] = useState<ResultData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isParsing, setIsParsing] = useState(false);
+  const [isApplying, setIsApplying] = useState(false);
+  const [parseResult, setParseResult] = useState<ParseResult | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [fields, setFields] = useState<FormFields>({
@@ -190,7 +194,7 @@ export default function EvaluationModal({ open, onClose }: Props) {
           <div className="flex items-center gap-3">
             {screen !== "method" && screen !== "result" && (
               <button
-                onClick={() => setScreen("method")}
+                onClick={() => setScreen(screen === "preview" ? "upload" : "method")}
                 className="text-primary/60 hover:text-primary transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -203,6 +207,7 @@ export default function EvaluationModal({ open, onClose }: Props) {
               <p className="text-[10px] font-mono text-primary/50 tracking-widest mt-0.5">
                 {screen === "method" && "SELECT INPUT METHOD"}
                 {screen === "upload" && "UPLOAD FINANCIAL STATEMENT"}
+                {screen === "preview" && "REVIEW EXTRACTED DATA"}
                 {screen === "manual" && "MANUAL DATA ENTRY PROTOCOL"}
                 {screen === "result" && "EVALUATION COMPLETE"}
               </p>
@@ -305,12 +310,12 @@ export default function EvaluationModal({ open, onClose }: Props) {
                       DROP STATEMENT HERE
                     </p>
                     <p className="text-xs font-mono text-primary/40 mt-2">
-                      PDF, CSV, PNG, JPG — or click to browse
+                      PDF or CSV · HDFC · ICICI · SBI · Axis · Kotak · Yes · IndusInd
                     </p>
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept=".pdf,.csv,.png,.jpg,.jpeg"
+                      accept=".pdf,.csv,.txt"
                       className="hidden"
                       onChange={(e) => {
                         if (e.target.files?.[0]) setUploadedFile(e.target.files[0]);
@@ -334,19 +339,108 @@ export default function EvaluationModal({ open, onClose }: Props) {
                   </div>
                 )}
 
-                <div className="border border-warning/30 bg-warning/5 p-3 text-center">
-                  <p className="text-[10px] font-mono text-warning/80">
-                    AUTO-EXTRACTION NOT AVAILABLE YET. PLEASE REVIEW AND FILL IN YOUR DETAILS BELOW.
-                  </p>
-                </div>
+                {error && (
+                  <div className="border border-destructive/40 bg-destructive/5 p-3 text-center">
+                    <p className="text-[10px] font-mono text-destructive">{error}</p>
+                  </div>
+                )}
 
                 <Button
                   className="w-full"
-                  onClick={() => setScreen("manual")}
-                  disabled={!uploadedFile}
+                  disabled={!uploadedFile || isParsing}
+                  onClick={async () => {
+                    if (!uploadedFile) return;
+                    setIsParsing(true);
+                    setError(null);
+                    try {
+                      const form = new FormData();
+                      form.append("statement", uploadedFile);
+                      const res = await fetch("/api/import/parse", {
+                        method: "POST",
+                        body: form,
+                        credentials: "include",
+                      });
+                      if (!res.ok) {
+                        const err = await res.json().catch(() => ({}));
+                        throw new Error((err as any).error ?? `Server error ${res.status}`);
+                      }
+                      const data: ParseResult = await res.json();
+                      setParseResult(data);
+                      setScreen("preview");
+                    } catch (e) {
+                      setError(e instanceof Error ? e.message : "PARSE FAILED");
+                    } finally {
+                      setIsParsing(false);
+                    }
+                  }}
                 >
-                  PROCEED TO MANUAL REVIEW
+                  {isParsing ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin" /> ANALYSING...
+                    </span>
+                  ) : (
+                    "PARSE STATEMENT"
+                  )}
                 </Button>
+                <button
+                  onClick={() => setScreen("manual")}
+                  className="w-full text-[10px] font-mono text-primary/40 hover:text-primary/70 transition-colors py-1"
+                >
+                  SKIP — ENTER MANUALLY INSTEAD
+                </button>
+              </motion.div>
+            )}
+
+            {/* ── PREVIEW SCREEN ── */}
+            {screen === "preview" && parseResult && (
+              <motion.div
+                key="preview"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+              >
+                <ParsePreview
+                  result={parseResult}
+                  applyLabel="APPLY & FILL EVALUATION FORM"
+                  isApplying={isApplying}
+                  onApply={async (data) => {
+                    setIsApplying(true);
+                    setError(null);
+                    try {
+                      // Persist budget + wealth
+                      await fetch("/api/import/apply", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        credentials: "include",
+                        body: JSON.stringify(data),
+                      });
+                      queryClient.invalidateQueries({ queryKey: getGetBudgetQueryKey() });
+                      queryClient.invalidateQueries({ queryKey: getGetWealthQueryKey() });
+                      // Pre-fill manual form from parsed metrics
+                      const p = data.evaluationPrefill;
+                      setFields((f) => ({
+                        ...f,
+                        netWorth: String(p.netWorth || ""),
+                        monthlyIncome: String(p.monthlyIncome || ""),
+                        totalSaved: String(p.totalSaved || ""),
+                        totalSpent: String(p.totalSpent || ""),
+                        budgetedExpenses: String(p.budgetedExpenses || ""),
+                        emergencyFundBalance: String(p.emergencyFundBalance || ""),
+                      }));
+                      setScreen("manual");
+                    } catch (e) {
+                      setError(e instanceof Error ? e.message : "APPLY FAILED");
+                    } finally {
+                      setIsApplying(false);
+                    }
+                  }}
+                  onSkip={() => setScreen("manual")}
+                />
+                {error && (
+                  <div className="border border-destructive/40 bg-destructive/5 p-3 text-center mt-3">
+                    <p className="text-[10px] font-mono text-destructive">{error}</p>
+                  </div>
+                )}
               </motion.div>
             )}
 

@@ -1,11 +1,15 @@
+import { useState } from "react";
 import { useGetWealth } from "@workspace/api-client-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Database, Plus } from "lucide-react";
+import { Database, Plus, Upload } from "lucide-react";
+import ImportStatementModal from "@/components/import/ImportStatementModal";
+import BankConnectPanel from "@/components/import/BankConnectPanel";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 
 export default function WealthTab() {
+  const [importOpen, setImportOpen] = useState(false);
   const { data: wealth, isLoading } = useGetWealth();
 
   if (isLoading) {
@@ -48,7 +52,9 @@ export default function WealthTab() {
             <CardTitle className="text-sm flex items-center gap-2">
               <Database className="w-4 h-4" /> ASSET MANIFEST
             </CardTitle>
-            <Button size="sm" variant="outline" className="h-8"><Plus className="w-4 h-4 mr-1"/> ADD ASSET</Button>
+            <Button size="sm" variant="outline" className="h-8" onClick={() => setImportOpen(true)}>
+            <Upload className="w-4 h-4 mr-1"/> IMPORT
+          </Button>
           </CardHeader>
           <CardContent className="p-0 pt-4">
             <div className="overflow-x-auto">
