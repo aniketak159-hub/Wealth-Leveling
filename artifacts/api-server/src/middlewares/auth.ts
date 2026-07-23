@@ -1,7 +1,30 @@
-import { getAuth } from "@clerk/express";
+import { getAuth, createClerkClient } from "@clerk/express";
 import type { Request, Response, NextFunction } from "express";
 import { db, usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
+
+function getClerkClient() {
+  return createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY! });
+}
+
+async function resolveDisplayName(clerkId: string): Promise<string> {
+  try {
+    const clerk = getClerkClient();
+    const clerkUser = await clerk.users.getUser(clerkId);
+    const name = [clerkUser.firstName, clerkUser.lastName]
+      .filter(Boolean)
+      .join(" ")
+      .trim();
+    return (
+      name ||
+      clerkUser.username ||
+      clerkUser.emailAddresses[0]?.emailAddress?.split("@")[0] ||
+      "Player"
+    );
+  } catch {
+    return "Player";
+  }
+}
 
 // Attach the local DB user to req.dbUser, JIT-provisioning if needed
 export async function requireAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -12,17 +35,25 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     return;
   }
 
-  // JIT provision user in local DB
   let [user] = await db.select().from(usersTable).where(eq(usersTable.clerkId, clerkId));
+
   if (!user) {
-    const displayName =
-      (auth as any)?.sessionClaims?.fullName ||
-      (auth as any)?.sessionClaims?.firstName ||
-      "Hunter";
+    // New user — fetch real name from Clerk
+    const displayName = await resolveDisplayName(clerkId);
     [user] = await db
       .insert(usersTable)
       .values({ clerkId, displayName })
       .returning();
+  } else if (user.displayName === "Hunter" || user.displayName === "Player") {
+    // Existing user with a placeholder name — backfill from Clerk
+    const displayName = await resolveDisplayName(clerkId);
+    if (displayName !== user.displayName) {
+      [user] = await db
+        .update(usersTable)
+        .set({ displayName })
+        .where(eq(usersTable.clerkId, clerkId))
+        .returning();
+    }
   }
 
   (req as any).dbUser = user;
