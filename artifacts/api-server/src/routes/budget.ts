@@ -48,11 +48,17 @@ router.patch("/budget", requireAuth, async (req, res): Promise<void> => {
   const updates: Record<string, unknown> = {};
   if (parsed.data.monthlyIncome !== undefined) updates.monthlyIncome = String(parsed.data.monthlyIncome);
 
-  const [updatedBudget] = await db
-    .update(budgetsTable)
-    .set(updates)
-    .where(eq(budgetsTable.id, budget.id))
-    .returning();
+  // Only run UPDATE when there are column changes — an empty SET is invalid SQL
+  const updatedBudget =
+    Object.keys(updates).length > 0
+      ? (
+          await db
+            .update(budgetsTable)
+            .set(updates)
+            .where(eq(budgetsTable.id, budget.id))
+            .returning()
+        )[0]
+      : budget;
 
   if (parsed.data.items !== undefined) {
     await db.delete(budgetItemsTable).where(eq(budgetItemsTable.budgetId, budget.id));
