@@ -1,15 +1,11 @@
 import { Router, type IRouter } from "express";
 import { db, skillTreeUnlocksTable, dashboardsTable } from "@workspace/db";
 import { eq, and, like, sql } from "drizzle-orm";
-import { z } from "zod";
 import { requireAuth } from "../middlewares/auth";
 
 const router: IRouter = Router();
 
 const SKILL_ID_RE = /^(inv|sav|kno)-t([1-5])-(0[1-9]|10)$/;
-const UnlockBody = z.object({
-  skillId: z.string().regex(SKILL_ID_RE, "Invalid skill ID format"),
-});
 
 // GET /api/skill-tree — returns the user's unlock state
 router.get("/skill-tree", requireAuth, async (req, res): Promise<void> => {
@@ -35,13 +31,11 @@ router.get("/skill-tree", requireAuth, async (req, res): Promise<void> => {
 router.post("/skill-tree/unlock", requireAuth, async (req, res): Promise<void> => {
   const user = (req as any).dbUser;
 
-  const parsed = UnlockBody.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: parsed.error.errors[0]?.message ?? "Invalid request." });
+  const { skillId } = req.body ?? {};
+  if (typeof skillId !== "string" || !SKILL_ID_RE.test(skillId)) {
+    res.status(400).json({ error: "Invalid skill ID format." });
     return;
   }
-
-  const { skillId } = parsed.data;
   const match = skillId.match(SKILL_ID_RE)!;
   const prefix = match[1];
   const tier = parseInt(match[2]);

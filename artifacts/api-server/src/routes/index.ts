@@ -27,6 +27,7 @@ router.use(budgetRouter);
 router.use(wealthRouter);
 router.use(adminRouter);
 router.use(streakRouter);
+router.use(skillTreeRouter);
 router.use(importRouter);
 router.use(aaRouter);
 
