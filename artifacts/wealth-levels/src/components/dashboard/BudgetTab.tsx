@@ -115,9 +115,7 @@ export default function BudgetTab() {
           </Table>
         </CardContent>
       </Card>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <BankConnectPanel />
-      </div>
+      <BankConnectPanel />
 
       <ImportStatementModal open={importOpen} onClose={() => setImportOpen(false)} />
     </div>

@@ -136,7 +136,7 @@ export default function WealthTab() {
           </CardContent>
         </Card>
       </div>
-      <div className="mt-4">
+      <div className="lg:col-span-12">
         <BankConnectPanel />
       </div>
 
