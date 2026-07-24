@@ -136,6 +136,11 @@ export default function WealthTab() {
           </CardContent>
         </Card>
       </div>
+      <div className="mt-4">
+        <BankConnectPanel />
+      </div>
+
+      <ImportStatementModal open={importOpen} onClose={() => setImportOpen(false)} />
     </div>
   );
 }
