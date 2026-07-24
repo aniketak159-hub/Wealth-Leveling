@@ -12,6 +12,8 @@ import Home from "@/pages/Home";
 import DashboardPage from "@/pages/Dashboard";
 import AdminPage from "@/pages/Admin";
 import ProfilePage from "@/pages/Profile";
+import PrivacyPage from "@/pages/Privacy";
+import TermsPage from "@/pages/Terms";
 import NotFound from "@/pages/not-found";
 import PinLoginFlow from "@/components/PinLoginFlow";
 import PinSetupModal from "@/components/PinSetupModal";
@@ -236,6 +238,8 @@ function ClerkProviderWithRoutes() {
           <Route path="/dashboard" component={DashboardProtect} />
           <Route path="/admin" component={AdminProtect} />
           <Route path="/profile" component={ProfileProtect} />
+          <Route path="/privacy" component={PrivacyPage} />
+          <Route path="/terms" component={TermsPage} />
           <Route component={NotFound} />
         </Switch>
         <PinSetupModal />

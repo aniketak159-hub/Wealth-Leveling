@@ -136,9 +136,24 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="w-full mt-auto border-t border-primary/20 py-8 bg-black/40 text-center">
-        <p className="text-primary/50 text-xs font-mono tracking-widest">
-          © {new Date().getFullYear()} WEALTH LEVELING // ENCRYPTED CONNECTION
+      <footer className="w-full mt-auto border-t border-primary/20 py-8 bg-black/40">
+        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-primary/50 text-xs font-mono tracking-widest">
+            © {new Date().getFullYear()} WEALTH LEVELING // ENCRYPTED CONNECTION
+          </p>
+          <div className="flex items-center gap-6 text-xs font-mono tracking-widest">
+            <Link href="/privacy" className="text-primary/40 hover:text-primary transition-colors uppercase">
+              Privacy Policy
+            </Link>
+            <span className="text-primary/20">·</span>
+            <Link href="/terms" className="text-primary/40 hover:text-primary transition-colors uppercase">
+              Terms of Service
+            </Link>
+          </div>
+        </div>
+        <p className="text-primary/25 text-[10px] font-mono tracking-wider text-center mt-4 px-6">
+          This platform is a personal finance tracker, not a financial advisory service.
+          Nothing here constitutes investment, tax, or legal advice.
         </p>
       </footer>
     </div>
