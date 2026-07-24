@@ -79,18 +79,16 @@ export default function OverviewTab({ dashboard }: { dashboard: Dashboard }) {
 
       {/* MIDDLE COLUMN */}
       <div className="md:col-span-6 space-y-6 flex flex-col">
-        {/* MONTHLY EVALUATION CARD */}
-        <Card className="bg-primary/5 border-primary/40 hud-glow-box">
-          <CardContent className="p-6 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div>
-              <h3 className="font-heading text-lg text-primary tracking-widest font-bold">MONTHLY EVALUATION</h3>
-              <p className="text-xs text-muted-foreground mt-1 max-w-sm">Submit your financial data for the month to calculate XP gains, level ups, and stat improvements.</p>
-            </div>
-            <Button size="lg" className="shrink-0 w-full md:w-auto" onClick={() => setEvalOpen(true)}>
-              INITIATE SCAN
-            </Button>
-          </CardContent>
-        </Card>
+        {/* MONTHLY EVALUATION — compact bar */}
+        <div className="flex items-center justify-between gap-3 px-3 py-2 border border-primary/20 bg-primary/5">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-[10px] font-mono text-primary/50 tracking-widest shrink-0">MONTHLY</span>
+            <span className="text-xs font-mono text-primary/70 tracking-widest truncate">EVALUATION</span>
+          </div>
+          <Button size="sm" variant="outline" className="shrink-0 h-7 text-[10px] px-3 tracking-widest" onClick={() => setEvalOpen(true)}>
+            INITIATE SCAN
+          </Button>
+        </div>
 
         <EvaluationModal open={evalOpen} onClose={() => setEvalOpen(false)} />
 
