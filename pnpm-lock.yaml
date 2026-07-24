@@ -179,12 +179,6 @@ importers:
       '@clerk/shared':
         specifier: ^4.25.5
         version: 4.25.5(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      '@types/multer':
-        specifier: ^2.2.0
-        version: 2.2.0
-      '@types/papaparse':
-        specifier: ^5.5.2
-        version: 5.5.2
       '@types/pdf-parse':
         specifier: ^1.1.5
         version: 1.1.5
@@ -243,9 +237,15 @@ importers:
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
+      '@types/multer':
+        specifier: ^2.2.0
+        version: 2.2.0
       '@types/node':
         specifier: 'catalog:'
         version: 25.9.5
+      '@types/papaparse':
+        specifier: ^5.5.2
+        version: 5.5.2
       '@types/supertest':
         specifier: ^7.2.1
         version: 7.2.1

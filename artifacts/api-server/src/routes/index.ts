@@ -9,6 +9,7 @@ import budgetRouter from "./budget";
 import wealthRouter from "./wealth";
 import adminRouter from "./admin";
 import pinRouter from "./pin";
+import streakRouter from "./streak";
 import skillTreeRouter from "./skill-tree";
 import importRouter from "./import";
 import aaRouter from "./aa";
@@ -25,6 +26,7 @@ router.use(buildsRouter);
 router.use(budgetRouter);
 router.use(wealthRouter);
 router.use(adminRouter);
+router.use(streakRouter);
 router.use(importRouter);
 router.use(aaRouter);
 

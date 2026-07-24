@@ -7,6 +7,7 @@ import { Dashboard } from "@workspace/api-client-react";
 import { Terminal, Shield, Zap, Target } from "lucide-react";
 import { useListQuests, useListSkills, useListBuilds } from "@workspace/api-client-react";
 import EvaluationModal from "./EvaluationModal";
+import StreakCard from "./StreakCard";
 
 export default function OverviewTab({ dashboard }: { dashboard: Dashboard }) {
   const { data: quests } = useListQuests();
@@ -135,6 +136,9 @@ export default function OverviewTab({ dashboard }: { dashboard: Dashboard }) {
 
       {/* RIGHT COLUMN */}
       <div className="md:col-span-3 space-y-6 flex flex-col">
+        {/* STREAK */}
+        <StreakCard />
+
         {/* TOP SKILLS */}
         <Card>
           <CardHeader className="pb-2">

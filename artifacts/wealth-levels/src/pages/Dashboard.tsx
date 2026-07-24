@@ -8,6 +8,9 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { LogOut, LayoutDashboard, Database, Target, BookOpen, User, ShieldAlert, Cpu, BarChart } from "lucide-react";
 import { useClerk } from "@clerk/react";
+import StreakHUD, { type CheckinResult } from "@/components/dashboard/StreakHUD";
+import StreakShieldModal from "@/components/StreakShieldModal";
+import StreakResetModal from "@/components/StreakResetModal";
 
 import OverviewTab from "@/components/dashboard/OverviewTab";
 import StatsTab from "@/components/dashboard/StatsTab";
@@ -21,6 +24,16 @@ export default function DashboardPage() {
   const { data: dashboard, isLoading: dashboardLoading } = useGetDashboard();
   const { signOut } = useClerk();
   const [location, setLocation] = useLocation();
+  const [shieldModal, setShieldModal] = useState<{ streakDays: number; shieldsLeft: number } | null>(null);
+  const [resetModal, setResetModal] = useState<{ brokenAt: number } | null>(null);
+
+  function handleCheckin(result: CheckinResult) {
+    if (result.shieldBurned) {
+      setShieldModal({ streakDays: result.streakDays, shieldsLeft: result.streakShields });
+    } else if (result.streakReset) {
+      setResetModal({ brokenAt: result.streakDays === 1 ? (result.longestStreak > 1 ? result.longestStreak : 0) : 0 });
+    }
+  }
 
   if (dashboardLoading) {
     return (
@@ -76,6 +89,9 @@ export default function DashboardPage() {
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
+              {/* Streak HUD */}
+              <StreakHUD onCheckin={handleCheckin} />
+
               {/* Net worth — hidden on xs, shown sm+ */}
               <div className="hidden sm:block text-right mr-2">
                 <div className="text-[10px] font-mono text-muted-foreground tracking-widest">NET WORTH</div>
@@ -114,6 +130,19 @@ export default function DashboardPage() {
           </div>
         </div>
       </header>
+
+      {/* Streak modals */}
+      <StreakShieldModal
+        open={!!shieldModal}
+        streakDays={shieldModal?.streakDays ?? 0}
+        shieldsLeft={shieldModal?.shieldsLeft ?? 0}
+        onClose={() => setShieldModal(null)}
+      />
+      <StreakResetModal
+        open={!!resetModal}
+        brokenAt={resetModal?.brokenAt ?? 0}
+        onClose={() => setResetModal(null)}
+      />
 
       {/* Main Content */}
       <main className="flex-1 w-full max-w-[1400px] mx-auto p-4 md:p-6 overflow-hidden">

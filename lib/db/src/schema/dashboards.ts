@@ -21,8 +21,14 @@ export const dashboardsTable = pgTable("dashboards", {
   statPer: integer("stat_per").notNull().default(10),
   statLuk: integer("stat_luk").notNull().default(10),
   unspentPoints: integer("unspent_points").notNull().default(0),
+  // Streak tracking
+  streakDays: integer("streak_days").notNull().default(0),
+  longestStreak: integer("longest_streak").notNull().default(0),
+  lastActivityDate: text("last_activity_date"), // YYYY-MM-DD UTC
+  streakShields: integer("streak_shields").notNull().default(0),
+  shieldsUsedTotal: integer("shields_used_total").notNull().default(0),
   // System log stored as newline-separated text
-  systemLog: text("system_log").notNull().default("The System has been installed.\nWelcome, Hunter."),
+  systemLog: text("system_log").notNull().default("The System has been installed.\nWelcome, Player."),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

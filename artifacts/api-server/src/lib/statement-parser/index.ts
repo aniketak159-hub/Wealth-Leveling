@@ -2,7 +2,10 @@
 // Accepts a file buffer + mimetype and returns a ParseResult.
 
 import Papa from "papaparse";
-import pdfParse from "pdf-parse";
+import { createRequire } from "node:module";
+const _require = createRequire(import.meta.url);
+// pdf-parse is CJS-only; use createRequire so ESM loader doesn't choke on it
+const pdfParse: (buf: Buffer) => Promise<{ text: string }> = _require("pdf-parse");
 
 import type { ParseResult, Transaction } from "./types";
 import { assignCategory, buildBudgetItems, detectInvestmentCredits } from "./categorize";
