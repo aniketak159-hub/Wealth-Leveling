@@ -36,12 +36,12 @@ export default function WealthTab() {
   }));
 
   // Aggregate by category for chart
-  const aggregatedData = Object.values(
-    pieData.reduce((acc, curr) => {
+  const aggregatedData: { name: string; value: number; color: string }[] = Object.values(
+    pieData.reduce<Record<string, { name: string; value: number; color: string }>>((acc, curr) => {
       if (!acc[curr.name]) acc[curr.name] = { name: curr.name, value: 0, color: curr.color };
       acc[curr.name].value += curr.value;
       return acc;
-    }, {} as Record<string, any>)
+    }, {})
   );
 
   return (
