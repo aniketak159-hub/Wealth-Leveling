@@ -1,11 +1,13 @@
 /**
  * StreakCard — detailed streak status panel for the Overview tab.
  * Shows: current streak, longest, shield count, milestone roadmap.
+ * Includes an explicit CHECK IN button that awards XP and syncs the header HUD.
  */
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { Flame, ShieldCheck, Trophy, Lock, CheckCircle2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Flame, ShieldCheck, Trophy, Lock, CheckCircle2, Zap } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { CheckinResult } from "./StreakHUD";
 
 const BASE_URL = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -28,16 +30,11 @@ const MILESTONES = [
   { day: 365, label: "Annual Legend",           shields: 3 },
 ];
 
-function flameGrad(days: number) {
-  if (days >= 100) return "from-amber-200 to-yellow-400";
-  if (days >= 30)  return "from-yellow-300 to-orange-400";
-  if (days >= 14)  return "from-orange-300 to-orange-500";
-  if (days >= 7)   return "from-orange-400 to-red-500";
-  return "from-orange-500 to-red-600";
-}
-
 export default function StreakCard() {
   const [data, setData] = useState<StreakState | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [xpFlash, setXpFlash] = useState<number | null>(null);
+  const [milestoneFlash, setMilestoneFlash] = useState<string | null>(null);
 
   useEffect(() => {
     fetch(`${BASE_URL}/api/streak`, { credentials: "include" })
@@ -46,20 +43,128 @@ export default function StreakCard() {
       .catch(() => {});
   }, []);
 
+  async function handleCheckIn() {
+    if (!data || data.alreadyCheckedIn || loading) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`${BASE_URL}/api/streak/checkin`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      });
+      const result: CheckinResult = await res.json();
+
+      // Update local card state
+      setData({
+        streakDays: result.streakDays,
+        longestStreak: result.longestStreak,
+        streakShields: result.streakShields,
+        shieldsUsedTotal: result.shieldsUsedTotal,
+        lastActivityDate: new Date().toISOString().slice(0, 10),
+        alreadyCheckedIn: true,
+      });
+
+      // Show XP pop
+      if (!result.alreadyCheckedIn && result.xpGained > 0) {
+        setXpFlash(result.xpGained);
+        setTimeout(() => setXpFlash(null), 2800);
+      }
+
+      // Show milestone pop
+      if (result.milestone) {
+        setMilestoneFlash(`${result.milestone.days}-DAY STREAK — ${result.milestone.label.toUpperCase()}`);
+        setTimeout(() => setMilestoneFlash(null), 4000);
+      }
+
+      // Notify StreakHUD and Dashboard (shield/reset modals)
+      window.dispatchEvent(new CustomEvent<CheckinResult>("streak:checkin", { detail: result }));
+    } catch {
+      // Silently ignore — user can retry
+    } finally {
+      setLoading(false);
+    }
+  }
+
   if (!data) return null;
 
-  const { streakDays, longestStreak, streakShields, shieldsUsedTotal } = data;
+  const { streakDays, longestStreak, streakShields, shieldsUsedTotal, alreadyCheckedIn } = data;
   const nextMilestone = MILESTONES.find(m => m.day > streakDays);
   const daysToNext = nextMilestone ? nextMilestone.day - streakDays : null;
 
   return (
     <Card className="border-primary/30">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm flex items-center gap-2">
-          <Flame className="w-4 h-4 text-orange-400" /> DAILY STREAK
+        <CardTitle className="text-sm flex items-center justify-between gap-2">
+          {/* Left: title */}
+          <div className="flex items-center gap-2">
+            <Flame className="w-4 h-4 text-orange-400" /> DAILY STREAK
+          </div>
+
+          {/* Right: Check-In button */}
+          <div className="relative">
+            <AnimatePresence>
+              {xpFlash !== null && (
+                <motion.span
+                  key="xp-card"
+                  initial={{ opacity: 0, y: 4, scale: 0.8 }}
+                  animate={{ opacity: 1, y: -14, scale: 1 }}
+                  exit={{ opacity: 0, y: -22 }}
+                  transition={{ duration: 0.4 }}
+                  className="absolute -top-1 left-1/2 -translate-x-1/2 text-[10px] font-mono
+                    text-yellow-300 whitespace-nowrap pointer-events-none z-10"
+                >
+                  +{xpFlash} XP
+                </motion.span>
+              )}
+            </AnimatePresence>
+
+            {alreadyCheckedIn ? (
+              <div className="flex items-center gap-1.5 px-3 py-1 border border-[#00c8ff]/30
+                bg-[#00c8ff]/5 text-[10px] font-mono tracking-widest text-[#00c8ff]/70 select-none">
+                <CheckCircle2 className="w-3 h-3" />
+                CHECKED IN
+              </div>
+            ) : (
+              <motion.button
+                onClick={handleCheckIn}
+                disabled={loading}
+                whileTap={{ scale: 0.96 }}
+                className={`flex items-center gap-1.5 px-3 py-1 border text-[10px] font-mono
+                  tracking-widest transition-colors select-none
+                  ${loading
+                    ? "border-primary/20 bg-primary/5 text-primary/40 cursor-not-allowed"
+                    : "border-orange-400/60 bg-orange-400/10 text-orange-300 hover:bg-orange-400/20 hover:border-orange-400/80 cursor-pointer"
+                  }`}
+              >
+                <Zap className={`w-3 h-3 ${loading ? "opacity-40" : "text-orange-400"}`} />
+                {loading ? "SYNCING..." : "CHECK IN"}
+              </motion.button>
+            )}
+          </div>
         </CardTitle>
       </CardHeader>
+
       <CardContent className="space-y-4">
+
+        {/* Milestone flash */}
+        <AnimatePresence>
+          {milestoneFlash && (
+            <motion.div
+              key="milestone-card"
+              initial={{ opacity: 0, y: -6, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -6, scale: 0.97 }}
+              transition={{ type: "spring", stiffness: 300, damping: 24 }}
+              className="flex items-center gap-2 px-3 py-2 border border-yellow-400/60
+                bg-yellow-400/5 shadow-[0_0_12px_rgba(250,204,21,0.25)]"
+            >
+              <Trophy className="w-3.5 h-3.5 text-yellow-300 shrink-0" />
+              <span className="text-[10px] font-mono tracking-widest text-yellow-300 uppercase">
+                {milestoneFlash}
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Big streak counter */}
         <div className="flex items-center justify-between">

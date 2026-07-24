@@ -1,6 +1,8 @@
 /**
  * StreakHUD — compact streak + shield status widget for the dashboard header.
- * Shows: 🔥 N days | 🛡 N shields | milestone flash on check-in
+ * Shows: 🔥 N days | 🛡 N shields | milestone flash when user checks in.
+ * Check-in is now triggered explicitly from StreakCard; this component only
+ * reads state and reacts to the global "streak:checkin" custom event.
  */
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -41,35 +43,51 @@ export default function StreakHUD({ onCheckin }: Props) {
   const [data, setData] = useState<CheckinResult | null>(null);
   const [milestoneFlash, setMilestoneFlash] = useState<string | null>(null);
   const [xpFlash, setXpFlash] = useState<string | null>(null);
-  const calledRef = useRef(false);
+  const onCheckinRef = useRef(onCheckin);
+  onCheckinRef.current = onCheckin;
 
+  // Load streak state on mount (read-only — no auto check-in)
   useEffect(() => {
-    if (calledRef.current) return;
-    calledRef.current = true;
-
-    fetch(`${BASE_URL}/api/streak/checkin`, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-    })
-      .then(r => r.json())
-      .then((result: CheckinResult) => {
-        setData(result);
-        onCheckin?.(result);
-
-        if (!result.alreadyCheckedIn && result.xpGained > 0) {
-          setXpFlash(`+${result.xpGained} XP`);
-          setTimeout(() => setXpFlash(null), 2800);
-        }
-
-        if (result.milestone) {
-          setMilestoneFlash(`${result.milestone.days}-DAY STREAK — ${result.milestone.label.toUpperCase()}`);
-          setTimeout(() => setMilestoneFlash(null), 4500);
-        }
+    fetch(`${BASE_URL}/api/streak`, { credentials: "include" })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d) return;
+        // Shape GET response to match CheckinResult so state type is consistent
+        setData({
+          alreadyCheckedIn: d.alreadyCheckedIn,
+          streakDays: d.streakDays,
+          longestStreak: d.longestStreak,
+          streakShields: d.streakShields,
+          shieldsUsedTotal: d.shieldsUsedTotal,
+          xpGained: 0,
+          shieldBurned: false,
+          streakReset: false,
+          milestone: null,
+        });
       })
-      .catch(() => {
-        // Silently fail — non-critical UI
-      });
+      .catch(() => {});
+  }, []);
+
+  // React to explicit check-ins fired from StreakCard
+  useEffect(() => {
+    function handleEvent(e: Event) {
+      const result = (e as CustomEvent<CheckinResult>).detail;
+      setData(result);
+      onCheckinRef.current?.(result);
+
+      if (!result.alreadyCheckedIn && result.xpGained > 0) {
+        setXpFlash(`+${result.xpGained} XP`);
+        setTimeout(() => setXpFlash(null), 2800);
+      }
+
+      if (result.milestone) {
+        setMilestoneFlash(`${result.milestone.days}-DAY STREAK — ${result.milestone.label.toUpperCase()}`);
+        setTimeout(() => setMilestoneFlash(null), 4500);
+      }
+    }
+
+    window.addEventListener("streak:checkin", handleEvent);
+    return () => window.removeEventListener("streak:checkin", handleEvent);
   }, []);
 
   if (!data) return null;
