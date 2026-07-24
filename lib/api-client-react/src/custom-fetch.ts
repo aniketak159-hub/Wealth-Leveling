@@ -17,6 +17,16 @@ const DEFAULT_JSON_ACCEPT = "application/json, application/problem+json";
 
 let _baseUrl: string | null = null;
 let _authTokenGetter: AuthTokenGetter | null = null;
+let _onUnauthorized: (() => void) | null = null;
+
+/**
+ * Register a callback that fires whenever any API response comes back with
+ * HTTP 401.  Use this to trigger a global sign-out / redirect-to-login flow.
+ * Pass `null` to clear the handler.
+ */
+export function setOnUnauthorized(cb: (() => void) | null): void {
+  _onUnauthorized = cb;
+}
 
 /**
  * Set a base URL that is prepended to every relative request URL
@@ -364,6 +374,9 @@ export async function customFetch<T = unknown>(
 
   if (!response.ok) {
     const errorData = await parseErrorBody(response, method);
+    if (response.status === 401 && _onUnauthorized) {
+      _onUnauthorized();
+    }
     throw new ApiError(response, errorData, requestInfo);
   }
 

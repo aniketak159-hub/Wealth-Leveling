@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useGetMe, useGetDashboard, useGetDashboardSummary, useListQuests, useListSkills, useListBuilds, useGetBudget, useGetWealth, useRunEvaluation, useUpdateStats, useLogQuestProgress } from "@workspace/api-client-react";
+import { ApiError } from "@workspace/api-client-react";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +22,7 @@ import SkillsTab from "@/components/dashboard/SkillsTab";
 
 export default function DashboardPage() {
   const { data: me } = useGetMe();
-  const { data: dashboard, isLoading: dashboardLoading } = useGetDashboard();
+  const { data: dashboard, isLoading: dashboardLoading, error: dashboardError } = useGetDashboard();
   const { signOut } = useClerk();
   const [location, setLocation] = useLocation();
   const [shieldModal, setShieldModal] = useState<{ streakDays: number; shieldsLeft: number } | null>(null);
@@ -44,10 +45,30 @@ export default function DashboardPage() {
   }
 
   if (!dashboard) {
+    const isAuthError = dashboardError != null && dashboardError instanceof ApiError && dashboardError.status === 401;
+    const isUnavailable = dashboardError != null && dashboardError instanceof ApiError && dashboardError.status === 503;
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <div className="text-destructive font-mono text-xl">ERROR: DASHBOARD CORRUPTED</div>
-        <Button onClick={() => window.location.reload()}>REBOOT SYSTEM</Button>
+        {isAuthError ? (
+          <>
+            <div className="text-warning font-mono text-xl">SESSION EXPIRED</div>
+            <p className="text-primary/50 font-mono text-sm">Your session has ended. Please sign in again.</p>
+            <Button onClick={() => signOut().finally(() => setLocation("/"))}>
+              SIGN IN AGAIN
+            </Button>
+          </>
+        ) : isUnavailable ? (
+          <>
+            <div className="text-destructive font-mono text-xl">SERVICE UNAVAILABLE</div>
+            <p className="text-primary/50 font-mono text-sm">The server is temporarily unreachable. Please wait and try again.</p>
+            <Button onClick={() => window.location.reload()}>RETRY</Button>
+          </>
+        ) : (
+          <>
+            <div className="text-destructive font-mono text-xl">ERROR: DASHBOARD CORRUPTED</div>
+            <Button onClick={() => window.location.reload()}>REBOOT SYSTEM</Button>
+          </>
+        )}
       </div>
     );
   }

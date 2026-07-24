@@ -5,6 +5,7 @@ import { dark } from '@clerk/themes';
 import { Switch, Route, Redirect, useLocation, Router as WouterRouter } from 'wouter';
 import { queryClient } from "@/lib/queryClient";
 import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { setOnUnauthorized } from "@workspace/api-client-react";
 import { KeyRound } from "lucide-react";
 
 import Home from "@/pages/Home";
@@ -160,6 +161,22 @@ function ProfileProtect() {
   );
 }
 
+// Registers a global 401 handler so any expired-session API response
+// triggers an immediate sign-out + redirect instead of a broken UI.
+function AuthWatcher() {
+  const { signOut } = useClerk();
+  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    setOnUnauthorized(() => {
+      signOut().finally(() => setLocation("/"));
+    });
+    return () => setOnUnauthorized(null);
+  }, [signOut, setLocation]);
+
+  return null;
+}
+
 function ClerkQueryClientCacheInvalidator() {
   const { addListener } = useClerk();
   const qc = useQueryClient();
@@ -210,6 +227,7 @@ function ClerkProviderWithRoutes() {
       routerReplace={(to) => setLocation(stripBase(to), { replace: true })}
     >
       <QueryClientProvider client={queryClient}>
+        <AuthWatcher />
         <ClerkQueryClientCacheInvalidator />
         <Switch>
           <Route path="/" component={HomeRedirect} />
