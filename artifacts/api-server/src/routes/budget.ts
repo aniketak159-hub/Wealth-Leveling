@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, budgetsTable, budgetItemsTable, transactionsTable } from "@workspace/db";
+import { db, budgetsTable, budgetItemsTable, transactionsTable, wealthTable, wealthAssetsTable, dashboardsTable } from "@workspace/db";
 import { eq, and, gte, lte, desc } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { GetBudgetResponse, UpdateBudgetBody, UpdateBudgetResponse } from "@workspace/api-zod";
@@ -210,6 +210,132 @@ router.delete("/budget/transactions/:id", requireAuth, async (req, res): Promise
 
   await db.delete(transactionsTable).where(eq(transactionsTable.id, txId));
   res.json({ success: true });
+});
+
+// ── GET /api/budget/analytics?year=YYYY ──────────────────────────────────────
+router.get("/budget/analytics", requireAuth, async (req, res): Promise<void> => {
+  const user = (req as any).dbUser;
+  const year = parseInt(typeof req.query.year === "string" ? req.query.year : String(new Date().getFullYear()), 10);
+  if (isNaN(year)) { res.status(400).json({ error: "Invalid year" }); return; }
+
+  const { budget } = await getOrCreateBudget(user.id);
+
+  const start = `${year}-01-01`;
+  const end   = `${year}-12-31`;
+
+  const rows = await db
+    .select()
+    .from(transactionsTable)
+    .where(and(eq(transactionsTable.budgetId, budget.id), gte(transactionsTable.date, start), lte(transactionsTable.date, end)));
+
+  // Aggregate by month
+  const byMonth: Record<string, { income: number; expense: number; txCount: number }> = {};
+  for (let m = 1; m <= 12; m++) {
+    const key = `${year}-${String(m).padStart(2, "0")}`;
+    byMonth[key] = { income: 0, expense: 0, txCount: 0 };
+  }
+  for (const tx of rows) {
+    const key = tx.date.slice(0, 7);
+    if (!byMonth[key]) continue;
+    const amount = parseFloat(tx.amount as string);
+    if (tx.type === "income") byMonth[key].income += amount;
+    else byMonth[key].expense += amount;
+    byMonth[key].txCount++;
+  }
+
+  const months = Object.entries(byMonth)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([month, d]) => ({ month, ...d, reserves: d.income - d.expense }));
+
+  const totals = months.reduce(
+    (acc, m) => ({ income: acc.income + m.income, expense: acc.expense + m.expense, reserves: acc.reserves + m.reserves }),
+    { income: 0, expense: 0, reserves: 0 }
+  );
+
+  const monthsWithData = months.filter(m => m.txCount > 0).length;
+  const factor = monthsWithData > 0 ? 12 / monthsWithData : 0;
+  const projection = {
+    annualIncome:   Math.round(totals.income   * factor),
+    annualExpense:  Math.round(totals.expense  * factor),
+    annualReserves: Math.round(totals.reserves * factor),
+  };
+
+  res.json({ year, months, totals, projection });
+});
+
+// ── POST /api/budget/sync-wealth ──────────────────────────────────────────────
+// Computes cumulative budget surplus from all transactions and upserts it as a
+// "Budget Savings" CASH asset in the wealth table, then recomputes net worth.
+router.post("/budget/sync-wealth", requireAuth, async (req, res): Promise<void> => {
+  const user = (req as any).dbUser;
+  const { budget } = await getOrCreateBudget(user.id);
+
+  // Sum all income and expense transactions ever
+  const allTx = await db.select().from(transactionsTable).where(eq(transactionsTable.budgetId, budget.id));
+  let totalIncome = 0, totalExpense = 0;
+  for (const tx of allTx) {
+    const amount = parseFloat(tx.amount as string);
+    if (tx.type === "income") totalIncome += amount;
+    else totalExpense += amount;
+  }
+  const surplus = parseFloat((totalIncome - totalExpense).toFixed(2));
+
+  // Get or create wealth record
+  let [wealth] = await db.select().from(wealthTable).where(eq(wealthTable.userId, user.id));
+  if (!wealth) {
+    [wealth] = await db.insert(wealthTable).values({ userId: user.id }).returning();
+  }
+
+  // Find existing "Budget Savings" asset
+  const assets = await db.select().from(wealthAssetsTable).where(eq(wealthAssetsTable.wealthId, wealth.id));
+  const existing = assets.find(a => a.label === "Budget Savings");
+
+  let assetId: number;
+  if (existing) {
+    await db.update(wealthAssetsTable).set({ amount: String(surplus) }).where(eq(wealthAssetsTable.id, existing.id));
+    assetId = existing.id;
+  } else {
+    const [created] = await db.insert(wealthAssetsTable).values({
+      wealthId: wealth.id, label: "Budget Savings", amount: String(surplus), category: "CASH",
+    }).returning();
+    assetId = created.id;
+  }
+
+  // Recompute total net worth from all assets
+  const updatedAssets = await db.select().from(wealthAssetsTable).where(eq(wealthAssetsTable.wealthId, wealth.id));
+  const newNetWorth = updatedAssets.reduce((s, a) => s + parseFloat(a.amount as string), 0);
+  const [updatedWealth] = await db
+    .update(wealthTable)
+    .set({ netWorth: String(newNetWorth) })
+    .where(eq(wealthTable.id, wealth.id))
+    .returning();
+
+  // Also sync net worth to dashboard snapshot
+  await db.update(dashboardsTable)
+    .set({ netWorth: String(newNetWorth), totalAssets: String(newNetWorth) })
+    .where(eq(dashboardsTable.userId, user.id));
+
+  // Compute budget adherence for PER stat context (returned but not auto-applied)
+  const items = await db.select().from(budgetItemsTable).where(eq(budgetItemsTable.budgetId, budget.id));
+  const totalPlanned = items.reduce((s, i) => s + parseFloat(i.planned as string), 0);
+
+  // Current month actual expense
+  const now = new Date().toISOString().slice(0, 7);
+  const monthStart = `${now}-01`;
+  const monthEnd   = `${now}-31`;
+  const monthTx = await db.select().from(transactionsTable)
+    .where(and(eq(transactionsTable.budgetId, budget.id), gte(transactionsTable.date, monthStart), lte(transactionsTable.date, monthEnd)));
+  const monthExpense = monthTx.filter(t => t.type === "expense").reduce((s, t) => s + parseFloat(t.amount as string), 0);
+  const budgetAdherence = totalPlanned > 0 ? Math.min(100, Math.round((1 - Math.max(0, monthExpense - totalPlanned) / totalPlanned) * 100)) : 100;
+
+  res.json({
+    synced: surplus,
+    newNetWorth: parseFloat(updatedWealth.netWorth as string),
+    assetId,
+    budgetAdherence,
+    totalIncome,
+    totalExpense,
+  });
 });
 
 export default router;

@@ -7,17 +7,19 @@ import { Button } from "@/components/ui/button";
 import {
   BarChart, Plus, Edit2, Trash2, ChevronLeft, ChevronRight,
   TrendingUp, TrendingDown, Calendar, List, Upload, Wallet,
+  RefreshCw, CheckCircle, LineChart,
 } from "lucide-react";
 import ImportStatementModal from "@/components/import/ImportStatementModal";
 import BankConnectPanel from "@/components/import/BankConnectPanel";
 import TransactionModal, { type TxRow } from "@/components/budget/TransactionModal";
 import CategoryModal, { type CategoryRow } from "@/components/budget/CategoryModal";
+import BudgetAnalytics from "@/components/budget/BudgetAnalytics";
 
 const BASE_URL = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 interface TxRecord extends TxRow { id: number; createdAt: string; }
 
-type SubTab = "ledger" | "allocation" | "calendar";
+type SubTab = "ledger" | "allocation" | "calendar" | "analytics";
 
 function fmtINR(n: number) {
   return "₹" + Math.abs(n).toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
@@ -56,6 +58,8 @@ export default function BudgetTab() {
   const [txLoading, setTxLoading] = useState(false);
   const [incomeEdit, setIncomeEdit] = useState(false);
   const [incomeInput, setIncomeInput] = useState("");
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<{ newNetWorth: number; synced: number; budgetAdherence: number } | null>(null);
 
   const { data: budget, isLoading, refetch } = useGetBudget();
   const { mutateAsync: updateBudget } = useUpdateBudget();
@@ -134,6 +138,15 @@ export default function BudgetTab() {
     await refetch();
   }
 
+  async function syncToWealth() {
+    setSyncing(true);
+    setSyncResult(null);
+    try {
+      const r = await fetch(`${BASE_URL}/api/budget/sync-wealth`, { method: "POST", credentials: "include" });
+      if (r.ok) setSyncResult(await r.json());
+    } finally { setSyncing(false); }
+  }
+
   async function deleteCat(id: number) {
     if (!confirm("Remove this category?")) return;
     const items = budget!.items
@@ -185,11 +198,12 @@ export default function BudgetTab() {
       {/* ── Month navigator + sub-tabs ─────────────────────────────────────── */}
       <div className="flex items-center justify-between gap-2 flex-wrap">
         {/* Sub-tab pills */}
-        <div className="flex gap-1">
+        <div className="flex flex-wrap gap-1">
           {([
-            { key: "ledger",     icon: List,     label: "LEDGER"     },
-            { key: "allocation", icon: BarChart,  label: "ALLOCATION" },
-            { key: "calendar",   icon: Calendar,  label: "CALENDAR"   },
+            { key: "ledger",     icon: List,      label: "LEDGER"     },
+            { key: "allocation", icon: BarChart,   label: "ALLOCATION" },
+            { key: "calendar",   icon: Calendar,   label: "CALENDAR"   },
+            { key: "analytics",  icon: LineChart,  label: "ANALYTICS"  },
           ] as const).map(({ key, icon: Icon, label }) => (
             <button
               key={key}
@@ -204,19 +218,49 @@ export default function BudgetTab() {
           ))}
         </div>
 
-        {/* Month stepper */}
-        <div className="flex items-center gap-1">
-          <button onClick={() => setMonth(m => shiftMonth(m, -1))} className="p-1.5 border border-primary/20 hover:border-primary/50 text-primary/50 hover:text-primary transition-colors">
-            <ChevronLeft className="w-3.5 h-3.5" />
+        {/* Right side: month stepper + sync button */}
+        <div className="flex items-center gap-2">
+          {/* Sync to net worth */}
+          <button
+            onClick={syncToWealth}
+            disabled={syncing}
+            title="Sync cumulative budget savings → Net Worth"
+            className="flex items-center gap-1.5 px-3 py-1.5 border border-primary/30 bg-primary/5 hover:border-primary/60 hover:bg-primary/10 font-mono text-[10px] tracking-widest text-primary/70 hover:text-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <RefreshCw className={`w-3 h-3 ${syncing ? "animate-spin" : ""}`} />
+            {syncing ? "SYNCING..." : "SYNC → NET WORTH"}
           </button>
-          <span className="font-mono text-[10px] tracking-widest text-primary/70 px-2 min-w-[130px] text-center">
-            {monthLabel(month)}
-          </span>
-          <button onClick={() => setMonth(m => shiftMonth(m, 1))} className="p-1.5 border border-primary/20 hover:border-primary/50 text-primary/50 hover:text-primary transition-colors">
-            <ChevronRight className="w-3.5 h-3.5" />
-          </button>
+
+          {/* Month stepper (hidden on analytics tab) */}
+          {subTab !== "analytics" && (
+            <div className="flex items-center gap-1">
+              <button onClick={() => setMonth(m => shiftMonth(m, -1))} className="p-1.5 border border-primary/20 hover:border-primary/50 text-primary/50 hover:text-primary transition-colors">
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </button>
+              <span className="font-mono text-[10px] tracking-widest text-primary/70 px-2 min-w-[130px] text-center">
+                {monthLabel(month)}
+              </span>
+              <button onClick={() => setMonth(m => shiftMonth(m, 1))} className="p-1.5 border border-primary/20 hover:border-primary/50 text-primary/50 hover:text-primary transition-colors">
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* ── Sync result banner ──────────────────────────────────────────────── */}
+      {syncResult && (
+        <div className="flex items-center gap-3 px-4 py-2.5 border border-green-400/40 bg-green-400/5 text-green-400">
+          <CheckCircle className="w-4 h-4 shrink-0" />
+          <div className="font-mono text-xs flex-1">
+            <span className="font-bold">SYNCED.</span>{" "}
+            Budget Savings asset updated to <span className="font-bold">{fmtINR(syncResult.synced)}</span> →{" "}
+            Net Worth now <span className="font-bold">{fmtINR(syncResult.newNetWorth)}</span>.{" "}
+            Budget adherence: <span className="font-bold">{syncResult.budgetAdherence}%</span>
+          </div>
+          <button onClick={() => setSyncResult(null)} className="text-green-400/60 hover:text-green-400 font-mono text-[10px]">✕</button>
+        </div>
+      )}
 
       {/* ══ LEDGER TAB ══════════════════════════════════════════════════════ */}
       {subTab === "ledger" && (
@@ -487,6 +531,23 @@ export default function BudgetTab() {
                 <div className="w-2 h-2 bg-red-400/40 rounded-sm" /> EXPENSE
               </div>
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ══ ANALYTICS TAB ═══════════════════════════════════════════════════ */}
+      {subTab === "analytics" && (
+        <Card className="flex-1">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 border-b border-primary/20">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <LineChart className="w-4 h-4" /> BUDGET ANALYTICS
+            </CardTitle>
+            <div className="text-[9px] font-mono text-muted-foreground/50 tracking-widest">
+              MONTHLY · YEARLY · PROJECTIONS
+            </div>
+          </CardHeader>
+          <CardContent className="p-4">
+            <BudgetAnalytics />
           </CardContent>
         </Card>
       )}
