@@ -5,7 +5,7 @@
  * On success calls signIn.create({ strategy: 'ticket', ticket }) to establish a Clerk session.
  */
 import { useState } from "react";
-import { useSignIn } from "@clerk/react";
+import { useSignIn } from "@clerk/react/legacy";
 import { motion, AnimatePresence } from "framer-motion";
 import { KeyRound, Eye, EyeOff, ChevronLeft, ArrowRight, ShieldCheck, Smartphone } from "lucide-react";
 

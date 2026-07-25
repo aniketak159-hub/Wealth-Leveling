@@ -7,6 +7,7 @@ import { queryClient } from "@/lib/queryClient";
 import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { setOnUnauthorized } from "@workspace/api-client-react";
 import { KeyRound } from "lucide-react";
+import TechBootLoader from "@/components/TechBootLoader";
 
 import Home from "@/pages/Home";
 import DashboardPage from "@/pages/Dashboard";
@@ -254,6 +255,7 @@ function App() {
   return (
     <WouterRouter base={basePath}>
       <ClerkProviderWithRoutes />
+      <TechBootLoader />
     </WouterRouter>
   );
 }

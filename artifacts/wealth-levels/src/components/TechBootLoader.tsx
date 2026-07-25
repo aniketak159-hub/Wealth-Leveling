@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Activity, ArrowUpRight, BrainCircuit, CircleDollarSign, ShieldCheck } from "lucide-react";
+import { useLocation } from "wouter";
 
 const lessons = [
   {
@@ -30,13 +31,21 @@ const lessons = [
 ];
 
 export default function TechBootLoader() {
+  const [location] = useLocation();
   const [progress, setProgress] = useState(0);
   const [lessonIndex, setLessonIndex] = useState(0);
   const [visible, setVisible] = useState(true);
   const lesson = useMemo(() => lessons[lessonIndex], [lessonIndex]);
   const LessonIcon = lesson.icon;
 
+  const isHomeRoute = location === "/";
+
   useEffect(() => {
+    if (!isHomeRoute) {
+      setVisible(false);
+      return;
+    }
+
     const progressTimer = window.setInterval(() => {
       setProgress((value) => Math.min(value + 2.5, 100));
     }, 85);
@@ -50,7 +59,11 @@ export default function TechBootLoader() {
       window.clearInterval(lessonTimer);
       window.clearTimeout(closeTimer);
     };
-  }, []);
+  }, [isHomeRoute]);
+
+  if (!isHomeRoute) {
+    return null;
+  }
 
   return (
     <AnimatePresence>

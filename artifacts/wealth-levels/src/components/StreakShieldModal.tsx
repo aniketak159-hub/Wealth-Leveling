@@ -23,6 +23,7 @@ export default function StreakShieldModal({ open, streakDays, shieldsLeft, onClo
       const t = setTimeout(() => setPhase("confirm"), 1800);
       return () => clearTimeout(t);
     }
+    return undefined;
   }, [open]);
 
   return (

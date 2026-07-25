@@ -443,7 +443,7 @@ function MyHabitsView() {
                   size="sm"
                   variant="outline"
                   disabled={checkinMutation.isPending}
-                  onClick={() => checkinMutation.mutate({ id: String(skill.id) })}
+                  onClick={() => checkinMutation.mutate({ id: skill.id })}
                   className="h-6 text-[10px] px-2 py-0 border-primary/30 hover:border-primary"
                 >
                   LOG CHECK-IN

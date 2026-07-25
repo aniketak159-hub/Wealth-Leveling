@@ -21,7 +21,7 @@ export default function PinSetupModal() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!isSignedIn || !user) return;
+    if (!isSignedIn || !user) return undefined;
 
     // Only show for users who signed up within the last 10 minutes
     const createdAt = user.createdAt ? new Date(user.createdAt).getTime() : 0;
@@ -32,6 +32,7 @@ export default function PinSetupModal() {
       const t = setTimeout(() => setVisible(true), 1800);
       return () => clearTimeout(t);
     }
+    return undefined;
   }, [isSignedIn, user]);
 
   function dismiss() {
