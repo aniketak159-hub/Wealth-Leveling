@@ -3,7 +3,7 @@
     "email": "jagruthi1221@gmail.com",
     "displayName": "jagruthi1221",
     "originalClerkId": "user_3GziYah19nbfrGP6mVGh242CTHc",
-    "exportedAt": "2026-07-25T12:05:50.269Z",
+    "exportedAt": "2026-07-25T12:10:37.751Z",
     "note": "If the Clerk user is deleted and re-created, run restore.mjs with the new Clerk ID. The new Clerk ID appears in the Replit Auth pane or in the /api/me response after signing in."
   },
   "user": {
