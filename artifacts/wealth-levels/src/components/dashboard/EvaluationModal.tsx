@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { createPortal } from "react-dom";
 import { useRunEvaluation, useGetDashboard } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { getGetDashboardQueryKey, getGetDashboardSummaryQueryKey, getGetBudgetQueryKey, getGetWealthQueryKey } from "@workspace/api-client-react";
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Upload, ClipboardList, X, ArrowLeft, CheckCircle, Zap, TrendingUp, ChevronRight, Loader2 } from "lucide-react";
+import LevelUpCinematic from "@/components/LevelUpCinematic";
 import ParsePreview, { type ParseResult } from "@/components/import/ParsePreview";
 
 type Screen = "method" | "upload" | "preview" | "manual" | "result";
@@ -16,6 +18,10 @@ interface ResultData {
   leveledUp: boolean;
   newLevel: number;
   newXp: number;
+  newRank: string;
+  prevRank: string;
+  xpToNext: number;
+  displayName: string;
 }
 
 interface Props {
@@ -41,6 +47,7 @@ export default function EvaluationModal({ open, onClose }: Props) {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [result, setResult] = useState<ResultData | null>(null);
+  const [showCinematic, setShowCinematic] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isParsing, setIsParsing] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
@@ -59,18 +66,30 @@ export default function EvaluationModal({ open, onClose }: Props) {
   });
 
   const queryClient = useQueryClient();
+  // Capture pre-eval rank so we can show promotion delta in cinematic
+  const { data: dashboardSnapshot } = useGetDashboard();
+
   const { mutate: runEvaluation, isPending } = useRunEvaluation({
     mutation: {
       onSuccess: (data) => {
         queryClient.invalidateQueries({ queryKey: getGetDashboardQueryKey() });
         queryClient.invalidateQueries({ queryKey: getGetDashboardSummaryQueryKey() });
-        setResult({
+        const resultData: ResultData = {
           xpGained: data.xpGained,
           leveledUp: data.leveledUp,
           newLevel: data.newLevel,
           newXp: data.newXp,
-        });
+          newRank: data.updatedDashboard.rank ?? "E",
+          prevRank: dashboardSnapshot?.rank ?? "E",
+          xpToNext: data.updatedDashboard.xpToNext,
+          displayName: data.updatedDashboard.displayName,
+        };
+        setResult(resultData);
         setScreen("result");
+        if (data.leveledUp) {
+          // Small delay so the result screen mounts before cinematic sweeps in
+          setTimeout(() => setShowCinematic(true), 120);
+        }
       },
       onError: () => {
         setError("EVALUATION FAILED. CHECK INPUTS AND RETRY.");
@@ -154,6 +173,7 @@ export default function EvaluationModal({ open, onClose }: Props) {
   function handleReset() {
     setScreen("method");
     setResult(null);
+    setShowCinematic(false);
     setError(null);
     setUploadedFile(null);
     setFields({
@@ -608,21 +628,6 @@ export default function EvaluationModal({ open, onClose }: Props) {
                 exit={{ opacity: 0 }}
                 className="space-y-6 text-center py-4"
               >
-                {result.leveledUp && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="border border-warning/60 bg-warning/10 px-4 py-3"
-                  >
-                    <p className="font-heading text-warning tracking-widest text-lg font-bold">
-                      ⚡ LEVEL UP
-                    </p>
-                    <p className="font-mono text-warning/70 text-sm mt-1">
-                      YOU ARE NOW LEVEL {result.newLevel}
-                    </p>
-                  </motion.div>
-                )}
-
                 <div className="border border-primary/30 bg-primary/5 p-8">
                   <CheckCircle className="w-12 h-12 text-primary mx-auto mb-4" />
                   <p className="font-heading text-primary tracking-widest text-2xl font-bold">
@@ -631,6 +636,11 @@ export default function EvaluationModal({ open, onClose }: Props) {
                   <p className="font-mono text-primary/60 text-sm mt-2">
                     EVALUATION PROCESSED. STATS UPDATED.
                   </p>
+                  {result.leveledUp && (
+                    <p className="font-mono text-warning/80 text-xs mt-3 tracking-widest">
+                      ⚡ LEVEL UP — SEE CINEMATIC
+                    </p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -645,11 +655,16 @@ export default function EvaluationModal({ open, onClose }: Props) {
                 </div>
 
                 <div className="flex gap-3">
+                  {result.leveledUp && (
+                    <Button variant="outline" className="flex-1" onClick={() => setShowCinematic(true)}>
+                      ⚡ VIEW LEVEL UP
+                    </Button>
+                  )}
                   <Button variant="outline" className="flex-1" onClick={handleReset}>
                     RUN ANOTHER
                   </Button>
                   <Button className="flex-1" onClick={onClose}>
-                    CLOSE TERMINAL
+                    CLOSE
                   </Button>
                 </div>
               </motion.div>
@@ -657,6 +672,23 @@ export default function EvaluationModal({ open, onClose }: Props) {
           </AnimatePresence>
         </div>
       </motion.div>
+
+      {/* ── LEVEL UP CINEMATIC ── renders as a full-screen portal over everything ── */}
+      {showCinematic && result?.leveledUp && createPortal(
+        <AnimatePresence>
+          <LevelUpCinematic
+            newLevel={result.newLevel}
+            newRank={result.newRank}
+            prevRank={result.prevRank}
+            newXp={result.newXp}
+            xpToNext={result.xpToNext}
+            xpGained={result.xpGained}
+            displayName={result.displayName}
+            onClose={() => setShowCinematic(false)}
+          />
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }
