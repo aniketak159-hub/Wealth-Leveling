@@ -116,6 +116,8 @@ export const QuestFrequency = {
   ONGOING: 'ONGOING',
 } as const;
 
+export type QuestDataLink = 'NET_WORTH' | 'MONTHLY_SAVINGS' | 'TOTAL_EXPENSES';
+
 export interface Quest {
   id: number;
   userId: number;
@@ -129,6 +131,10 @@ export interface Quest {
   xpReward: number;
   frequency: QuestFrequency;
   completed: boolean;
+  /** @nullable */
+  completedAt?: string | null;
+  /** @nullable */
+  dataLink?: QuestDataLink | null;
   createdAt: string;
 }
 
@@ -156,8 +162,9 @@ export interface QuestInput {
   description?: string;
   category?: QuestInputCategory;
   targetAmount?: number;
-  xpReward: number;
-  frequency: QuestInputFrequency;
+  xpReward?: number;
+  frequency?: QuestInputFrequency;
+  dataLink?: QuestDataLink | null;
 }
 
 export interface QuestUpdate {
@@ -168,6 +175,7 @@ export interface QuestUpdate {
   currentAmount?: number;
   xpReward?: number;
   completed?: boolean;
+  completedAt?: string | null;
 }
 
 export interface QuestProgressInput {

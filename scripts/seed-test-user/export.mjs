@@ -86,7 +86,10 @@ try {
     budget: { monthly_income: budget?.monthly_income ?? "0.00" },
     budget_items: budgetItems.map(({ id, budget_id, ...rest }) => rest),
     transactions:  transactions.map(({ id, budget_id, created_at, ...rest }) => rest),
-    quests:  quests.map(({ id, user_id, created_at, updated_at, ...rest }) => rest),
+    quests:  quests.map(({ id, user_id, created_at, updated_at, completed_at, ...rest }) => ({
+      ...rest,
+      completed_at: completed_at ? completed_at.toISOString() : null,
+    })),
     skills:  skills.map(({ id, user_id, created_at, updated_at, ...rest }) => rest),
     skill_tree_unlocks: unlocks.map(({ id, user_id, unlocked_at, ...rest }) => rest),
     builds:  builds.map(({ id, user_id, created_at, updated_at, ...rest }) => rest),

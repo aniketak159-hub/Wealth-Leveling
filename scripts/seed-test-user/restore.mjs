@@ -167,9 +167,11 @@ try {
     await client.query(`DELETE FROM quests WHERE user_id = $1`, [userId]);
     for (const q of data.quests) {
       await client.query(
-        `INSERT INTO quests (user_id, title, description, category, target_amount, current_amount, xp_reward, frequency, completed)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-        [userId, q.title, q.description, q.category, q.target_amount, q.current_amount, q.xp_reward, q.frequency, q.completed]
+        `INSERT INTO quests (user_id, title, description, category, target_amount, current_amount, xp_reward, frequency, completed, completed_at, data_link)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+        [userId, q.title, q.description ?? null, q.category, q.target_amount ?? null,
+         q.current_amount, q.xp_reward, q.frequency, q.completed,
+         q.completed_at ?? null, q.data_link ?? null]
       );
     }
     console.log(`✅  Quests restored  (${data.quests.length} rows)`);

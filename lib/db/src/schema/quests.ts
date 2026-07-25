@@ -13,6 +13,8 @@ export const questsTable = pgTable("quests", {
   xpReward: integer("xp_reward").notNull().default(100),
   frequency: text("frequency").notNull().default("ONGOING"), // DAILY | WEEKLY | MONTHLY | ONGOING
   completed: boolean("completed").notNull().default(false),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+  dataLink: text("data_link"), // NET_WORTH | MONTHLY_SAVINGS | TOTAL_EXPENSES | null
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

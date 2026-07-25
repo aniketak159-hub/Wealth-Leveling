@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, questsTable } from "@workspace/db";
+import { db, questsTable, wealthTable, budgetsTable, budgetItemsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import {
@@ -17,7 +17,9 @@ import {
 
 const router: IRouter = Router();
 
-function questToResponse(q: typeof questsTable.$inferSelect) {
+type DataLink = "NET_WORTH" | "MONTHLY_SAVINGS" | "TOTAL_EXPENSES" | null;
+
+function questToResponse(q: typeof questsTable.$inferSelect, liveAmount?: number) {
   return {
     id: q.id,
     userId: q.userId,
@@ -25,18 +27,56 @@ function questToResponse(q: typeof questsTable.$inferSelect) {
     description: q.description ?? null,
     category: q.category as "SYSTEM" | "SELF",
     targetAmount: q.targetAmount ? parseFloat(q.targetAmount as string) : null,
-    currentAmount: parseFloat(q.currentAmount as string),
+    currentAmount: liveAmount !== undefined ? liveAmount : parseFloat(q.currentAmount as string),
     xpReward: q.xpReward,
     frequency: q.frequency as "DAILY" | "WEEKLY" | "MONTHLY" | "ONGOING",
     completed: q.completed,
+    completedAt: q.completedAt?.toISOString() ?? null,
+    dataLink: (q.dataLink as DataLink) ?? null,
     createdAt: q.createdAt.toISOString(),
   };
+}
+
+/** Fetch the live financial value for a dataLink type */
+async function getLiveAmount(userId: number, dataLink: string): Promise<number> {
+  if (dataLink === "NET_WORTH") {
+    const [row] = await db.select().from(wealthTable).where(eq(wealthTable.userId, userId));
+    return row ? parseFloat(row.netWorth as string) : 0;
+  }
+
+  if (dataLink === "MONTHLY_SAVINGS" || dataLink === "TOTAL_EXPENSES") {
+    const [budget] = await db.select().from(budgetsTable).where(eq(budgetsTable.userId, userId));
+    if (!budget) return 0;
+    const items = await db.select().from(budgetItemsTable).where(eq(budgetItemsTable.budgetId, budget.id));
+    const totalExpenses = items.reduce((sum, item) => sum + parseFloat(item.actual as string), 0);
+    if (dataLink === "TOTAL_EXPENSES") return totalExpenses;
+    // MONTHLY_SAVINGS = income - expenses
+    const income = parseFloat(budget.monthlyIncome as string);
+    return Math.max(0, income - totalExpenses);
+  }
+
+  return 0;
 }
 
 router.get("/quests", requireAuth, async (req, res): Promise<void> => {
   const user = (req as any).dbUser;
   const quests = await db.select().from(questsTable).where(eq(questsTable.userId, user.id));
-  res.json(ListQuestsResponse.parse(quests.map(questToResponse)));
+
+  // For quests with a dataLink, auto-compute currentAmount from financial data
+  const linkedLinks = [...new Set(quests.filter(q => q.dataLink).map(q => q.dataLink!))];
+  const liveValues: Record<string, number> = {};
+  await Promise.all(
+    linkedLinks.map(async (link) => {
+      liveValues[link] = await getLiveAmount(user.id, link);
+    })
+  );
+
+  const responses = quests.map(q => {
+    const live = q.dataLink ? liveValues[q.dataLink] : undefined;
+    return questToResponse(q, live);
+  });
+
+  res.json(ListQuestsResponse.parse(responses));
 });
 
 router.post("/quests", requireAuth, async (req, res): Promise<void> => {
@@ -55,8 +95,9 @@ router.post("/quests", requireAuth, async (req, res): Promise<void> => {
       description: parsed.data.description,
       category: parsed.data.category ?? "SELF",
       targetAmount: parsed.data.targetAmount ? String(parsed.data.targetAmount) : null,
-      xpReward: parsed.data.xpReward,
-      frequency: parsed.data.frequency,
+      xpReward: parsed.data.xpReward ?? 100,
+      frequency: parsed.data.frequency ?? "ONGOING",
+      dataLink: parsed.data.dataLink ?? null,
     })
     .returning();
 
@@ -83,7 +124,14 @@ router.patch("/quests/:id", requireAuth, async (req, res): Promise<void> => {
   if (parsed.data.targetAmount !== undefined) updates.targetAmount = String(parsed.data.targetAmount);
   if (parsed.data.currentAmount !== undefined) updates.currentAmount = String(parsed.data.currentAmount);
   if (parsed.data.xpReward !== undefined) updates.xpReward = parsed.data.xpReward;
-  if (parsed.data.completed !== undefined) updates.completed = parsed.data.completed;
+  if (parsed.data.completed !== undefined) {
+    updates.completed = parsed.data.completed;
+    // Auto-stamp completedAt when marking complete
+    updates.completedAt = parsed.data.completed ? new Date() : null;
+  }
+  if (parsed.data.completedAt !== undefined) {
+    updates.completedAt = parsed.data.completedAt ? new Date(parsed.data.completedAt) : null;
+  }
 
   const [quest] = await db
     .update(questsTable)
@@ -146,11 +194,19 @@ router.post("/quests/:id/progress", requireAuth, async (req, res): Promise<void>
 
   const newAmount = parseFloat(existing.currentAmount as string) + parsed.data.amount;
   const targetAmount = existing.targetAmount ? parseFloat(existing.targetAmount as string) : null;
-  const completed = targetAmount !== null && newAmount >= targetAmount;
+  const nowCompleted = targetAmount !== null && newAmount >= targetAmount;
+
+  const setValues: Record<string, unknown> = {
+    currentAmount: String(newAmount),
+    completed: nowCompleted,
+  };
+  if (nowCompleted && !existing.completed) {
+    setValues.completedAt = new Date();
+  }
 
   const [updated] = await db
     .update(questsTable)
-    .set({ currentAmount: String(newAmount), completed })
+    .set(setValues)
     .where(eq(questsTable.id, existing.id))
     .returning();
 
