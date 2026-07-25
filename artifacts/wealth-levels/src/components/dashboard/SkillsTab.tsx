@@ -363,6 +363,16 @@ function SkillTreeView() {
         TAP A SKILL TO VIEW DETAILS · TIER 1 ALWAYS ACCESSIBLE · UNLOCK 6/10 TO ADVANCE
       </p>
 
+      {/* Tracking disclaimer */}
+      <div className="border border-primary/10 bg-primary/[0.03] px-4 py-3 flex items-start gap-3 -mt-1">
+        <span className="text-primary/30 font-mono text-xs shrink-0 mt-0.5">ℹ</span>
+        <p className="text-[10px] font-mono text-foreground/35 leading-relaxed">
+          THESE ARE TRACKING MILESTONES — unlock them by logging actions you have already decided to take.
+          This system does not recommend what to buy, when to sell, or how to allocate your money.
+          For personalised financial guidance, consult a SEBI-registered Investment Adviser.
+        </p>
+      </div>
+
       {/* Three tree columns */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {SKILL_TREES.map((tree) => (
