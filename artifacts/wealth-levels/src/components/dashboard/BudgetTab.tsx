@@ -119,14 +119,14 @@ export default function BudgetTab() {
   }
 
   async function saveCat(row: CategoryRow) {
-    const items = budget.items.map(i => ({
+    const items = budget!.items.map(i => ({
       label: i.label,
       planned: i.planned,
       actual: i.actual,
     }));
     if (row.id) {
-      const idx = budget.items.findIndex(i => i.id === row.id);
-      if (idx >= 0) items[idx] = { label: row.label, planned: row.planned, actual: budget.items[idx].actual };
+      const idx = budget!.items.findIndex(i => i.id === row.id);
+      if (idx >= 0) items[idx] = { label: row.label, planned: row.planned, actual: budget!.items[idx].actual };
     } else {
       items.push({ label: row.label, planned: row.planned, actual: 0 });
     }
@@ -136,7 +136,7 @@ export default function BudgetTab() {
 
   async function deleteCat(id: number) {
     if (!confirm("Remove this category?")) return;
-    const items = budget.items
+    const items = budget!.items
       .filter(i => i.id !== id)
       .map(i => ({ label: i.label, planned: i.planned, actual: i.actual }));
     await updateBudget({ data: { items } });

@@ -163,7 +163,7 @@ router.post("/budget/transactions", requireAuth, async (req, res): Promise<void>
 // ── PATCH /api/budget/transactions/:id ────────────────────────────────────────
 router.patch("/budget/transactions/:id", requireAuth, async (req, res): Promise<void> => {
   const user = (req as any).dbUser;
-  const txId = parseInt(req.params.id, 10);
+  const txId = parseInt(req.params.id as string, 10);
   if (isNaN(txId)) { res.status(400).json({ error: "Invalid id" }); return; }
 
   const parsed = UpdateTxBody.safeParse(req.body);
@@ -197,7 +197,7 @@ router.patch("/budget/transactions/:id", requireAuth, async (req, res): Promise<
 // ── DELETE /api/budget/transactions/:id ───────────────────────────────────────
 router.delete("/budget/transactions/:id", requireAuth, async (req, res): Promise<void> => {
   const user = (req as any).dbUser;
-  const txId = parseInt(req.params.id, 10);
+  const txId = parseInt(req.params.id as string, 10);
   if (isNaN(txId)) { res.status(400).json({ error: "Invalid id" }); return; }
 
   const { budget } = await getOrCreateBudget(user.id);

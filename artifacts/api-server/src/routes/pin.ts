@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 // otplib and qrcode are CJS-only packages externalised from the esbuild bundle;
 // they load correctly at runtime via the globalThis.require shim.
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { authenticator } = require("otplib") as typeof import("otplib");
+const { generateSecret: totpGenerateSecret, generateURI: totpGenerateURI, verifySync: totpVerifySync } = require("otplib") as typeof import("otplib");
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const QRCode = require("qrcode") as typeof import("qrcode");
 import { createClerkClient } from "@clerk/express";
@@ -111,8 +111,8 @@ router.post("/auth/totp/setup", requireAuth, async (req, res): Promise<void> => 
   const clerkUserObj = await clerk.users.getUser(clerkUser);
   const email = clerkUserObj.primaryEmailAddress?.emailAddress ?? "user";
 
-  const secret = authenticator.generateSecret();
-  const otpauth = authenticator.keyuri(email, APP_NAME, secret);
+  const secret = totpGenerateSecret();
+  const otpauth = totpGenerateURI({ issuer: APP_NAME, label: email, secret });
   const qrDataUrl = await QRCode.toDataURL(otpauth);
 
   // Store pending secret; totpEnabled stays false until verified
@@ -138,7 +138,7 @@ router.post("/auth/totp/enable", requireAuth, async (req, res): Promise<void> =>
     return;
   }
 
-  const isValid = authenticator.verify({ token: code, secret: user.totpSecret });
+  const isValid = totpVerifySync({ token: code, secret: user.totpSecret });
   if (!isValid) {
     res.status(401).json({ error: "Authenticator code is incorrect. Try again." });
     return;
@@ -166,7 +166,7 @@ router.delete("/auth/totp/disable", requireAuth, async (req, res): Promise<void>
     return;
   }
 
-  const isValid = authenticator.verify({ token: code, secret: user.totpSecret! });
+  const isValid = totpVerifySync({ token: code, secret: user.totpSecret! });
   if (!isValid) {
     res.status(401).json({ error: "Authenticator code is incorrect." });
     return;
@@ -229,7 +229,7 @@ router.post("/auth/pin-login", async (req, res): Promise<void> => {
         return;
       }
 
-      const totpValid = authenticator.verify({
+      const totpValid = totpVerifySync({
         token: parsed.data.totpCode,
         secret: dbUser.totpSecret!,
       });

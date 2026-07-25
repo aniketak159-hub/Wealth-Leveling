@@ -5,7 +5,7 @@
  * On success calls signIn.create({ strategy: 'ticket', ticket }) to establish a Clerk session.
  */
 import { useState } from "react";
-import { useSignIn } from "@clerk/react/legacy";
+import { useClerk } from "@clerk/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { KeyRound, Eye, EyeOff, ChevronLeft, ArrowRight, ShieldCheck, Smartphone } from "lucide-react";
 
@@ -18,7 +18,7 @@ interface Props {
 type Step = "email" | "pin" | "totp" | "done";
 
 export default function PinLoginFlow({ onCancel }: Props) {
-  const { signIn, setActive } = useSignIn();
+  const clerk = useClerk();
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
   const [pin, setPin] = useState("");
@@ -100,10 +100,10 @@ export default function PinLoginFlow({ onCancel }: Props) {
   }
 
   async function finishLogin(token: string) {
-    if (!signIn) { setError("Auth not ready. Try again."); return; }
-    const result = await signIn.create({ strategy: "ticket", ticket: token });
+    if (!clerk.client) { setError("Auth not ready. Try again."); return; }
+    const result = await clerk.client.signIn.create({ strategy: "ticket", ticket: token });
     if (result.status === "complete") {
-      await setActive!({ session: result.createdSessionId });
+      await clerk.setActive({ session: result.createdSessionId });
       setStep("done");
     } else {
       setError("Authentication incomplete. Try the standard login.");
