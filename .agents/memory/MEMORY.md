@@ -1,1 +1,2 @@
 - [Generated client sync](generated-client-sync.md) — frontend API hook types can drift from the current OpenAPI-generated client and should be regenerated before typechecking.
+- [TOTP on PIN login](totp-pin-2fa.md) — TOTP 2FA on PIN login only; otplib/qrcode must be externalised in build.mjs (esbuild named-export issue); DB columns totpSecret + totpEnabled on usersTable.

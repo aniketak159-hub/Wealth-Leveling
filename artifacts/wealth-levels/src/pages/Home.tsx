@@ -135,6 +135,71 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Trust Protocol */}
+      <section className="w-full max-w-6xl px-6 py-20 mx-auto">
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 hud-panel px-4 py-2 mb-6">
+            <BarChart className="w-4 h-4 text-primary" />
+            <span className="text-primary text-xs font-mono tracking-widest">TRUST PROTOCOL // ACTIVE</span>
+          </div>
+          <h2 className="text-3xl font-heading font-bold mb-3 tracking-widest">YOUR DATA. YOUR VAULT.</h2>
+          <p className="text-muted-foreground font-mono text-sm max-w-xl mx-auto">
+            Real financial data deserves real security. Here's what's under the hood.
+          </p>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            {
+              icon: <Shield className="w-5 h-5 text-primary" />,
+              title: "TLS on every byte",
+              body: "Replit's proxy enforces HTTPS on all connections. Plain HTTP never reaches the server.",
+            },
+            {
+              icon: <TrendingUp className="w-5 h-5 text-primary" />,
+              title: "Enterprise identity",
+              body: "Accounts run on Clerk — SOC 2 certified. Your password is hashed by Clerk; we never see it.",
+            },
+            {
+              icon: <Zap className="w-5 h-5 text-primary" />,
+              title: "bcrypt-hashed PIN",
+              body: "Your quick-login PIN is stored as a bcrypt hash (cost 12). The raw digits are never logged.",
+            },
+            {
+              icon: <Target className="w-5 h-5 text-primary" />,
+              title: "2-factor option",
+              body: "Enable TOTP in Profile. PIN + authenticator code — both required, neither alone is enough.",
+            },
+          ].map((item, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.08 }}
+              className="hud-panel p-6 flex flex-col gap-3"
+            >
+              <div className="w-9 h-9 border border-primary/30 bg-primary/10 flex items-center justify-center shrink-0">
+                {item.icon}
+              </div>
+              <div>
+                <h3 className="font-heading text-sm text-primary tracking-widest mb-1">{item.title}</h3>
+                <p className="text-muted-foreground text-xs font-mono leading-relaxed">{item.body}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        <div className="mt-8 flex justify-center">
+          <Link
+            href="/security"
+            className="text-xs font-mono tracking-widest text-primary/50 hover:text-primary transition-colors underline underline-offset-4 uppercase"
+          >
+            Full Security &amp; Data Trust document →
+          </Link>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="w-full mt-auto border-t border-primary/20 py-8 bg-black/40">
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -148,6 +213,10 @@ export default function Home() {
             <span className="text-primary/20">·</span>
             <Link href="/terms" className="text-primary/40 hover:text-primary transition-colors uppercase">
               Terms of Service
+            </Link>
+            <span className="text-primary/20">·</span>
+            <Link href="/security" className="text-primary/40 hover:text-primary transition-colors uppercase">
+              Security
             </Link>
           </div>
         </div>

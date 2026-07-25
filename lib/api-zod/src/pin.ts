@@ -28,6 +28,11 @@ export const PinLoginBody = z.object({
     .string({ required_error: "email is required." })
     .email("Must be a valid email address."),
   pin,
+  /** 6-digit TOTP code — required only when TOTP is enabled for the account */
+  totpCode: z
+    .string()
+    .regex(/^\d{6}$/, "Authenticator code must be 6 digits.")
+    .optional(),
 });
 
 export type SetPinBody = z.infer<typeof SetPinBody>;

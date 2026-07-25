@@ -46,6 +46,7 @@ import {
   Swords,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import TotpCard from "@/components/TotpCard";
 
 // ─── Achievement System ──────────────────────────────────────────────────────
 
@@ -1007,6 +1008,7 @@ export default function ProfilePage() {
             >
               <PasswordCard passwordEnabled={passwordEnabled} />
               <PinCard />
+              <TotpCard />
             </motion.div>
 
             {/* Account info */}

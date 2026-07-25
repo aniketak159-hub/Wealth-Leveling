@@ -21,12 +21,15 @@
     "cors": "^2.8.6",
     "drizzle-orm": "catalog:",
     "express": "^5.2.1",
+    "helmet": "^8.3.0",
     "http-proxy-middleware": "^4.2.0",
     "multer": "^2.2.0",
+    "otplib": "^13.4.1",
     "papaparse": "^5.5.4",
     "pdf-parse": "^2.4.5",
     "pino": "^9.14.0",
     "pino-http": "^10.5.0",
+    "qrcode": "^1.5.4",
     "zod": "catalog:"
   },
   "devDependencies": {
@@ -37,6 +40,7 @@
     "@types/multer": "^2.2.0",
     "@types/node": "catalog:",
     "@types/papaparse": "^5.5.2",
+    "@types/qrcode": "^1.5.6",
     "@types/supertest": "^7.2.1",
     "esbuild": "0.27.3",
     "esbuild-plugin-pino": "^2.3.3",
