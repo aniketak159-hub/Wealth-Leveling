@@ -339,8 +339,6 @@ export const ListQuestsResponseItem = zod.object({
   "xpReward": zod.number(),
   "frequency": zod.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'ONGOING']),
   "completed": zod.boolean(),
-  "completedAt": zod.coerce.date().nullable(),
-  "dataLink": zod.enum(['NET_WORTH', 'MONTHLY_SAVINGS', 'TOTAL_EXPENSES']).nullable(),
   "createdAt": zod.coerce.date()
 })
 export const ListQuestsResponse = zod.array(ListQuestsResponseItem)
@@ -357,9 +355,8 @@ export const CreateQuestBody = zod.object({
   "description": zod.string().optional(),
   "category": zod.enum(['SYSTEM', 'SELF']).optional(),
   "targetAmount": zod.number().optional(),
-  "xpReward": zod.number().optional(),
-  "frequency": zod.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'ONGOING']).optional(),
-  "dataLink": zod.enum(['NET_WORTH', 'MONTHLY_SAVINGS', 'TOTAL_EXPENSES']).nullable().optional()
+  "xpReward": zod.number(),
+  "frequency": zod.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'ONGOING'])
 })
 
 export const CreateQuestResponse = zod.object({
@@ -373,8 +370,6 @@ export const CreateQuestResponse = zod.object({
   "xpReward": zod.number(),
   "frequency": zod.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'ONGOING']),
   "completed": zod.boolean(),
-  "completedAt": zod.coerce.date().nullable(),
-  "dataLink": zod.enum(['NET_WORTH', 'MONTHLY_SAVINGS', 'TOTAL_EXPENSES']).nullable(),
   "createdAt": zod.coerce.date()
 })
 
@@ -395,8 +390,7 @@ export const UpdateQuestBody = zod.object({
   "targetAmount": zod.number().optional(),
   "currentAmount": zod.number().optional(),
   "xpReward": zod.number().optional(),
-  "completed": zod.boolean().optional(),
-  "completedAt": zod.string().nullable().optional()
+  "completed": zod.boolean().optional()
 })
 
 export const UpdateQuestResponse = zod.object({
@@ -410,8 +404,6 @@ export const UpdateQuestResponse = zod.object({
   "xpReward": zod.number(),
   "frequency": zod.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'ONGOING']),
   "completed": zod.boolean(),
-  "completedAt": zod.coerce.date().nullable(),
-  "dataLink": zod.enum(['NET_WORTH', 'MONTHLY_SAVINGS', 'TOTAL_EXPENSES']).nullable(),
   "createdAt": zod.coerce.date()
 })
 
@@ -448,8 +440,6 @@ export const LogQuestProgressResponse = zod.object({
   "xpReward": zod.number(),
   "frequency": zod.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'ONGOING']),
   "completed": zod.boolean(),
-  "completedAt": zod.coerce.date().nullable(),
-  "dataLink": zod.enum(['NET_WORTH', 'MONTHLY_SAVINGS', 'TOTAL_EXPENSES']).nullable(),
   "createdAt": zod.coerce.date()
 })
 
@@ -900,5 +890,195 @@ export const AdminGetLeaderboardResponseItem = zod.object({
   "xp": zod.number()
 })
 export const AdminGetLeaderboardResponse = zod.array(AdminGetLeaderboardResponseItem)
+
+
+/**
+ * @summary Push a system quest to one or all users (admin only)
+ */
+
+
+
+export const AdminPushQuestBody = zod.object({
+  "userId": zod.number().optional(),
+  "title": zod.string().min(1),
+  "description": zod.string().optional(),
+  "category": zod.enum(['SYSTEM', 'SELF']).optional(),
+  "targetAmount": zod.number().optional(),
+  "xpReward": zod.number().optional(),
+  "frequency": zod.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'ONGOING']).optional()
+})
+
+export const AdminPushQuestResponse = zod.object({
+  "pushed": zod.number(),
+  "message": zod.string()
+})
+
+
+/**
+ * @summary List all badges (admin only)
+ */
+export const AdminListBadgesResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "description": zod.string(),
+  "icon": zod.string(),
+  "rarity": zod.enum(['COMMON', 'RARE', 'EPIC', 'LEGENDARY']),
+  "triggerType": zod.enum(['MANUAL', 'QUEST_COUNT', 'SKILL_COUNT', 'BUILD_COUNT', 'NET_WORTH', 'LEVEL', 'DAYS_ACTIVE']),
+  "triggerValue": zod.number(),
+  "createdAt": zod.coerce.date()
+})
+export const AdminListBadgesResponse = zod.array(AdminListBadgesResponseItem)
+
+
+/**
+ * @summary Create a badge (admin only)
+ */
+
+
+
+export const AdminCreateBadgeBody = zod.object({
+  "name": zod.string().min(1),
+  "description": zod.string().optional(),
+  "icon": zod.string().optional(),
+  "rarity": zod.enum(['COMMON', 'RARE', 'EPIC', 'LEGENDARY']).optional(),
+  "triggerType": zod.enum(['MANUAL', 'QUEST_COUNT', 'SKILL_COUNT', 'BUILD_COUNT', 'NET_WORTH', 'LEVEL', 'DAYS_ACTIVE']).optional(),
+  "triggerValue": zod.number().optional()
+})
+
+export const AdminCreateBadgeResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "description": zod.string(),
+  "icon": zod.string(),
+  "rarity": zod.enum(['COMMON', 'RARE', 'EPIC', 'LEGENDARY']),
+  "triggerType": zod.enum(['MANUAL', 'QUEST_COUNT', 'SKILL_COUNT', 'BUILD_COUNT', 'NET_WORTH', 'LEVEL', 'DAYS_ACTIVE']),
+  "triggerValue": zod.number(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Update a badge (admin only)
+ */
+export const AdminUpdateBadgeParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+
+
+
+export const AdminUpdateBadgeBody = zod.object({
+  "name": zod.string().min(1).optional(),
+  "description": zod.string().optional(),
+  "icon": zod.string().optional(),
+  "rarity": zod.enum(['COMMON', 'RARE', 'EPIC', 'LEGENDARY']).optional(),
+  "triggerType": zod.enum(['MANUAL', 'QUEST_COUNT', 'SKILL_COUNT', 'BUILD_COUNT', 'NET_WORTH', 'LEVEL', 'DAYS_ACTIVE']).optional(),
+  "triggerValue": zod.number().optional()
+})
+
+export const AdminUpdateBadgeResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "description": zod.string(),
+  "icon": zod.string(),
+  "rarity": zod.enum(['COMMON', 'RARE', 'EPIC', 'LEGENDARY']),
+  "triggerType": zod.enum(['MANUAL', 'QUEST_COUNT', 'SKILL_COUNT', 'BUILD_COUNT', 'NET_WORTH', 'LEVEL', 'DAYS_ACTIVE']),
+  "triggerValue": zod.number(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Delete a badge (admin only)
+ */
+export const AdminDeleteBadgeParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const AdminDeleteBadgeResponse = zod.void()
+
+
+/**
+ * @summary List all milestones (admin only)
+ */
+export const AdminListMilestonesResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "description": zod.string(),
+  "icon": zod.string(),
+  "category": zod.enum(['QUEST', 'SKILL', 'BUILD', 'WEALTH', 'CHARACTER']),
+  "threshold": zod.number(),
+  "xpReward": zod.number(),
+  "createdAt": zod.coerce.date()
+})
+export const AdminListMilestonesResponse = zod.array(AdminListMilestonesResponseItem)
+
+
+/**
+ * @summary Create a milestone (admin only)
+ */
+
+
+
+export const AdminCreateMilestoneBody = zod.object({
+  "name": zod.string().min(1),
+  "description": zod.string().optional(),
+  "icon": zod.string().optional(),
+  "category": zod.enum(['QUEST', 'SKILL', 'BUILD', 'WEALTH', 'CHARACTER']).optional(),
+  "threshold": zod.number().optional(),
+  "xpReward": zod.number().optional()
+})
+
+export const AdminCreateMilestoneResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "description": zod.string(),
+  "icon": zod.string(),
+  "category": zod.enum(['QUEST', 'SKILL', 'BUILD', 'WEALTH', 'CHARACTER']),
+  "threshold": zod.number(),
+  "xpReward": zod.number(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Update a milestone (admin only)
+ */
+export const AdminUpdateMilestoneParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+
+
+
+export const AdminUpdateMilestoneBody = zod.object({
+  "name": zod.string().min(1).optional(),
+  "description": zod.string().optional(),
+  "icon": zod.string().optional(),
+  "category": zod.enum(['QUEST', 'SKILL', 'BUILD', 'WEALTH', 'CHARACTER']).optional(),
+  "threshold": zod.number().optional(),
+  "xpReward": zod.number().optional()
+})
+
+export const AdminUpdateMilestoneResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "description": zod.string(),
+  "icon": zod.string(),
+  "category": zod.enum(['QUEST', 'SKILL', 'BUILD', 'WEALTH', 'CHARACTER']),
+  "threshold": zod.number(),
+  "xpReward": zod.number(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Delete a milestone (admin only)
+ */
+export const AdminDeleteMilestoneParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const AdminDeleteMilestoneResponse = zod.void()
 
 

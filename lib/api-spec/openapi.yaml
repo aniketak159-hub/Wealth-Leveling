@@ -826,6 +826,205 @@ paths:
         "403":
           description: Forbidden
 
+  /admin/quests/push:
+    post:
+      operationId: adminPushQuest
+      tags: [admin]
+      summary: Push a system quest to one or all users (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminPushQuestInput"
+      responses:
+        "200":
+          description: Quest pushed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminPushQuestResult"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+
+  /admin/badges:
+    get:
+      operationId: adminListBadges
+      tags: [admin]
+      summary: List all badges (admin only)
+      responses:
+        "200":
+          description: List of badges
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminBadge"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+    post:
+      operationId: adminCreateBadge
+      tags: [admin]
+      summary: Create a badge (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminBadgeInput"
+      responses:
+        "201":
+          description: Badge created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminBadge"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+
+  /admin/badges/{id}:
+    patch:
+      operationId: adminUpdateBadge
+      tags: [admin]
+      summary: Update a badge (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminBadgeUpdate"
+      responses:
+        "200":
+          description: Badge updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminBadge"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Badge not found
+    delete:
+      operationId: adminDeleteBadge
+      tags: [admin]
+      summary: Delete a badge (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Badge not found
+
+  /admin/milestones:
+    get:
+      operationId: adminListMilestones
+      tags: [admin]
+      summary: List all milestones (admin only)
+      responses:
+        "200":
+          description: List of milestones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminMilestone"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+    post:
+      operationId: adminCreateMilestone
+      tags: [admin]
+      summary: Create a milestone (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminMilestoneInput"
+      responses:
+        "201":
+          description: Milestone created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminMilestone"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+
+  /admin/milestones/{id}:
+    patch:
+      operationId: adminUpdateMilestone
+      tags: [admin]
+      summary: Update a milestone (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminMilestoneUpdate"
+      responses:
+        "200":
+          description: Milestone updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminMilestone"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Milestone not found
+    delete:
+      operationId: adminDeleteMilestone
+      tags: [admin]
+      summary: Delete a milestone (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Milestone not found
+
 components:
   schemas:
     HealthStatus:
@@ -1121,6 +1320,94 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/WealthAssetInput"
+
+    # ─── Admin — Badges / Milestones / Quest Push ─────────────────────────────
+    AdminBadge:
+      type: object
+      required: [id, name, description, icon, rarity, triggerType, triggerValue, createdAt]
+      properties:
+        id:           { type: integer }
+        name:         { type: string }
+        description:  { type: string }
+        icon:         { type: string }
+        rarity:       { type: string, enum: [COMMON, RARE, EPIC, LEGENDARY] }
+        triggerType:  { type: string, enum: [MANUAL, QUEST_COUNT, SKILL_COUNT, BUILD_COUNT, NET_WORTH, LEVEL, DAYS_ACTIVE] }
+        triggerValue: { type: integer }
+        createdAt:    { type: string, format: date-time }
+
+    AdminBadgeInput:
+      type: object
+      required: [name]
+      properties:
+        name:         { type: string, minLength: 1 }
+        description:  { type: string }
+        icon:         { type: string }
+        rarity:       { type: string, enum: [COMMON, RARE, EPIC, LEGENDARY] }
+        triggerType:  { type: string, enum: [MANUAL, QUEST_COUNT, SKILL_COUNT, BUILD_COUNT, NET_WORTH, LEVEL, DAYS_ACTIVE] }
+        triggerValue: { type: integer }
+
+    AdminBadgeUpdate:
+      type: object
+      properties:
+        name:         { type: string, minLength: 1 }
+        description:  { type: string }
+        icon:         { type: string }
+        rarity:       { type: string, enum: [COMMON, RARE, EPIC, LEGENDARY] }
+        triggerType:  { type: string, enum: [MANUAL, QUEST_COUNT, SKILL_COUNT, BUILD_COUNT, NET_WORTH, LEVEL, DAYS_ACTIVE] }
+        triggerValue: { type: integer }
+
+    AdminMilestone:
+      type: object
+      required: [id, name, description, icon, category, threshold, xpReward, createdAt]
+      properties:
+        id:          { type: integer }
+        name:        { type: string }
+        description: { type: string }
+        icon:        { type: string }
+        category:    { type: string, enum: [QUEST, SKILL, BUILD, WEALTH, CHARACTER] }
+        threshold:   { type: number }
+        xpReward:    { type: integer }
+        createdAt:   { type: string, format: date-time }
+
+    AdminMilestoneInput:
+      type: object
+      required: [name]
+      properties:
+        name:        { type: string, minLength: 1 }
+        description: { type: string }
+        icon:        { type: string }
+        category:    { type: string, enum: [QUEST, SKILL, BUILD, WEALTH, CHARACTER] }
+        threshold:   { type: number }
+        xpReward:    { type: integer }
+
+    AdminMilestoneUpdate:
+      type: object
+      properties:
+        name:        { type: string, minLength: 1 }
+        description: { type: string }
+        icon:        { type: string }
+        category:    { type: string, enum: [QUEST, SKILL, BUILD, WEALTH, CHARACTER] }
+        threshold:   { type: number }
+        xpReward:    { type: integer }
+
+    AdminPushQuestInput:
+      type: object
+      required: [title]
+      properties:
+        userId:       { type: integer }
+        title:        { type: string, minLength: 1 }
+        description:  { type: string }
+        category:     { type: string, enum: [SYSTEM, SELF] }
+        targetAmount: { type: number }
+        xpReward:     { type: integer }
+        frequency:    { type: string, enum: [DAILY, WEEKLY, MONTHLY, ONGOING] }
+
+    AdminPushQuestResult:
+      type: object
+      required: [pushed, message]
+      properties:
+        pushed:  { type: integer }
+        message: { type: string }
 
     # ─── Admin ─────────────────────────────────────────────────────────────────
     AdminUser:

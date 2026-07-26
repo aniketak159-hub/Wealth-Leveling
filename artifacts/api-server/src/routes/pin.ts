@@ -10,7 +10,7 @@ const { generateSecret: totpGenerateSecret, generateURI: totpGenerateURI, verify
 const QRCode = require("qrcode") as typeof import("qrcode");
 import { createClerkClient } from "@clerk/express";
 import { requireAuth } from "../middlewares/auth";
-import { SetPinBody, ChangePinBody, DeletePinBody, PinLoginBody } from "@workspace/api-zod";
+import { CreatePinBody, ChangePinBody, DeletePinBody, PinLoginBody } from "@workspace/api-zod";
 
 const router: IRouter = Router();
 
@@ -34,7 +34,7 @@ router.post("/users/me/pin", requireAuth, async (req, res): Promise<void> => {
     return;
   }
 
-  const parsed = SetPinBody.safeParse(req.body);
+  const parsed = CreatePinBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.errors[0]?.message ?? "Invalid request." });
     return;

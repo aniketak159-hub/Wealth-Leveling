@@ -10,18 +10,22 @@ Wealth Leveling turns money management into a status window: your real financial
 
 | Feature | Description |
 |---|---|
-| **Status Window** | Level, Rank (E → S), Title, and an EXP bar that fills from real financial activity |
+| **Status Window** | Level, Rank (E → S), Title, and an EXP bar driven by real financial activity |
 | **Hunter Stats** | STR · VIT · INT · AGI · PER · LUK — allocate stat points earned on level-up |
 | **System Evaluation** | Monthly scoring pass that converts net worth growth, savings rate, budget adherence, and emergency-fund coverage into XP |
-| **Quest Log** | Savings and financial goals as quests tagged **Self** (you added it) or **System** (assigned), with cadences from daily to ongoing |
+| **Quest Log** | Savings and financial goals as quests tagged **Self** (user-created) or **System** (assigned), with cadences from daily to ongoing |
 | **Skill Trees** | Three trees (Investment · Savings · Knowledge) with five tiers each; unlock higher tiers by mastering lower ones |
 | **Skill Check-ins** | Log recurring money habits to build streaks; streaks level up skills and earn XP |
-| **Dungeons / Builds** | Model businesses as Guild entries ranked E → S; profit/loss feeds XP back to your Hunter |
+| **Daily Streak** | Global activity streak tracked separately from skill check-ins, with its own XP reward |
+| **Guild Hall / Builds** | Model businesses or income projects as Guild entries ranked E → S; profit/loss feeds back to net worth and XP |
 | **Inventory** | Assets (cash, stocks, funds, real estate, crypto) as loot items with category-based diversification scoring |
-| **Budget** | Fully custom categories, income/expense logging, and live spend-vs-limit tracking |
+| **Budget** | Fully custom categories, income/expense logging, live spend-vs-limit tracking, and transaction history |
+| **Budget Analytics** | Spending breakdown by category, month-over-month trends, and wealth-sync |
+| **Bank Statement Import** | Upload bank statements (CSV / PDF); the parser auto-detects 7 Indian banks and maps transactions to budget categories |
 | **Badges & Milestones** | Unlockable rewards for financial milestones (net worth thresholds, skill counts, quest completions, etc.) |
-| **PIN Lock** | A secondary PIN layer on top of Clerk auth for private device security |
-| **Admin Panel** | Manage milestones and badges across all users |
+| **PIN Lock + TOTP 2FA** | Secondary PIN layer on top of Clerk auth for private device security, with optional authenticator-app TOTP |
+| **Level-Up Cinematic** | Full-screen Solo Leveling–style animation that fires when you cross a level threshold |
+| **Admin Panel** | Manage users, push system quests, configure badges and milestones across all accounts, view leaderboard and platform stats |
 
 ---
 
@@ -79,7 +83,13 @@ Stat points earned per evaluation: `floor(xpGained / 100)`
 
 - Streak increments after a gap of **> 20 hours**
 - XP per check-in: `min(50, 10 + level × 5)`
-- Level up every **5 streak points**
+- Skill levels up every **5 streak points**
+
+### Daily Streak
+
+- Separate global streak tracked per user
+- Maintained by daily check-in calls; resets if a day is skipped
+- XP reward on each check-in
 
 ### Builds (Guild Hall)
 
@@ -90,193 +100,156 @@ Stat points earned per evaluation: `floor(xpGained / 100)`
 
 `CASH` · `STOCKS` · `MUTUAL_FUNDS` · `REAL_ESTATE` · `CRYPTO` · `OTHER`
 
-Diversification score: `(categories used / 6) × 100`
+Diversification score: `(unique categories used / 6) × 100`
 
 ---
 
 ## 🛠 Tech Stack
 
+### Frontend — `artifacts/wealth-levels`
+
 | Layer | Technology |
 |---|---|
-| **Frontend** | React 19, Vite 7, Tailwind CSS v4, shadcn/ui, Radix UI |
-| **Routing** | Wouter |
-| **Server state** | TanStack Query (React Query v5) |
-| **Backend** | Express.js, Pino structured logging |
-| **Database** | PostgreSQL 16 via Drizzle ORM |
-| **Auth** | Clerk (Replit-managed tenant) |
-| **API contract** | OpenAPI 3.1 → Orval codegen (Zod + React Query client) |
-| **Build tool** | esbuild (API server), Vite (frontend) |
-| **Monorepo** | pnpm workspaces |
+| Framework | React 18 + TypeScript |
+| Build tool | Vite |
+| Styling | Tailwind CSS |
+| UI components | Radix UI + shadcn/ui |
+| Routing | React Router v6 |
+| Server state | TanStack Query (React Query) — hooks auto-generated from OpenAPI |
+| Auth | Clerk (hosted sign-in/sign-up, themed to app branding) |
+| Animations | Framer Motion |
 
----
+### Backend — `artifacts/api-server`
 
-## 📁 Project Structure
+| Layer | Technology |
+|---|---|
+| Runtime | Node.js + TypeScript |
+| Framework | Express |
+| Auth middleware | `@clerk/express` — verifies Clerk session tokens |
+| Build | esbuild (single-file bundle) |
+| Testing | Vitest |
 
-```
-Wealth-Leveling/
-├── artifacts/
-│   ├── wealth-levels/          # React + Vite frontend (preview path: /)
-│   │   └── src/
-│   │       ├── components/
-│   │       │   └── dashboard/  # OverviewTab, StatsTab, WealthTab,
-│   │       │                   # QuestsTab, BudgetTab, SkillsTab
-│   │       ├── pages/          # Home, Dashboard, Admin, Profile, 404
-│   │       ├── hooks/          # useSkillTree, use-mobile, etc.
-│   │       └── lib/            # queryClient, apiFetch utility
-│   │
-│   ├── api-server/             # Express backend (preview path: /api)
-│   │   └── src/
-│   │       ├── routes/         # budget, wealth, skills, quests,
-│   │       │                   # builds, users, dashboard, admin,
-│   │       │                   # skill-tree
-│   │       ├── middlewares/    # requireAuth, requireAdmin,
-│   │       │                   # clerkProxyMiddleware
-│   │       └── lib/            # pino logger
-│   │
-│   └── mockup-sandbox/         # Isolated component preview server
-│
-├── lib/
-│   ├── db/                     # Drizzle ORM — schema + migrations
-│   │   └── src/schema/         # users, dashboards, quests, skills,
-│   │                           # skill_tree_unlocks, builds, budgets,
-│   │                           # budget_items, wealth, wealth_assets,
-│   │                           # badges, milestones
-│   ├── api-spec/               # openapi.yaml + Orval config
-│   ├── api-zod/                # Generated Zod validation schemas
-│   └── api-client-react/       # Generated TanStack Query hooks
-│
-└── scripts/
-    └── post-merge.sh           # Runs after task-agent merges (pnpm install + db push)
-```
+### Shared Libraries — `lib/`
 
----
+| Package | Purpose |
+|---|---|
+| `@workspace/db` | Drizzle ORM + PostgreSQL schema (13 tables), `drizzle-kit` migrations |
+| `@workspace/api-spec` | Single source-of-truth OpenAPI 3.1 spec (`openapi.yaml`) + Orval codegen config |
+| `@workspace/api-client-react` | Auto-generated TanStack Query hooks and `customFetch` client (produced by Orval from the spec) |
+| `@workspace/api-zod` | Auto-generated Zod validation schemas for every request/response (produced by Orval from the spec) |
 
-## 🔗 Contract-First API Design
+### Infrastructure
 
-The API is schema-first:
-
-```
-lib/api-spec/openapi.yaml
-        │
-        ├──▶ lib/api-zod/          (Zod schemas — request validation in the server)
-        └──▶ lib/api-client-react/ (TanStack Query hooks — data fetching in the frontend)
-```
-
-After changing `openapi.yaml`, regenerate both libraries:
-
-```bash
-pnpm --filter @workspace/api-zod run generate
-pnpm --filter @workspace/api-client-react run generate
-```
-
-The generated client is imported in the frontend — never call the API with raw `fetch` unless the endpoint is missing from the spec (e.g. `skill-tree`).
+- **Monorepo**: pnpm workspaces
+- **Database**: PostgreSQL (Replit-managed or external)
+- **Auth**: Clerk (white-label, separate dev and production tenants)
+- **Codegen**: Orval regenerates React Query hooks and Zod schemas from `openapi.yaml` on every spec change
 
 ---
 
 ## 🗄 Database Schema
 
-All tables use `serial` primary keys and are linked to `users.id` via a `userId` integer column.
+All tables are managed via Drizzle ORM. Push the schema with `pnpm run push` inside `lib/db`.
 
-| Table | Purpose | Key columns |
-|---|---|---|
-| `users` | Clerk identity + local profile | `clerkId`, `displayName`, `isAdmin`, `pinHash` |
-| `dashboards` | Character sheet (1-to-1 with user) | `level`, `rank`, `xp`, `xpToNext`, `netWorth`, `stat*`, `unspentPoints` |
-| `quests` | User goals and savings challenges | `category` (SYSTEM/SELF), `frequency`, `targetAmount`, `currentAmount`, `completed` |
-| `skills` | Recurring financial habits | `category` (INVESTMENT/SAVINGS/KNOWLEDGE), `level`, `streakCount`, `lastCheckin` |
-| `skill_tree_unlocks` | Which skill-tree nodes a user has unlocked | `treeSkillId` (e.g. `inv-t1-01`) |
-| `builds` | Businesses/projects (Guild Hall) | `rank` (S–E), `revenue`, `expenses` |
-| `budgets` | Monthly budget header | `monthlyIncome` |
-| `budget_items` | Individual budget line items | `label`, `planned`, `actual`, `sortOrder` |
-| `wealth` | Wealth summary header | `netWorth` |
-| `wealth_assets` | Individual assets (Inventory) | `label`, `amount`, `category` |
-| `badges` | Achievement definitions | `rarity` (COMMON/RARE/EPIC/LEGENDARY), `triggerType`, `triggerValue` |
-| `milestones` | Admin-managed milestone definitions | `category`, `threshold`, `xpReward` |
-
----
-
-## 🌐 API Reference
-
-All routes are prefixed `/api` and require Clerk authentication unless noted.
-
-### Users
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/api/healthz` | Health check (public) |
-| `GET` | `/api/users/me` | Current user profile |
-| `PATCH` | `/api/users/me` | Update display name / avatar |
-| `GET` | `/api/users/me/pin-status` | Check if PIN is set |
-| `POST` | `/api/users/me/pin` | Set PIN (first time) |
-| `PUT` | `/api/users/me/pin` | Change existing PIN |
-
-### Dashboard / Character Sheet
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/api/dashboard` | Full dashboard payload (character + quests + skills) |
-| `GET` | `/api/dashboard/summary` | Lightweight stats summary |
-
-### Quests
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/api/quests` | List user quests |
-| `POST` | `/api/quests` | Create quest |
-| `PATCH` | `/api/quests/:id` | Update quest |
-| `DELETE` | `/api/quests/:id` | Delete quest |
-| `POST` | `/api/quests/:id/progress` | Log progress toward a quest |
-
-### Skills
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/api/skills` | List skills |
-| `POST` | `/api/skills` | Create skill |
-| `PATCH` | `/api/skills/:id` | Update skill / record check-in |
-| `POST` | `/api/skill-tree/unlock` | Unlock a node in a skill tree |
-
-### Builds (Guild Hall)
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/api/builds` | List builds |
-| `POST` | `/api/builds` | Create build |
-| `DELETE` | `/api/builds/:id` | Delete build |
-
-### Budget
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/api/budget` | Budget + all line items |
-| `PATCH` | `/api/budget` | Update income or line items |
-
-### Wealth (Inventory)
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/api/wealth` | Wealth record + all assets |
-| `PATCH` | `/api/wealth` | Update assets |
-
-### Admin *(requires `isAdmin = true`)*
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/api/admin/milestones` | List all milestones |
-| `POST` | `/api/admin/milestones` | Create milestone |
-| `PATCH` | `/api/admin/milestones/:id` | Update milestone |
-| `DELETE` | `/api/admin/milestones/:id` | Delete milestone |
+| Table | Key Columns |
+|---|---|
+| `users` | `clerkId`, `displayName`, `pinHash`, `totpSecret`, `totpEnabled`, `isAdmin` |
+| `dashboards` | `level`, `xp`, `rank`, `str/vit/int/agi/per/luk`, `statPoints`, `streakDays` |
+| `wealth` | `netWorth`, linked to `wealth_assets` |
+| `wealth_assets` | `label`, `amount`, `category` (STOCKS, MUTUAL_FUNDS, REAL_ESTATE, CASH, CRYPTO, OTHER) |
+| `budgets` | `monthlyIncome`, linked to `budget_items` and `transactions` |
+| `budget_items` | `label`, `planned`, `actual` |
+| `transactions` | `date`, `amount`, `description`, `category`, `source` |
+| `quests` | `title`, `type` (SELF/SYSTEM), `cadence`, `reward`, `progress`, `completed` |
+| `skills` | `name`, `category` (INVESTMENT/SAVINGS/KNOWLEDGE), `tier`, `streakPoints`, `level` |
+| `skill_tree_unlocks` | `tier`, `category`, `unlockedAt` |
+| `badges` | `name`, `description`, `icon`, `condition` |
+| `milestones` | `label`, `threshold`, `badgeId` |
+| `builds` | `name`, `description`, `rank`, `revenue`, `expenses` |
 
 ---
 
-## 🔐 Authentication
+## 🔐 Security
 
-Clerk is managed automatically by Replit — no account or dashboard access is required.
+### Clerk Authentication
 
-- **Two environments**: Development and Production have separate user stores. Development uses `pk_test` keys; production uses `pk_live` keys (auto-swapped on publish). This is expected and not a bug.
-- **JIT provisioning**: `requireAuth` middleware auto-creates a local `users` row the first time a Clerk user hits any protected endpoint.
-- **PIN lock**: A secondary 4-digit PIN can be set per user for shared-device privacy. Stored as a bcrypt hash in `users.pinHash`.
-- **Clerk proxy**: The API server proxies Clerk's JS SDK requests so auth works behind Replit's domain routing.
+All API routes (except `/api/healthz` and `/api/auth/pin-login`) are protected by Clerk session token verification via the `requireAuth` middleware. The middleware also loads the user's database row and attaches it to `req.dbUser`.
+
+### PIN Lock
+
+Users can optionally set a 4–6 digit numeric PIN as a secondary lock on the app:
+
+- **Set PIN**: `POST /api/users/me/pin`
+- **Change PIN**: `PUT /api/users/me/pin` (requires current PIN)
+- **Remove PIN**: `DELETE /api/users/me/pin` (requires PIN confirmation)
+- **Status**: `GET /api/users/me/pin-status`
+
+### TOTP 2FA (Authenticator App)
+
+Users with a PIN set can additionally enable time-based one-time passwords (Google Authenticator, Authy, etc.):
+
+- **Setup**: `POST /api/auth/totp/setup` — generates a QR code and manual entry secret
+- **Enable**: `POST /api/auth/totp/enable` — confirms with a valid 6-digit code
+- **Disable**: `DELETE /api/auth/totp/disable` — requires a valid code
+- **Status**: `GET /api/auth/totp/status`
+
+### PIN Login Flow
+
+`POST /api/auth/pin-login` accepts `{ email, pin, totpCode? }`. If TOTP is enabled and no `totpCode` is provided, the endpoint returns `{ requiresTotp: true }` — the UI then prompts for the authenticator code and retries. On success it returns a short-lived Clerk sign-in token that the frontend exchanges for a full session.
 
 ---
 
-## 🚀 Getting Started
+## 📥 Bank Statement Import
+
+The import pipeline handles 7 Indian banks automatically:
+
+| Bank | Format |
+|---|---|
+| HDFC | CSV |
+| SBI | CSV |
+| ICICI | CSV |
+| Axis | CSV |
+| Kotak | CSV |
+| Yes Bank | CSV |
+| IDFC First | CSV |
+
+**Flow:**
+
+1. Upload via `POST /api/import/csv` — returns parsed rows with auto-categorised amounts
+2. Review in the Import Wizard UI
+3. Confirm via `POST /api/import/apply` — writes transactions and syncs the budget
+
+---
+
+## 🏦 Bank Sync (Coming Soon)
+
+The Account Aggregator (AA) integration skeleton is present under `/api/aa/*` using the **Setu AA framework**. It currently returns `503 AA_NOT_CONFIGURED` until `SETU_CLIENT_ID` and `SETU_CLIENT_SECRET` are set. When configured it will support consent-based live bank data sync.
+
+---
+
+## 🔧 Codegen Pipeline
+
+Any change to `lib/api-spec/openapi.yaml` must be followed by:
+
+```bash
+pnpm run --filter @workspace/api-spec codegen
+```
+
+This runs Orval and regenerates:
+- `lib/api-client-react/src/generated/` — TanStack Query hooks for every endpoint
+- `lib/api-zod/src/generated/` — Zod request/response schemas
+
+All frontend components should import from `@workspace/api-client-react` rather than calling `fetch()` directly.
+
+---
+
+## 🚀 Setup
 
 ### Prerequisites
 
-- Node.js 20
-- pnpm 10
+- Node.js 20+
+- pnpm 9+
+- PostgreSQL database
 
 ### Install
 
@@ -286,16 +259,20 @@ pnpm install
 
 ### Environment Variables
 
-On Replit these are auto-managed. Elsewhere, set them manually:
+On Replit these are auto-managed via Secrets. Elsewhere, set them manually:
 
 | Variable | Description |
 |---|---|
 | `DATABASE_URL` | PostgreSQL connection string |
-| `PGHOST` / `PGPORT` / `PGUSER` / `PGPASSWORD` / `PGDATABASE` | Individual PG connection parts |
+| `PGHOST` / `PGPORT` / `PGUSER` / `PGPASSWORD` / `PGDATABASE` | Individual PG connection parts (alternative to `DATABASE_URL`) |
 | `CLERK_SECRET_KEY` | Clerk server-side secret key |
-| `CLERK_PUBLISHABLE_KEY` | Clerk publishable key (server) |
-| `VITE_CLERK_PUBLISHABLE_KEY` | Clerk publishable key (Vite frontend) |
+| `CLERK_PUBLISHABLE_KEY` | Clerk publishable key (used by server) |
+| `VITE_CLERK_PUBLISHABLE_KEY` | Clerk publishable key (injected into the Vite frontend) |
 | `SESSION_SECRET` | Express session secret |
+| `SETU_CLIENT_ID` | *(Optional)* Setu AA client ID for live bank sync |
+| `SETU_CLIENT_SECRET` | *(Optional)* Setu AA client secret for live bank sync |
+
+> **Note on Clerk environments:** The development Clerk tenant and the production Clerk tenant are separate user stores. Users registered in development will not exist in production, and vice versa. PostgreSQL rows are keyed by Clerk user IDs — switching environments effectively starts a fresh user database.
 
 ### Database
 
@@ -305,27 +282,41 @@ Push the Drizzle schema to your database:
 cd lib/db && pnpm run push
 ```
 
+### Codegen (after spec changes)
+
+```bash
+pnpm run --filter @workspace/api-spec codegen
+```
+
 ### Run
 
 Three workflows run in parallel:
 
-| Workflow | Command | Port |
+| Workflow | Command | Default Port |
 |---|---|---|
-| Frontend | `pnpm --filter @workspace/wealth-levels run dev` | `5000` |
+| Frontend | `pnpm --filter @workspace/wealth-levels run dev` | `23656` |
 | API Server | `pnpm --filter @workspace/api-server run dev` | `8080` |
 | Mockup Sandbox | `pnpm --filter @workspace/mockup-sandbox run dev` | auto |
 
-On Replit, use the **Run** button — all three start automatically.
+On Replit, use the **Run** button — all three start automatically via managed workflows.
+
+### Type Check
+
+```bash
+pnpm run typecheck        # checks all packages
+pnpm run typecheck:libs   # checks shared libraries only
+```
 
 ---
 
 ## 🗺 Roadmap
 
 - Live portfolio sync (Angel One SmartAPI) instead of manual asset entry
-- Recurring transactions (rent, SIPs, subscriptions)
+- Full Setu Account Aggregator integration for automatic bank sync
+- Recurring transactions (rent, SIPs, subscriptions) with smart suggestions
 - Party / guild leaderboards for shared accountability
-- Monthly auto-generated "Hunter Report" summaries
-- Mobile companion app
+- Monthly auto-generated "Hunter Report" PDF summaries
+- Mobile companion app (Expo)
 
 ---
 

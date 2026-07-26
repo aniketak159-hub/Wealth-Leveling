@@ -116,8 +116,6 @@ export const QuestFrequency = {
   ONGOING: 'ONGOING',
 } as const;
 
-export type QuestDataLink = 'NET_WORTH' | 'MONTHLY_SAVINGS' | 'TOTAL_EXPENSES';
-
 export interface Quest {
   id: number;
   userId: number;
@@ -131,10 +129,6 @@ export interface Quest {
   xpReward: number;
   frequency: QuestFrequency;
   completed: boolean;
-  /** @nullable */
-  completedAt?: string | null;
-  /** @nullable */
-  dataLink?: QuestDataLink | null;
   createdAt: string;
 }
 
@@ -162,9 +156,8 @@ export interface QuestInput {
   description?: string;
   category?: QuestInputCategory;
   targetAmount?: number;
-  xpReward?: number;
-  frequency?: QuestInputFrequency;
-  dataLink?: QuestDataLink | null;
+  xpReward: number;
+  frequency: QuestInputFrequency;
 }
 
 export interface QuestUpdate {
@@ -175,7 +168,6 @@ export interface QuestUpdate {
   currentAmount?: number;
   xpReward?: number;
   completed?: boolean;
-  completedAt?: string | null;
 }
 
 export interface QuestProgressInput {
@@ -392,6 +384,204 @@ export interface WealthAssetInput {
 export interface WealthUpdate {
   netWorth?: number;
   assets?: WealthAssetInput[];
+}
+
+export type AdminBadgeRarity = typeof AdminBadgeRarity[keyof typeof AdminBadgeRarity];
+
+
+export const AdminBadgeRarity = {
+  COMMON: 'COMMON',
+  RARE: 'RARE',
+  EPIC: 'EPIC',
+  LEGENDARY: 'LEGENDARY',
+} as const;
+
+export type AdminBadgeTriggerType = typeof AdminBadgeTriggerType[keyof typeof AdminBadgeTriggerType];
+
+
+export const AdminBadgeTriggerType = {
+  MANUAL: 'MANUAL',
+  QUEST_COUNT: 'QUEST_COUNT',
+  SKILL_COUNT: 'SKILL_COUNT',
+  BUILD_COUNT: 'BUILD_COUNT',
+  NET_WORTH: 'NET_WORTH',
+  LEVEL: 'LEVEL',
+  DAYS_ACTIVE: 'DAYS_ACTIVE',
+} as const;
+
+export interface AdminBadge {
+  id: number;
+  name: string;
+  description: string;
+  icon: string;
+  rarity: AdminBadgeRarity;
+  triggerType: AdminBadgeTriggerType;
+  triggerValue: number;
+  createdAt: string;
+}
+
+export type AdminBadgeInputRarity = typeof AdminBadgeInputRarity[keyof typeof AdminBadgeInputRarity];
+
+
+export const AdminBadgeInputRarity = {
+  COMMON: 'COMMON',
+  RARE: 'RARE',
+  EPIC: 'EPIC',
+  LEGENDARY: 'LEGENDARY',
+} as const;
+
+export type AdminBadgeInputTriggerType = typeof AdminBadgeInputTriggerType[keyof typeof AdminBadgeInputTriggerType];
+
+
+export const AdminBadgeInputTriggerType = {
+  MANUAL: 'MANUAL',
+  QUEST_COUNT: 'QUEST_COUNT',
+  SKILL_COUNT: 'SKILL_COUNT',
+  BUILD_COUNT: 'BUILD_COUNT',
+  NET_WORTH: 'NET_WORTH',
+  LEVEL: 'LEVEL',
+  DAYS_ACTIVE: 'DAYS_ACTIVE',
+} as const;
+
+export interface AdminBadgeInput {
+  /** @minLength 1 */
+  name: string;
+  description?: string;
+  icon?: string;
+  rarity?: AdminBadgeInputRarity;
+  triggerType?: AdminBadgeInputTriggerType;
+  triggerValue?: number;
+}
+
+export type AdminBadgeUpdateRarity = typeof AdminBadgeUpdateRarity[keyof typeof AdminBadgeUpdateRarity];
+
+
+export const AdminBadgeUpdateRarity = {
+  COMMON: 'COMMON',
+  RARE: 'RARE',
+  EPIC: 'EPIC',
+  LEGENDARY: 'LEGENDARY',
+} as const;
+
+export type AdminBadgeUpdateTriggerType = typeof AdminBadgeUpdateTriggerType[keyof typeof AdminBadgeUpdateTriggerType];
+
+
+export const AdminBadgeUpdateTriggerType = {
+  MANUAL: 'MANUAL',
+  QUEST_COUNT: 'QUEST_COUNT',
+  SKILL_COUNT: 'SKILL_COUNT',
+  BUILD_COUNT: 'BUILD_COUNT',
+  NET_WORTH: 'NET_WORTH',
+  LEVEL: 'LEVEL',
+  DAYS_ACTIVE: 'DAYS_ACTIVE',
+} as const;
+
+export interface AdminBadgeUpdate {
+  /** @minLength 1 */
+  name?: string;
+  description?: string;
+  icon?: string;
+  rarity?: AdminBadgeUpdateRarity;
+  triggerType?: AdminBadgeUpdateTriggerType;
+  triggerValue?: number;
+}
+
+export type AdminMilestoneCategory = typeof AdminMilestoneCategory[keyof typeof AdminMilestoneCategory];
+
+
+export const AdminMilestoneCategory = {
+  QUEST: 'QUEST',
+  SKILL: 'SKILL',
+  BUILD: 'BUILD',
+  WEALTH: 'WEALTH',
+  CHARACTER: 'CHARACTER',
+} as const;
+
+export interface AdminMilestone {
+  id: number;
+  name: string;
+  description: string;
+  icon: string;
+  category: AdminMilestoneCategory;
+  threshold: number;
+  xpReward: number;
+  createdAt: string;
+}
+
+export type AdminMilestoneInputCategory = typeof AdminMilestoneInputCategory[keyof typeof AdminMilestoneInputCategory];
+
+
+export const AdminMilestoneInputCategory = {
+  QUEST: 'QUEST',
+  SKILL: 'SKILL',
+  BUILD: 'BUILD',
+  WEALTH: 'WEALTH',
+  CHARACTER: 'CHARACTER',
+} as const;
+
+export interface AdminMilestoneInput {
+  /** @minLength 1 */
+  name: string;
+  description?: string;
+  icon?: string;
+  category?: AdminMilestoneInputCategory;
+  threshold?: number;
+  xpReward?: number;
+}
+
+export type AdminMilestoneUpdateCategory = typeof AdminMilestoneUpdateCategory[keyof typeof AdminMilestoneUpdateCategory];
+
+
+export const AdminMilestoneUpdateCategory = {
+  QUEST: 'QUEST',
+  SKILL: 'SKILL',
+  BUILD: 'BUILD',
+  WEALTH: 'WEALTH',
+  CHARACTER: 'CHARACTER',
+} as const;
+
+export interface AdminMilestoneUpdate {
+  /** @minLength 1 */
+  name?: string;
+  description?: string;
+  icon?: string;
+  category?: AdminMilestoneUpdateCategory;
+  threshold?: number;
+  xpReward?: number;
+}
+
+export type AdminPushQuestInputCategory = typeof AdminPushQuestInputCategory[keyof typeof AdminPushQuestInputCategory];
+
+
+export const AdminPushQuestInputCategory = {
+  SYSTEM: 'SYSTEM',
+  SELF: 'SELF',
+} as const;
+
+export type AdminPushQuestInputFrequency = typeof AdminPushQuestInputFrequency[keyof typeof AdminPushQuestInputFrequency];
+
+
+export const AdminPushQuestInputFrequency = {
+  DAILY: 'DAILY',
+  WEEKLY: 'WEEKLY',
+  MONTHLY: 'MONTHLY',
+  ONGOING: 'ONGOING',
+} as const;
+
+export interface AdminPushQuestInput {
+  userId?: number;
+  /** @minLength 1 */
+  title: string;
+  description?: string;
+  category?: AdminPushQuestInputCategory;
+  targetAmount?: number;
+  xpReward?: number;
+  frequency?: AdminPushQuestInputFrequency;
+}
+
+export interface AdminPushQuestResult {
+  pushed: number;
+  message: string;
 }
 
 export interface AdminUser {

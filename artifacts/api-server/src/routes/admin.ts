@@ -14,16 +14,18 @@ import {
   AdminGetLeaderboardResponse,
   AdminListBadgesResponse,
   AdminCreateBadgeBody,
+  AdminCreateBadgeResponse,
   AdminUpdateBadgeParams,
   AdminUpdateBadgeBody,
+  AdminUpdateBadgeResponse,
   AdminDeleteBadgeParams,
-  AdminBadgeResponse,
   AdminListMilestonesResponse,
   AdminCreateMilestoneBody,
+  AdminCreateMilestoneResponse,
   AdminUpdateMilestoneParams,
   AdminUpdateMilestoneBody,
+  AdminUpdateMilestoneResponse,
   AdminDeleteMilestoneParams,
-  AdminMilestoneResponse,
   AdminPushQuestBody,
   AdminPushQuestResponse,
 } from "@workspace/api-zod";
@@ -248,7 +250,7 @@ router.post("/admin/badges", requireAuth, requireAdmin, async (req, res): Promis
     triggerValue: parsed.data.triggerValue ?? 0,
   }).returning();
 
-  res.status(201).json(AdminBadgeResponse.parse({
+  res.status(201).json(AdminCreateBadgeResponse.parse({
     id: badge.id, name: badge.name, description: badge.description, icon: badge.icon,
     rarity: badge.rarity, triggerType: badge.triggerType,
     triggerValue: badge.triggerValue, createdAt: badge.createdAt.toISOString(),
@@ -274,7 +276,7 @@ router.patch("/admin/badges/:id", requireAuth, requireAdmin, async (req, res): P
   const [badge] = await db.update(badgesTable).set(updates).where(eq(badgesTable.id, numId)).returning();
   if (!badge) { res.status(404).json({ error: "Badge not found" }); return; }
 
-  res.json(AdminBadgeResponse.parse({
+  res.json(AdminUpdateBadgeResponse.parse({
     id: badge.id, name: badge.name, description: badge.description, icon: badge.icon,
     rarity: badge.rarity, triggerType: badge.triggerType,
     triggerValue: badge.triggerValue, createdAt: badge.createdAt.toISOString(),
@@ -316,7 +318,7 @@ router.post("/admin/milestones", requireAuth, requireAdmin, async (req, res): Pr
     xpReward: parsed.data.xpReward ?? 100,
   }).returning();
 
-  res.status(201).json(AdminMilestoneResponse.parse({
+  res.status(201).json(AdminCreateMilestoneResponse.parse({
     id: milestone.id, name: milestone.name, description: milestone.description, icon: milestone.icon,
     category: milestone.category, threshold: parseFloat(milestone.threshold as string),
     xpReward: milestone.xpReward, createdAt: milestone.createdAt.toISOString(),
@@ -342,7 +344,7 @@ router.patch("/admin/milestones/:id", requireAuth, requireAdmin, async (req, res
   const [milestone] = await db.update(milestonesTable).set(updates).where(eq(milestonesTable.id, numId)).returning();
   if (!milestone) { res.status(404).json({ error: "Milestone not found" }); return; }
 
-  res.json(AdminMilestoneResponse.parse({
+  res.json(AdminUpdateMilestoneResponse.parse({
     id: milestone.id, name: milestone.name, description: milestone.description, icon: milestone.icon,
     category: milestone.category, threshold: parseFloat(milestone.threshold as string),
     xpReward: milestone.xpReward, createdAt: milestone.createdAt.toISOString(),
