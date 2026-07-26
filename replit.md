@@ -20,6 +20,14 @@ All three workflows are configured and start automatically:
 | `artifacts/api-server: API Server` | `pnpm --filter @workspace/api-server run dev` | `/api` |
 | `artifacts/mockup-sandbox: Component Preview Server` | `pnpm --filter @workspace/mockup-sandbox run dev` | `/__mockup` |
 
+On a fresh checkout, shared library declarations are built before the
+dependent API and frontend checks run. This is also performed by the
+post-merge setup:
+
+```bash
+pnpm run build:libs
+```
+
 ## Environment
 
 The following are auto-managed by Replit — do not set manually:

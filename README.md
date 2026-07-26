@@ -257,6 +257,20 @@ All frontend components should import from `@workspace/api-client-react` rather 
 pnpm install
 ```
 
+### Cold checkout build order
+
+The API and frontend consume declaration files emitted by the shared
+libraries. On a fresh checkout, build those libraries before running a
+dependent package check:
+
+```bash
+pnpm run build:libs
+```
+
+The post-merge setup runs this automatically. The API and frontend
+`typecheck` scripts also build the shared libraries first, so direct
+leaf-package checks work without relying on cached `dist/` files.
+
 ### Environment Variables
 
 On Replit these are auto-managed via Secrets. Elsewhere, set them manually:

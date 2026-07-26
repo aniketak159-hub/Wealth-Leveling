@@ -1,3 +1,4 @@
 - [Generated client sync](generated-client-sync.md) — frontend API hook types can drift from the current OpenAPI-generated client and should be regenerated before typechecking.
 - [TOTP on PIN login](totp-pin-2fa.md) — TOTP 2FA on PIN login only; otplib/qrcode must be externalised in build.mjs (esbuild named-export issue); DB columns totpSecret + totpEnabled on usersTable.
 - [Clerk and database environments](clerk-database-environments.md) — PostgreSQL rows are keyed by Clerk user IDs; development and published Clerk environments are separate user stores.
+- [Cold-start library build](cold-start-library-build.md) — shared declaration files must be emitted before API or frontend checks on fresh imports.

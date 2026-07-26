@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 pnpm install --frozen-lockfile
+pnpm run build:libs
 pnpm --filter db push
 
 # Do not seed demo or test-user data here.
