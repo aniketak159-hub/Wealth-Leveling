@@ -6,6 +6,7 @@
  */
 import { useState } from "react";
 import { useClerk } from "@clerk/react";
+import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { KeyRound, Eye, EyeOff, ChevronLeft, ArrowRight, ShieldCheck, Smartphone } from "lucide-react";
 
@@ -19,6 +20,7 @@ type Step = "email" | "pin" | "totp" | "done";
 
 export default function PinLoginFlow({ onCancel }: Props) {
   const clerk = useClerk();
+  const [, setLocation] = useLocation();
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
   const [pin, setPin] = useState("");
