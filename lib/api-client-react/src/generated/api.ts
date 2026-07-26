@@ -20,15 +20,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  AdminBadgeResponse,
-  AdminCreateBadgeBody,
-  AdminCreateMilestoneBody,
-  AdminMilestoneResponse,
-  AdminPushQuestBody,
-  AdminPushQuestResponse,
   AdminStats,
-  AdminUpdateBadgeBody,
-  AdminUpdateMilestoneBody,
   AdminUser,
   AdminUserDetail,
   AdminUserUpdate,
@@ -37,12 +29,18 @@ import type {
   Build,
   BuildInput,
   BuildUpdate,
+  ChangePinInput,
+  CreatePinInput,
   Dashboard,
   DashboardSummary,
+  DeletePinInput,
   EvaluationInput,
   EvaluationResult,
   HealthStatus,
   LeaderboardEntry,
+  PinLoginInput,
+  PinLoginResult,
+  PinStatus,
   Quest,
   QuestInput,
   QuestProgressInput,
@@ -51,6 +49,10 @@ import type {
   SkillInput,
   SkillUpdate,
   StatsUpdate,
+  SuccessResponse,
+  TotpCodeInput,
+  TotpSetupResult,
+  TotpStatus,
   UserProfile,
   UserProfileUpdate,
   Wealth,
@@ -308,6 +310,657 @@ export const useUpdateMe = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getUpdateMeMutationOptions(options));
+    }
+
+export const getGetPinStatusUrl = () => {
+
+
+
+
+  return `/api/users/me/pin-status`
+}
+
+/**
+ * @summary Check whether the current user has a PIN set
+ */
+export const getPinStatus = async ( options?: RequestInit): Promise<PinStatus> => {
+
+  return customFetch<PinStatus>(getGetPinStatusUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPinStatusQueryKey = () => {
+    return [
+    `/api/users/me/pin-status`
+    ] as const;
+    }
+
+
+export const getGetPinStatusQueryOptions = <TData = Awaited<ReturnType<typeof getPinStatus>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPinStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPinStatusQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPinStatus>>> = ({ signal }) => getPinStatus({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPinStatus>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPinStatusQueryResult = NonNullable<Awaited<ReturnType<typeof getPinStatus>>>
+export type GetPinStatusQueryError = ErrorType<void>
+
+
+/**
+ * @summary Check whether the current user has a PIN set
+ */
+
+export function useGetPinStatus<TData = Awaited<ReturnType<typeof getPinStatus>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPinStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPinStatusQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreatePinUrl = () => {
+
+
+
+
+  return `/api/users/me/pin`
+}
+
+/**
+ * @summary Set a PIN for the first time
+ */
+export const createPin = async (createPinInput: CreatePinInput, options?: RequestInit): Promise<SuccessResponse> => {
+
+  return customFetch<SuccessResponse>(getCreatePinUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createPinInput)
+  }
+);}
+
+
+
+
+
+export const getCreatePinMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPin>>, TError,{data: BodyType<CreatePinInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createPin>>, TError,{data: BodyType<CreatePinInput>}, TContext> => {
+
+const mutationKey = ['createPin'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createPin>>, {data: BodyType<CreatePinInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createPin(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreatePinMutationResult = NonNullable<Awaited<ReturnType<typeof createPin>>>
+    export type CreatePinMutationBody = BodyType<CreatePinInput>
+    export type CreatePinMutationError = ErrorType<void>
+
+    /**
+ * @summary Set a PIN for the first time
+ */
+export const useCreatePin = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPin>>, TError,{data: BodyType<CreatePinInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createPin>>,
+        TError,
+        {data: BodyType<CreatePinInput>},
+        TContext
+      > => {
+      return useMutation(getCreatePinMutationOptions(options));
+    }
+
+export const getChangePinUrl = () => {
+
+
+
+
+  return `/api/users/me/pin`
+}
+
+/**
+ * @summary Change an existing PIN
+ */
+export const changePin = async (changePinInput: ChangePinInput, options?: RequestInit): Promise<SuccessResponse> => {
+
+  return customFetch<SuccessResponse>(getChangePinUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(changePinInput)
+  }
+);}
+
+
+
+
+
+export const getChangePinMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof changePin>>, TError,{data: BodyType<ChangePinInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof changePin>>, TError,{data: BodyType<ChangePinInput>}, TContext> => {
+
+const mutationKey = ['changePin'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof changePin>>, {data: BodyType<ChangePinInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  changePin(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ChangePinMutationResult = NonNullable<Awaited<ReturnType<typeof changePin>>>
+    export type ChangePinMutationBody = BodyType<ChangePinInput>
+    export type ChangePinMutationError = ErrorType<void>
+
+    /**
+ * @summary Change an existing PIN
+ */
+export const useChangePin = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof changePin>>, TError,{data: BodyType<ChangePinInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof changePin>>,
+        TError,
+        {data: BodyType<ChangePinInput>},
+        TContext
+      > => {
+      return useMutation(getChangePinMutationOptions(options));
+    }
+
+export const getDeletePinUrl = () => {
+
+
+
+
+  return `/api/users/me/pin`
+}
+
+/**
+ * @summary Remove the PIN
+ */
+export const deletePin = async (deletePinInput: DeletePinInput, options?: RequestInit): Promise<SuccessResponse> => {
+
+  return customFetch<SuccessResponse>(getDeletePinUrl(),
+  {
+    ...options,
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(deletePinInput)
+  }
+);}
+
+
+
+
+
+export const getDeletePinMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePin>>, TError,{data: BodyType<DeletePinInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deletePin>>, TError,{data: BodyType<DeletePinInput>}, TContext> => {
+
+const mutationKey = ['deletePin'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deletePin>>, {data: BodyType<DeletePinInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  deletePin(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeletePinMutationResult = NonNullable<Awaited<ReturnType<typeof deletePin>>>
+    export type DeletePinMutationBody = BodyType<DeletePinInput>
+    export type DeletePinMutationError = ErrorType<void>
+
+    /**
+ * @summary Remove the PIN
+ */
+export const useDeletePin = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePin>>, TError,{data: BodyType<DeletePinInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deletePin>>,
+        TError,
+        {data: BodyType<DeletePinInput>},
+        TContext
+      > => {
+      return useMutation(getDeletePinMutationOptions(options));
+    }
+
+export const getGetTotpStatusUrl = () => {
+
+
+
+
+  return `/api/auth/totp/status`
+}
+
+/**
+ * @summary Check whether TOTP 2FA is enabled for the current user
+ */
+export const getTotpStatus = async ( options?: RequestInit): Promise<TotpStatus> => {
+
+  return customFetch<TotpStatus>(getGetTotpStatusUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetTotpStatusQueryKey = () => {
+    return [
+    `/api/auth/totp/status`
+    ] as const;
+    }
+
+
+export const getGetTotpStatusQueryOptions = <TData = Awaited<ReturnType<typeof getTotpStatus>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTotpStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTotpStatusQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTotpStatus>>> = ({ signal }) => getTotpStatus({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTotpStatus>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetTotpStatusQueryResult = NonNullable<Awaited<ReturnType<typeof getTotpStatus>>>
+export type GetTotpStatusQueryError = ErrorType<void>
+
+
+/**
+ * @summary Check whether TOTP 2FA is enabled for the current user
+ */
+
+export function useGetTotpStatus<TData = Awaited<ReturnType<typeof getTotpStatus>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTotpStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetTotpStatusQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSetupTotpUrl = () => {
+
+
+
+
+  return `/api/auth/totp/setup`
+}
+
+/**
+ * @summary Generate a new TOTP secret and QR code
+ */
+export const setupTotp = async ( options?: RequestInit): Promise<TotpSetupResult> => {
+
+  return customFetch<TotpSetupResult>(getSetupTotpUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getSetupTotpMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setupTotp>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof setupTotp>>, TError,void, TContext> => {
+
+const mutationKey = ['setupTotp'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setupTotp>>, void> = () => {
+
+
+          return  setupTotp(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SetupTotpMutationResult = NonNullable<Awaited<ReturnType<typeof setupTotp>>>
+
+    export type SetupTotpMutationError = ErrorType<void>
+
+    /**
+ * @summary Generate a new TOTP secret and QR code
+ */
+export const useSetupTotp = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setupTotp>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof setupTotp>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getSetupTotpMutationOptions(options));
+    }
+
+export const getEnableTotpUrl = () => {
+
+
+
+
+  return `/api/auth/totp/enable`
+}
+
+/**
+ * @summary Confirm and enable TOTP using a valid authenticator code
+ */
+export const enableTotp = async (totpCodeInput: TotpCodeInput, options?: RequestInit): Promise<SuccessResponse> => {
+
+  return customFetch<SuccessResponse>(getEnableTotpUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(totpCodeInput)
+  }
+);}
+
+
+
+
+
+export const getEnableTotpMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof enableTotp>>, TError,{data: BodyType<TotpCodeInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof enableTotp>>, TError,{data: BodyType<TotpCodeInput>}, TContext> => {
+
+const mutationKey = ['enableTotp'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof enableTotp>>, {data: BodyType<TotpCodeInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  enableTotp(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type EnableTotpMutationResult = NonNullable<Awaited<ReturnType<typeof enableTotp>>>
+    export type EnableTotpMutationBody = BodyType<TotpCodeInput>
+    export type EnableTotpMutationError = ErrorType<void>
+
+    /**
+ * @summary Confirm and enable TOTP using a valid authenticator code
+ */
+export const useEnableTotp = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof enableTotp>>, TError,{data: BodyType<TotpCodeInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof enableTotp>>,
+        TError,
+        {data: BodyType<TotpCodeInput>},
+        TContext
+      > => {
+      return useMutation(getEnableTotpMutationOptions(options));
+    }
+
+export const getDisableTotpUrl = () => {
+
+
+
+
+  return `/api/auth/totp/disable`
+}
+
+/**
+ * @summary Disable TOTP using a valid authenticator code
+ */
+export const disableTotp = async (totpCodeInput: TotpCodeInput, options?: RequestInit): Promise<SuccessResponse> => {
+
+  return customFetch<SuccessResponse>(getDisableTotpUrl(),
+  {
+    ...options,
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(totpCodeInput)
+  }
+);}
+
+
+
+
+
+export const getDisableTotpMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof disableTotp>>, TError,{data: BodyType<TotpCodeInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof disableTotp>>, TError,{data: BodyType<TotpCodeInput>}, TContext> => {
+
+const mutationKey = ['disableTotp'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof disableTotp>>, {data: BodyType<TotpCodeInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  disableTotp(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DisableTotpMutationResult = NonNullable<Awaited<ReturnType<typeof disableTotp>>>
+    export type DisableTotpMutationBody = BodyType<TotpCodeInput>
+    export type DisableTotpMutationError = ErrorType<void>
+
+    /**
+ * @summary Disable TOTP using a valid authenticator code
+ */
+export const useDisableTotp = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof disableTotp>>, TError,{data: BodyType<TotpCodeInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof disableTotp>>,
+        TError,
+        {data: BodyType<TotpCodeInput>},
+        TContext
+      > => {
+      return useMutation(getDisableTotpMutationOptions(options));
+    }
+
+export const getPinLoginUrl = () => {
+
+
+
+
+  return `/api/auth/pin-login`
+}
+
+/**
+ * @summary Authenticate with email + PIN (and optional TOTP code)
+ */
+export const pinLogin = async (pinLoginInput: PinLoginInput, options?: RequestInit): Promise<PinLoginResult> => {
+
+  return customFetch<PinLoginResult>(getPinLoginUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(pinLoginInput)
+  }
+);}
+
+
+
+
+
+export const getPinLoginMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof pinLogin>>, TError,{data: BodyType<PinLoginInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof pinLogin>>, TError,{data: BodyType<PinLoginInput>}, TContext> => {
+
+const mutationKey = ['pinLogin'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof pinLogin>>, {data: BodyType<PinLoginInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  pinLogin(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PinLoginMutationResult = NonNullable<Awaited<ReturnType<typeof pinLogin>>>
+    export type PinLoginMutationBody = BodyType<PinLoginInput>
+    export type PinLoginMutationError = ErrorType<void>
+
+    /**
+ * @summary Authenticate with email + PIN (and optional TOTP code)
+ */
+export const usePinLogin = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof pinLogin>>, TError,{data: BodyType<PinLoginInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof pinLogin>>,
+        TError,
+        {data: BodyType<PinLoginInput>},
+        TContext
+      > => {
+      return useMutation(getPinLoginMutationOptions(options));
     }
 
 export const getGetDashboardUrl = () => {
@@ -2369,190 +3022,3 @@ export function useAdminGetLeaderboard<TData = Awaited<ReturnType<typeof adminGe
 
 
 
-
-
-// ─── Badges ───────────────────────────────────────────────────────────────────
-
-export const getAdminListBadgesUrl = () => `/api/admin/badges`;
-
-export const adminListBadges = async (options?: RequestInit): Promise<AdminBadgeResponse[]> =>
-  customFetch<AdminBadgeResponse[]>(getAdminListBadgesUrl(), { ...options, method: 'GET' });
-
-export const getAdminListBadgesQueryKey = () => ['/api/admin/badges'] as const;
-
-export const getAdminListBadgesQueryOptions = <TData = Awaited<ReturnType<typeof adminListBadges>>, TError = ErrorType<void>>(
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof adminListBadges>>, TError, TData>; request?: SecondParameter<typeof customFetch> }
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-  const queryKey = queryOptions?.queryKey ?? getAdminListBadgesQueryKey();
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof adminListBadges>>> = ({ signal }) => adminListBadges({ signal, ...requestOptions });
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<Awaited<ReturnType<typeof adminListBadges>>, TError, TData> & { queryKey: QueryKey };
-};
-
-export function useAdminListBadges<TData = Awaited<ReturnType<typeof adminListBadges>>, TError = ErrorType<void>>(
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof adminListBadges>>, TError, TData>; request?: SecondParameter<typeof customFetch> }
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getAdminListBadgesQueryOptions(options);
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-export const adminCreateBadge = async (body: AdminCreateBadgeBody, options?: RequestInit): Promise<AdminBadgeResponse> =>
-  customFetch<AdminBadgeResponse>(getAdminListBadgesUrl(), {
-    ...options, method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(body),
-  });
-
-export const getAdminCreateBadgeMutationOptions = <TError = ErrorType<void>, TContext = unknown>(
-  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminCreateBadge>>, TError, { data: AdminCreateBadgeBody }, TContext>; request?: SecondParameter<typeof customFetch> }
-): UseMutationOptions<Awaited<ReturnType<typeof adminCreateBadge>>, TError, { data: AdminCreateBadgeBody }, TContext> => {
-  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCreateBadge>>, { data: AdminCreateBadgeBody }> = ({ data }) => adminCreateBadge(data, requestOptions);
-  return { mutationFn, ...mutationOptions };
-};
-
-export const useAdminCreateBadge = <TError = ErrorType<void>, TContext = unknown>(
-  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminCreateBadge>>, TError, { data: AdminCreateBadgeBody }, TContext>; request?: SecondParameter<typeof customFetch> }
-): UseMutationResult<Awaited<ReturnType<typeof adminCreateBadge>>, TError, { data: AdminCreateBadgeBody }, TContext> =>
-  useMutation(getAdminCreateBadgeMutationOptions(options));
-
-export const adminUpdateBadge = async (id: string, body: AdminUpdateBadgeBody, options?: RequestInit): Promise<AdminBadgeResponse> =>
-  customFetch<AdminBadgeResponse>(`/api/admin/badges/${id}`, {
-    ...options, method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(body),
-  });
-
-export const getAdminUpdateBadgeMutationOptions = <TError = ErrorType<void>, TContext = unknown>(
-  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminUpdateBadge>>, TError, { id: string; data: AdminUpdateBadgeBody }, TContext>; request?: SecondParameter<typeof customFetch> }
-): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateBadge>>, TError, { id: string; data: AdminUpdateBadgeBody }, TContext> => {
-  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateBadge>>, { id: string; data: AdminUpdateBadgeBody }> = ({ id, data }) => adminUpdateBadge(id, data, requestOptions);
-  return { mutationFn, ...mutationOptions };
-};
-
-export const useAdminUpdateBadge = <TError = ErrorType<void>, TContext = unknown>(
-  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminUpdateBadge>>, TError, { id: string; data: AdminUpdateBadgeBody }, TContext>; request?: SecondParameter<typeof customFetch> }
-): UseMutationResult<Awaited<ReturnType<typeof adminUpdateBadge>>, TError, { id: string; data: AdminUpdateBadgeBody }, TContext> =>
-  useMutation(getAdminUpdateBadgeMutationOptions(options));
-
-export const adminDeleteBadge = async (id: string, options?: RequestInit): Promise<void> =>
-  customFetch<void>(`/api/admin/badges/${id}`, { ...options, method: 'DELETE' });
-
-export const getAdminDeleteBadgeMutationOptions = <TError = ErrorType<void>, TContext = unknown>(
-  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminDeleteBadge>>, TError, { id: string }, TContext>; request?: SecondParameter<typeof customFetch> }
-): UseMutationOptions<Awaited<ReturnType<typeof adminDeleteBadge>>, TError, { id: string }, TContext> => {
-  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminDeleteBadge>>, { id: string }> = ({ id }) => adminDeleteBadge(id, requestOptions);
-  return { mutationFn, ...mutationOptions };
-};
-
-export const useAdminDeleteBadge = <TError = ErrorType<void>, TContext = unknown>(
-  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminDeleteBadge>>, TError, { id: string }, TContext>; request?: SecondParameter<typeof customFetch> }
-): UseMutationResult<Awaited<ReturnType<typeof adminDeleteBadge>>, TError, { id: string }, TContext> =>
-  useMutation(getAdminDeleteBadgeMutationOptions(options));
-
-// ─── Milestones ───────────────────────────────────────────────────────────────
-
-export const getAdminListMilestonesUrl = () => `/api/admin/milestones`;
-
-export const adminListMilestones = async (options?: RequestInit): Promise<AdminMilestoneResponse[]> =>
-  customFetch<AdminMilestoneResponse[]>(getAdminListMilestonesUrl(), { ...options, method: 'GET' });
-
-export const getAdminListMilestonesQueryKey = () => ['/api/admin/milestones'] as const;
-
-export const getAdminListMilestonesQueryOptions = <TData = Awaited<ReturnType<typeof adminListMilestones>>, TError = ErrorType<void>>(
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof adminListMilestones>>, TError, TData>; request?: SecondParameter<typeof customFetch> }
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-  const queryKey = queryOptions?.queryKey ?? getAdminListMilestonesQueryKey();
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof adminListMilestones>>> = ({ signal }) => adminListMilestones({ signal, ...requestOptions });
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<Awaited<ReturnType<typeof adminListMilestones>>, TError, TData> & { queryKey: QueryKey };
-};
-
-export function useAdminListMilestones<TData = Awaited<ReturnType<typeof adminListMilestones>>, TError = ErrorType<void>>(
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof adminListMilestones>>, TError, TData>; request?: SecondParameter<typeof customFetch> }
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getAdminListMilestonesQueryOptions(options);
-  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-export const adminCreateMilestone = async (body: AdminCreateMilestoneBody, options?: RequestInit): Promise<AdminMilestoneResponse> =>
-  customFetch<AdminMilestoneResponse>(getAdminListMilestonesUrl(), {
-    ...options, method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(body),
-  });
-
-export const getAdminCreateMilestoneMutationOptions = <TError = ErrorType<void>, TContext = unknown>(
-  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminCreateMilestone>>, TError, { data: AdminCreateMilestoneBody }, TContext>; request?: SecondParameter<typeof customFetch> }
-): UseMutationOptions<Awaited<ReturnType<typeof adminCreateMilestone>>, TError, { data: AdminCreateMilestoneBody }, TContext> => {
-  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCreateMilestone>>, { data: AdminCreateMilestoneBody }> = ({ data }) => adminCreateMilestone(data, requestOptions);
-  return { mutationFn, ...mutationOptions };
-};
-
-export const useAdminCreateMilestone = <TError = ErrorType<void>, TContext = unknown>(
-  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminCreateMilestone>>, TError, { data: AdminCreateMilestoneBody }, TContext>; request?: SecondParameter<typeof customFetch> }
-): UseMutationResult<Awaited<ReturnType<typeof adminCreateMilestone>>, TError, { data: AdminCreateMilestoneBody }, TContext> =>
-  useMutation(getAdminCreateMilestoneMutationOptions(options));
-
-export const adminUpdateMilestone = async (id: string, body: AdminUpdateMilestoneBody, options?: RequestInit): Promise<AdminMilestoneResponse> =>
-  customFetch<AdminMilestoneResponse>(`/api/admin/milestones/${id}`, {
-    ...options, method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(body),
-  });
-
-export const getAdminUpdateMilestoneMutationOptions = <TError = ErrorType<void>, TContext = unknown>(
-  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminUpdateMilestone>>, TError, { id: string; data: AdminUpdateMilestoneBody }, TContext>; request?: SecondParameter<typeof customFetch> }
-): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateMilestone>>, TError, { id: string; data: AdminUpdateMilestoneBody }, TContext> => {
-  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateMilestone>>, { id: string; data: AdminUpdateMilestoneBody }> = ({ id, data }) => adminUpdateMilestone(id, data, requestOptions);
-  return { mutationFn, ...mutationOptions };
-};
-
-export const useAdminUpdateMilestone = <TError = ErrorType<void>, TContext = unknown>(
-  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminUpdateMilestone>>, TError, { id: string; data: AdminUpdateMilestoneBody }, TContext>; request?: SecondParameter<typeof customFetch> }
-): UseMutationResult<Awaited<ReturnType<typeof adminUpdateMilestone>>, TError, { id: string; data: AdminUpdateMilestoneBody }, TContext> =>
-  useMutation(getAdminUpdateMilestoneMutationOptions(options));
-
-export const adminDeleteMilestone = async (id: string, options?: RequestInit): Promise<void> =>
-  customFetch<void>(`/api/admin/milestones/${id}`, { ...options, method: 'DELETE' });
-
-export const getAdminDeleteMilestoneMutationOptions = <TError = ErrorType<void>, TContext = unknown>(
-  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminDeleteMilestone>>, TError, { id: string }, TContext>; request?: SecondParameter<typeof customFetch> }
-): UseMutationOptions<Awaited<ReturnType<typeof adminDeleteMilestone>>, TError, { id: string }, TContext> => {
-  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminDeleteMilestone>>, { id: string }> = ({ id }) => adminDeleteMilestone(id, requestOptions);
-  return { mutationFn, ...mutationOptions };
-};
-
-export const useAdminDeleteMilestone = <TError = ErrorType<void>, TContext = unknown>(
-  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminDeleteMilestone>>, TError, { id: string }, TContext>; request?: SecondParameter<typeof customFetch> }
-): UseMutationResult<Awaited<ReturnType<typeof adminDeleteMilestone>>, TError, { id: string }, TContext> =>
-  useMutation(getAdminDeleteMilestoneMutationOptions(options));
-
-// ─── Quest Push ───────────────────────────────────────────────────────────────
-
-export const adminPushQuest = async (body: AdminPushQuestBody, options?: RequestInit): Promise<AdminPushQuestResponse> =>
-  customFetch<AdminPushQuestResponse>('/api/admin/quests/push', {
-    ...options, method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(body),
-  });
-
-export const getAdminPushQuestMutationOptions = <TError = ErrorType<void>, TContext = unknown>(
-  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminPushQuest>>, TError, { data: AdminPushQuestBody }, TContext>; request?: SecondParameter<typeof customFetch> }
-): UseMutationOptions<Awaited<ReturnType<typeof adminPushQuest>>, TError, { data: AdminPushQuestBody }, TContext> => {
-  const { mutation: mutationOptions, request: requestOptions } = options ?? {};
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminPushQuest>>, { data: AdminPushQuestBody }> = ({ data }) => adminPushQuest(data, requestOptions);
-  return { mutationFn, ...mutationOptions };
-};
-
-export const useAdminPushQuest = <TError = ErrorType<void>, TContext = unknown>(
-  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof adminPushQuest>>, TError, { data: AdminPushQuestBody }, TContext>; request?: SecondParameter<typeof customFetch> }
-): UseMutationResult<Awaited<ReturnType<typeof adminPushQuest>>, TError, { data: AdminPushQuestBody }, TContext> =>
-  useMutation(getAdminPushQuestMutationOptions(options));

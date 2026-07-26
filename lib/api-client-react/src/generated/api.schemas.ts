@@ -445,84 +445,83 @@ export interface LeaderboardEntry {
   xp: number;
 }
 
-
-// ─── Badge ────────────────────────────────────────────────────────────────────
-export type BadgeRarity = 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY';
-export type BadgeTriggerType = 'QUEST_COUNT' | 'SKILL_COUNT' | 'BUILD_COUNT' | 'NET_WORTH' | 'LEVEL' | 'DAYS_ACTIVE' | 'MANUAL';
-
-export interface AdminBadgeResponse {
-  id: number;
-  name: string;
-  description: string;
-  icon: string;
-  rarity: BadgeRarity;
-  triggerType: BadgeTriggerType;
-  triggerValue: number;
-  createdAt: string;
+export interface SuccessResponse {
+  success: boolean;
 }
 
-export interface AdminCreateBadgeBody {
-  name: string;
-  description?: string;
-  icon?: string;
-  rarity?: BadgeRarity;
-  triggerType?: BadgeTriggerType;
-  triggerValue?: number;
+export interface PinStatus {
+  hasPinSet: boolean;
 }
 
-export interface AdminUpdateBadgeBody {
-  name?: string;
-  description?: string;
-  icon?: string;
-  rarity?: BadgeRarity;
-  triggerType?: BadgeTriggerType;
-  triggerValue?: number;
+export interface CreatePinInput {
+  /**
+     * @minLength 4
+     * @maxLength 6
+     * @pattern ^\d{4,6}$
+     */
+  pin: string;
 }
 
-// ─── Milestone ────────────────────────────────────────────────────────────────
-export type MilestoneCategory = 'QUEST' | 'SKILL' | 'BUILD' | 'WEALTH' | 'CHARACTER';
-
-export interface AdminMilestoneResponse {
-  id: number;
-  name: string;
-  description: string;
-  icon: string;
-  category: MilestoneCategory;
-  threshold: number;
-  xpReward: number;
-  createdAt: string;
+export interface ChangePinInput {
+  /**
+     * @minLength 4
+     * @maxLength 6
+     * @pattern ^\d{4,6}$
+     */
+  currentPin: string;
+  /**
+     * @minLength 4
+     * @maxLength 6
+     * @pattern ^\d{4,6}$
+     */
+  newPin: string;
 }
 
-export interface AdminCreateMilestoneBody {
-  name: string;
-  description?: string;
-  icon?: string;
-  category?: MilestoneCategory;
-  threshold?: number;
-  xpReward?: number;
+export interface DeletePinInput {
+  /**
+     * @minLength 4
+     * @maxLength 6
+     * @pattern ^\d{4,6}$
+     */
+  pin: string;
 }
 
-export interface AdminUpdateMilestoneBody {
-  name?: string;
-  description?: string;
-  icon?: string;
-  category?: MilestoneCategory;
-  threshold?: number;
-  xpReward?: number;
+export interface TotpStatus {
+  totpEnabled: boolean;
 }
 
-// ─── Quest Push ───────────────────────────────────────────────────────────────
-export interface AdminPushQuestBody {
-  userId?: number;
-  title: string;
-  description?: string;
-  category?: 'SYSTEM' | 'SELF';
-  targetAmount?: number;
-  xpReward?: number;
-  frequency?: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'ONGOING';
+export interface TotpSetupResult {
+  qrDataUrl: string;
+  secret: string;
 }
 
-export interface AdminPushQuestResponse {
-  pushed: number;
-  message: string;
+export interface TotpCodeInput {
+  /**
+     * @minLength 6
+     * @maxLength 6
+     * @pattern ^\d{6}$
+     */
+  code: string;
 }
+
+export interface PinLoginInput {
+  email: string;
+  /**
+     * @minLength 4
+     * @maxLength 6
+     * @pattern ^\d{4,6}$
+     */
+  pin: string;
+  /**
+     * @minLength 6
+     * @maxLength 6
+     * @pattern ^\d{6}$
+     */
+  totpCode?: string;
+}
+
+export interface PinLoginResult {
+  token?: string;
+  requiresTotp?: boolean;
+}
+

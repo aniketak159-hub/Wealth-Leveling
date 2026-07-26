@@ -52,6 +52,159 @@ export const UpdateMeResponse = zod.object({
 
 
 /**
+ * @summary Check whether the current user has a PIN set
+ */
+export const GetPinStatusResponse = zod.object({
+  "hasPinSet": zod.boolean()
+})
+
+
+/**
+ * @summary Set a PIN for the first time
+ */
+export const createPinBodyPinMin = 4;
+export const createPinBodyPinMax = 6;
+
+
+export const createPinBodyPinRegExp = new RegExp('^\\d{4,6}$');
+
+
+export const CreatePinBody = zod.object({
+  "pin": zod.string().min(createPinBodyPinMin).max(createPinBodyPinMax).regex(createPinBodyPinRegExp)
+})
+
+export const CreatePinResponse = zod.object({
+  "success": zod.boolean()
+})
+
+
+/**
+ * @summary Change an existing PIN
+ */
+export const changePinBodyCurrentPinMin = 4;
+export const changePinBodyCurrentPinMax = 6;
+
+
+export const changePinBodyCurrentPinRegExp = new RegExp('^\\d{4,6}$');
+export const changePinBodyNewPinMin = 4;
+export const changePinBodyNewPinMax = 6;
+
+
+export const changePinBodyNewPinRegExp = new RegExp('^\\d{4,6}$');
+
+
+export const ChangePinBody = zod.object({
+  "currentPin": zod.string().min(changePinBodyCurrentPinMin).max(changePinBodyCurrentPinMax).regex(changePinBodyCurrentPinRegExp),
+  "newPin": zod.string().min(changePinBodyNewPinMin).max(changePinBodyNewPinMax).regex(changePinBodyNewPinRegExp)
+})
+
+export const ChangePinResponse = zod.object({
+  "success": zod.boolean()
+})
+
+
+/**
+ * @summary Remove the PIN
+ */
+export const deletePinBodyPinMin = 4;
+export const deletePinBodyPinMax = 6;
+
+
+export const deletePinBodyPinRegExp = new RegExp('^\\d{4,6}$');
+
+
+export const DeletePinBody = zod.object({
+  "pin": zod.string().min(deletePinBodyPinMin).max(deletePinBodyPinMax).regex(deletePinBodyPinRegExp)
+})
+
+export const DeletePinResponse = zod.object({
+  "success": zod.boolean()
+})
+
+
+/**
+ * @summary Check whether TOTP 2FA is enabled for the current user
+ */
+export const GetTotpStatusResponse = zod.object({
+  "totpEnabled": zod.boolean()
+})
+
+
+/**
+ * @summary Generate a new TOTP secret and QR code
+ */
+export const SetupTotpResponse = zod.object({
+  "qrDataUrl": zod.string(),
+  "secret": zod.string()
+})
+
+
+/**
+ * @summary Confirm and enable TOTP using a valid authenticator code
+ */
+export const enableTotpBodyCodeMin = 6;
+export const enableTotpBodyCodeMax = 6;
+
+
+export const enableTotpBodyCodeRegExp = new RegExp('^\\d{6}$');
+
+
+export const EnableTotpBody = zod.object({
+  "code": zod.string().min(enableTotpBodyCodeMin).max(enableTotpBodyCodeMax).regex(enableTotpBodyCodeRegExp)
+})
+
+export const EnableTotpResponse = zod.object({
+  "success": zod.boolean()
+})
+
+
+/**
+ * @summary Disable TOTP using a valid authenticator code
+ */
+export const disableTotpBodyCodeMin = 6;
+export const disableTotpBodyCodeMax = 6;
+
+
+export const disableTotpBodyCodeRegExp = new RegExp('^\\d{6}$');
+
+
+export const DisableTotpBody = zod.object({
+  "code": zod.string().min(disableTotpBodyCodeMin).max(disableTotpBodyCodeMax).regex(disableTotpBodyCodeRegExp)
+})
+
+export const DisableTotpResponse = zod.object({
+  "success": zod.boolean()
+})
+
+
+/**
+ * @summary Authenticate with email + PIN (and optional TOTP code)
+ */
+export const pinLoginBodyPinMin = 4;
+export const pinLoginBodyPinMax = 6;
+
+
+export const pinLoginBodyPinRegExp = new RegExp('^\\d{4,6}$');
+export const pinLoginBodyTotpCodeMin = 6;
+export const pinLoginBodyTotpCodeMax = 6;
+
+
+export const pinLoginBodyTotpCodeRegExp = new RegExp('^\\d{6}$');
+
+
+export const PinLoginBody = zod.object({
+  "email": zod.string(),
+  "pin": zod.string().min(pinLoginBodyPinMin).max(pinLoginBodyPinMax).regex(pinLoginBodyPinRegExp),
+  "totpCode": zod.string().min(pinLoginBodyTotpCodeMin).max(pinLoginBodyTotpCodeMax).regex(pinLoginBodyTotpCodeRegExp).optional()
+})
+
+export const PinLoginResponse = zod.object({
+  "token": zod.string().optional(),
+  "requiresTotp": zod.boolean().optional()
+})
+
+
+/**
  * @summary Get user dashboard data
  */
 export const GetDashboardResponse = zod.object({
@@ -749,105 +902,3 @@ export const AdminGetLeaderboardResponseItem = zod.object({
 export const AdminGetLeaderboardResponse = zod.array(AdminGetLeaderboardResponseItem)
 
 
-
-
-// ─── Badge types ──────────────────────────────────────────────────────────────
-
-export const AdminListBadgesResponse = zod.array(zod.object({
-  "id": zod.number(),
-  "name": zod.string(),
-  "description": zod.string(),
-  "icon": zod.string(),
-  "rarity": zod.enum(["COMMON", "RARE", "EPIC", "LEGENDARY"]),
-  "triggerType": zod.enum(["QUEST_COUNT", "SKILL_COUNT", "BUILD_COUNT", "NET_WORTH", "LEVEL", "DAYS_ACTIVE", "MANUAL"]),
-  "triggerValue": zod.number(),
-  "createdAt": zod.coerce.date(),
-}))
-
-export const AdminCreateBadgeBody = zod.object({
-  "name": zod.string().min(1),
-  "description": zod.string().optional(),
-  "icon": zod.string().optional(),
-  "rarity": zod.enum(["COMMON", "RARE", "EPIC", "LEGENDARY"]).optional(),
-  "triggerType": zod.enum(["QUEST_COUNT", "SKILL_COUNT", "BUILD_COUNT", "NET_WORTH", "LEVEL", "DAYS_ACTIVE", "MANUAL"]).optional(),
-  "triggerValue": zod.number().optional(),
-})
-
-export const AdminUpdateBadgeParams = zod.object({ "id": zod.coerce.string() })
-export const AdminUpdateBadgeBody = zod.object({
-  "name": zod.string().min(1).optional(),
-  "description": zod.string().optional(),
-  "icon": zod.string().optional(),
-  "rarity": zod.enum(["COMMON", "RARE", "EPIC", "LEGENDARY"]).optional(),
-  "triggerType": zod.enum(["QUEST_COUNT", "SKILL_COUNT", "BUILD_COUNT", "NET_WORTH", "LEVEL", "DAYS_ACTIVE", "MANUAL"]).optional(),
-  "triggerValue": zod.number().optional(),
-})
-export const AdminDeleteBadgeParams = zod.object({ "id": zod.coerce.string() })
-export const AdminBadgeResponse = zod.object({
-  "id": zod.number(),
-  "name": zod.string(),
-  "description": zod.string(),
-  "icon": zod.string(),
-  "rarity": zod.enum(["COMMON", "RARE", "EPIC", "LEGENDARY"]),
-  "triggerType": zod.enum(["QUEST_COUNT", "SKILL_COUNT", "BUILD_COUNT", "NET_WORTH", "LEVEL", "DAYS_ACTIVE", "MANUAL"]),
-  "triggerValue": zod.number(),
-  "createdAt": zod.coerce.date(),
-})
-
-// ─── Milestone types ───────────────────────────────────────────────────────────
-
-export const AdminListMilestonesResponse = zod.array(zod.object({
-  "id": zod.number(),
-  "name": zod.string(),
-  "description": zod.string(),
-  "icon": zod.string(),
-  "category": zod.enum(["QUEST", "SKILL", "BUILD", "WEALTH", "CHARACTER"]),
-  "threshold": zod.number(),
-  "xpReward": zod.number(),
-  "createdAt": zod.coerce.date(),
-}))
-
-export const AdminCreateMilestoneBody = zod.object({
-  "name": zod.string().min(1),
-  "description": zod.string().optional(),
-  "icon": zod.string().optional(),
-  "category": zod.enum(["QUEST", "SKILL", "BUILD", "WEALTH", "CHARACTER"]).optional(),
-  "threshold": zod.number().optional(),
-  "xpReward": zod.number().optional(),
-})
-export const AdminUpdateMilestoneParams = zod.object({ "id": zod.coerce.string() })
-export const AdminUpdateMilestoneBody = zod.object({
-  "name": zod.string().min(1).optional(),
-  "description": zod.string().optional(),
-  "icon": zod.string().optional(),
-  "category": zod.enum(["QUEST", "SKILL", "BUILD", "WEALTH", "CHARACTER"]).optional(),
-  "threshold": zod.number().optional(),
-  "xpReward": zod.number().optional(),
-})
-export const AdminDeleteMilestoneParams = zod.object({ "id": zod.coerce.string() })
-export const AdminMilestoneResponse = zod.object({
-  "id": zod.number(),
-  "name": zod.string(),
-  "description": zod.string(),
-  "icon": zod.string(),
-  "category": zod.enum(["QUEST", "SKILL", "BUILD", "WEALTH", "CHARACTER"]),
-  "threshold": zod.number(),
-  "xpReward": zod.number(),
-  "createdAt": zod.coerce.date(),
-})
-
-// ─── Quest Push ───────────────────────────────────────────────────────────────
-
-export const AdminPushQuestBody = zod.object({
-  "userId": zod.number().optional(),
-  "title": zod.string().min(1),
-  "description": zod.string().optional(),
-  "category": zod.enum(["SYSTEM", "SELF"]).optional(),
-  "targetAmount": zod.number().optional(),
-  "xpReward": zod.number().optional(),
-  "frequency": zod.enum(["DAILY", "WEEKLY", "MONTHLY", "ONGOING"]).optional(),
-})
-export const AdminPushQuestResponse = zod.object({
-  "pushed": zod.number(),
-  "message": zod.string(),
-})

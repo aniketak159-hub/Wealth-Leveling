@@ -12,6 +12,8 @@ tags:
     description: Health operations
   - name: users
     description: User profile operations
+  - name: auth
+    description: PIN and TOTP authentication
   - name: dashboard
     description: Dashboard and character data
   - name: quests
@@ -78,6 +80,178 @@ paths:
                 $ref: "#/components/schemas/UserProfile"
         "401":
           description: Unauthorized
+
+  # ─── PIN management ──────────────────────────────────────────────────────────
+  /users/me/pin-status:
+    get:
+      operationId: getPinStatus
+      tags: [auth]
+      summary: Check whether the current user has a PIN set
+      responses:
+        "200":
+          description: PIN status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PinStatus"
+        "401":
+          description: Unauthorized
+
+  /users/me/pin:
+    post:
+      operationId: createPin
+      tags: [auth]
+      summary: Set a PIN for the first time
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePinInput"
+      responses:
+        "200":
+          description: PIN created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          description: Unauthorized
+        "409":
+          description: PIN already set
+    put:
+      operationId: changePin
+      tags: [auth]
+      summary: Change an existing PIN
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangePinInput"
+      responses:
+        "200":
+          description: PIN changed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          description: Unauthorized or current PIN incorrect
+    delete:
+      operationId: deletePin
+      tags: [auth]
+      summary: Remove the PIN
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeletePinInput"
+      responses:
+        "200":
+          description: PIN removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          description: Unauthorized or PIN incorrect
+
+  # ─── TOTP management ─────────────────────────────────────────────────────────
+  /auth/totp/status:
+    get:
+      operationId: getTotpStatus
+      tags: [auth]
+      summary: Check whether TOTP 2FA is enabled for the current user
+      responses:
+        "200":
+          description: TOTP status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TotpStatus"
+        "401":
+          description: Unauthorized
+
+  /auth/totp/setup:
+    post:
+      operationId: setupTotp
+      tags: [auth]
+      summary: Generate a new TOTP secret and QR code
+      responses:
+        "200":
+          description: QR code and manual entry secret
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TotpSetupResult"
+        "401":
+          description: Unauthorized
+
+  /auth/totp/enable:
+    post:
+      operationId: enableTotp
+      tags: [auth]
+      summary: Confirm and enable TOTP using a valid authenticator code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TotpCodeInput"
+      responses:
+        "200":
+          description: TOTP enabled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          description: Unauthorized or code incorrect
+
+  /auth/totp/disable:
+    delete:
+      operationId: disableTotp
+      tags: [auth]
+      summary: Disable TOTP using a valid authenticator code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TotpCodeInput"
+      responses:
+        "200":
+          description: TOTP disabled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          description: Unauthorized or code incorrect
+
+  # ─── PIN login (unauthenticated) ─────────────────────────────────────────────
+  /auth/pin-login:
+    post:
+      operationId: pinLogin
+      tags: [auth]
+      summary: Authenticate with email + PIN (and optional TOTP code)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PinLoginInput"
+      responses:
+        "200":
+          description: Login result — either a Clerk sign-in token or a TOTP challenge
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PinLoginResult"
+        "401":
+          description: Invalid credentials
 
   # ─── Dashboard ───────────────────────────────────────────────────────────────
   /dashboard:
@@ -1017,3 +1191,68 @@ components:
         tierRank:    { type: string }
         netWorth:    { type: number }
         xp:          { type: integer }
+
+    # ─── Auth / PIN / TOTP ─────────────────────────────────────────────────────
+    SuccessResponse:
+      type: object
+      required: [success]
+      properties:
+        success: { type: boolean }
+
+    PinStatus:
+      type: object
+      required: [hasPinSet]
+      properties:
+        hasPinSet: { type: boolean }
+
+    CreatePinInput:
+      type: object
+      required: [pin]
+      properties:
+        pin: { type: string, minLength: 4, maxLength: 6, pattern: "^\\d{4,6}$" }
+
+    ChangePinInput:
+      type: object
+      required: [currentPin, newPin]
+      properties:
+        currentPin: { type: string, minLength: 4, maxLength: 6, pattern: "^\\d{4,6}$" }
+        newPin:     { type: string, minLength: 4, maxLength: 6, pattern: "^\\d{4,6}$" }
+
+    DeletePinInput:
+      type: object
+      required: [pin]
+      properties:
+        pin: { type: string, minLength: 4, maxLength: 6, pattern: "^\\d{4,6}$" }
+
+    TotpStatus:
+      type: object
+      required: [totpEnabled]
+      properties:
+        totpEnabled: { type: boolean }
+
+    TotpSetupResult:
+      type: object
+      required: [qrDataUrl, secret]
+      properties:
+        qrDataUrl: { type: string }
+        secret:    { type: string }
+
+    TotpCodeInput:
+      type: object
+      required: [code]
+      properties:
+        code: { type: string, minLength: 6, maxLength: 6, pattern: "^\\d{6}$" }
+
+    PinLoginInput:
+      type: object
+      required: [email, pin]
+      properties:
+        email:    { type: string }
+        pin:      { type: string, minLength: 4, maxLength: 6, pattern: "^\\d{4,6}$" }
+        totpCode: { type: string, minLength: 6, maxLength: 6, pattern: "^\\d{6}$" }
+
+    PinLoginResult:
+      type: object
+      properties:
+        token:         { type: string }
+        requiresTotp:  { type: boolean }
