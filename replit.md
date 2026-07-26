@@ -16,7 +16,7 @@ Three workflows run in parallel (managed by Replit):
 
 | Workflow | Command |
 |---|---|
-| Frontend | `pnpm --filter @workspace/wealth-levels run dev` |
+| Frontend | `PORT=23656 BASE_PATH=/ pnpm --filter @workspace/wealth-levels run dev` |
 | API Server | `PORT=8080 pnpm --filter @workspace/api-server run dev` |
 | Mockup Sandbox | `pnpm --filter @workspace/mockup-sandbox run dev` |
 
