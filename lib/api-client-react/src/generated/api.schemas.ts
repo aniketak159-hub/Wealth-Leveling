@@ -116,6 +116,18 @@ export const QuestFrequency = {
   ONGOING: 'ONGOING',
 } as const;
 
+/**
+ * @nullable
+ */
+export type QuestDataLink = typeof QuestDataLink[keyof typeof QuestDataLink] | null;
+
+
+export const QuestDataLink = {
+  NET_WORTH: 'NET_WORTH',
+  MONTHLY_SAVINGS: 'MONTHLY_SAVINGS',
+  TOTAL_EXPENSES: 'TOTAL_EXPENSES',
+} as const;
+
 export interface Quest {
   id: number;
   userId: number;
@@ -129,6 +141,10 @@ export interface Quest {
   xpReward: number;
   frequency: QuestFrequency;
   completed: boolean;
+  /** @nullable */
+  completedAt: string | null;
+  /** @nullable */
+  dataLink: QuestDataLink;
   createdAt: string;
 }
 
@@ -150,6 +166,15 @@ export const QuestInputFrequency = {
   ONGOING: 'ONGOING',
 } as const;
 
+export type QuestInputDataLink = typeof QuestInputDataLink[keyof typeof QuestInputDataLink];
+
+
+export const QuestInputDataLink = {
+  NET_WORTH: 'NET_WORTH',
+  MONTHLY_SAVINGS: 'MONTHLY_SAVINGS',
+  TOTAL_EXPENSES: 'TOTAL_EXPENSES',
+} as const;
+
 export interface QuestInput {
   /** @minLength 1 */
   title: string;
@@ -158,6 +183,7 @@ export interface QuestInput {
   targetAmount?: number;
   xpReward: number;
   frequency: QuestInputFrequency;
+  dataLink?: QuestInputDataLink;
 }
 
 export interface QuestUpdate {
@@ -168,6 +194,8 @@ export interface QuestUpdate {
   currentAmount?: number;
   xpReward?: number;
   completed?: boolean;
+  /** @nullable */
+  completedAt?: string | null;
 }
 
 export interface QuestProgressInput {

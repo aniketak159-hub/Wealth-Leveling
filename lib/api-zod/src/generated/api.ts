@@ -339,6 +339,8 @@ export const ListQuestsResponseItem = zod.object({
   "xpReward": zod.number(),
   "frequency": zod.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'ONGOING']),
   "completed": zod.boolean(),
+  "completedAt": zod.coerce.date().nullable(),
+  "dataLink": zod.union([zod.literal('NET_WORTH'),zod.literal('MONTHLY_SAVINGS'),zod.literal('TOTAL_EXPENSES'),zod.literal(null)]).nullable(),
   "createdAt": zod.coerce.date()
 })
 export const ListQuestsResponse = zod.array(ListQuestsResponseItem)
@@ -356,7 +358,8 @@ export const CreateQuestBody = zod.object({
   "category": zod.enum(['SYSTEM', 'SELF']).optional(),
   "targetAmount": zod.number().optional(),
   "xpReward": zod.number(),
-  "frequency": zod.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'ONGOING'])
+  "frequency": zod.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'ONGOING']),
+  "dataLink": zod.enum(['NET_WORTH', 'MONTHLY_SAVINGS', 'TOTAL_EXPENSES']).optional()
 })
 
 export const CreateQuestResponse = zod.object({
@@ -370,6 +373,8 @@ export const CreateQuestResponse = zod.object({
   "xpReward": zod.number(),
   "frequency": zod.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'ONGOING']),
   "completed": zod.boolean(),
+  "completedAt": zod.coerce.date().nullable(),
+  "dataLink": zod.union([zod.literal('NET_WORTH'),zod.literal('MONTHLY_SAVINGS'),zod.literal('TOTAL_EXPENSES'),zod.literal(null)]).nullable(),
   "createdAt": zod.coerce.date()
 })
 
@@ -390,7 +395,8 @@ export const UpdateQuestBody = zod.object({
   "targetAmount": zod.number().optional(),
   "currentAmount": zod.number().optional(),
   "xpReward": zod.number().optional(),
-  "completed": zod.boolean().optional()
+  "completed": zod.boolean().optional(),
+  "completedAt": zod.coerce.date().nullish()
 })
 
 export const UpdateQuestResponse = zod.object({
@@ -404,6 +410,8 @@ export const UpdateQuestResponse = zod.object({
   "xpReward": zod.number(),
   "frequency": zod.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'ONGOING']),
   "completed": zod.boolean(),
+  "completedAt": zod.coerce.date().nullable(),
+  "dataLink": zod.union([zod.literal('NET_WORTH'),zod.literal('MONTHLY_SAVINGS'),zod.literal('TOTAL_EXPENSES'),zod.literal(null)]).nullable(),
   "createdAt": zod.coerce.date()
 })
 
@@ -440,6 +448,8 @@ export const LogQuestProgressResponse = zod.object({
   "xpReward": zod.number(),
   "frequency": zod.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'ONGOING']),
   "completed": zod.boolean(),
+  "completedAt": zod.coerce.date().nullable(),
+  "dataLink": zod.union([zod.literal('NET_WORTH'),zod.literal('MONTHLY_SAVINGS'),zod.literal('TOTAL_EXPENSES'),zod.literal(null)]).nullable(),
   "createdAt": zod.coerce.date()
 })
 
@@ -796,6 +806,8 @@ export const AdminGetUserResponse = zod.object({
   "xpReward": zod.number(),
   "frequency": zod.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'ONGOING']),
   "completed": zod.boolean(),
+  "completedAt": zod.coerce.date().nullable(),
+  "dataLink": zod.union([zod.literal('NET_WORTH'),zod.literal('MONTHLY_SAVINGS'),zod.literal('TOTAL_EXPENSES'),zod.literal(null)]).nullable(),
   "createdAt": zod.coerce.date()
 })),
   "skills": zod.array(zod.object({

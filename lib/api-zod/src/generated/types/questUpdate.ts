@@ -14,4 +14,6 @@ export interface QuestUpdate {
   currentAmount?: number;
   xpReward?: number;
   completed?: boolean;
+  /** @nullable */
+  completedAt?: Date | null;
 }

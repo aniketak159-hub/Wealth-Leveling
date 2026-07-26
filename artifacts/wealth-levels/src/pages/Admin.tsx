@@ -21,12 +21,12 @@ import {
   getAdminListUsersQueryKey,
 } from "@workspace/api-client-react";
 import type {
-  AdminBadgeResponse,
-  AdminMilestoneResponse,
+  AdminBadge,
+  AdminMilestone,
   AdminUser,
-  BadgeRarity,
-  BadgeTriggerType,
-  MilestoneCategory,
+  AdminBadgeRarity,
+  AdminBadgeTriggerType,
+  AdminMilestoneCategory,
 } from "@workspace/api-client-react";
 import { Link } from "wouter";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -45,14 +45,14 @@ import {
 const TABS = ["OVERVIEW", "PLAYERS", "QUEST DISPATCH", "BADGES", "MILESTONES"] as const;
 type Tab = typeof TABS[number];
 
-const RARITY_COLORS: Record<BadgeRarity, string> = {
+const RARITY_COLORS: Record<AdminBadgeRarity, string> = {
   COMMON: "text-muted-foreground border-muted-foreground/40 bg-muted/20",
   RARE: "text-blue-400 border-blue-400/40 bg-blue-400/10",
   EPIC: "text-purple-400 border-purple-400/40 bg-purple-400/10",
   LEGENDARY: "text-yellow-400 border-yellow-400/40 bg-yellow-400/10",
 };
 
-const TRIGGER_LABELS: Record<BadgeTriggerType, string> = {
+const TRIGGER_LABELS: Record<AdminBadgeTriggerType, string> = {
   QUEST_COUNT: "Quests Completed",
   SKILL_COUNT: "Skills Leveled",
   BUILD_COUNT: "Builds Created",
@@ -62,7 +62,7 @@ const TRIGGER_LABELS: Record<BadgeTriggerType, string> = {
   MANUAL: "Manual Award",
 };
 
-const MILESTONE_CATEGORY_COLORS: Record<MilestoneCategory, string> = {
+const MILESTONE_CATEGORY_COLORS: Record<AdminMilestoneCategory, string> = {
   QUEST: "text-primary border-primary/40",
   SKILL: "text-cyan-400 border-cyan-400/40",
   BUILD: "text-orange-400 border-orange-400/40",
@@ -630,8 +630,8 @@ function QuestDispatchTab() {
 
 // ─── Badges Tab ───────────────────────────────────────────────────────────────
 
-const BADGE_TRIGGER_TYPES: BadgeTriggerType[] = ["QUEST_COUNT", "SKILL_COUNT", "BUILD_COUNT", "NET_WORTH", "LEVEL", "DAYS_ACTIVE", "MANUAL"];
-const BADGE_RARITIES: BadgeRarity[] = ["COMMON", "RARE", "EPIC", "LEGENDARY"];
+const BADGE_TRIGGER_TYPES: AdminBadgeTriggerType[] = ["QUEST_COUNT", "SKILL_COUNT", "BUILD_COUNT", "NET_WORTH", "LEVEL", "DAYS_ACTIVE", "MANUAL"];
+const BADGE_RARITIES: AdminBadgeRarity[] = ["COMMON", "RARE", "EPIC", "LEGENDARY"];
 
 function BadgesTab() {
   const qc = useQueryClient();
@@ -640,13 +640,13 @@ function BadgesTab() {
   const updateBadge = useAdminUpdateBadge();
   const deleteBadge = useAdminDeleteBadge();
 
-  const emptyForm = { name: "", description: "", icon: "🏅", rarity: "COMMON" as BadgeRarity, triggerType: "MANUAL" as BadgeTriggerType, triggerValue: "0" };
+  const emptyForm = { name: "", description: "", icon: "🏅", rarity: "COMMON" as AdminBadgeRarity, triggerType: "MANUAL" as AdminBadgeTriggerType, triggerValue: "0" };
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [error, setError] = useState("");
 
-  function startEdit(b: AdminBadgeResponse) {
+  function startEdit(b: AdminBadge) {
     setEditingId(b.id);
     setForm({ name: b.name, description: b.description, icon: b.icon, rarity: b.rarity, triggerType: b.triggerType, triggerValue: String(b.triggerValue) });
   }
@@ -744,7 +744,7 @@ function BadgesTab() {
               </div>
               <div>
                 <label className="text-[10px] font-mono text-muted-foreground block mb-1">RARITY</label>
-                <select value={form.rarity} onChange={e => setForm(f => ({ ...f, rarity: e.target.value as BadgeRarity }))}
+                <select value={form.rarity} onChange={e => setForm(f => ({ ...f, rarity: e.target.value as AdminBadgeRarity }))}
                   className="w-full h-9 rounded border border-input bg-background px-2 text-sm font-mono">
                   {BADGE_RARITIES.map(r => <option key={r}>{r}</option>)}
                 </select>
@@ -754,7 +754,7 @@ function BadgesTab() {
           <div className="space-y-3">
             <div>
               <label className="text-[10px] font-mono text-muted-foreground block mb-1">TRIGGER TYPE</label>
-              <select value={form.triggerType} onChange={e => setForm(f => ({ ...f, triggerType: e.target.value as BadgeTriggerType }))}
+                <select value={form.triggerType} onChange={e => setForm(f => ({ ...f, triggerType: e.target.value as AdminBadgeTriggerType }))}
                 className="w-full h-9 rounded border border-input bg-background px-2 text-sm font-mono">
                 {BADGE_TRIGGER_TYPES.map(t => <option key={t} value={t}>{TRIGGER_LABELS[t]}</option>)}
               </select>
@@ -799,7 +799,7 @@ function BadgesTab() {
 
 // ─── Milestones Tab ───────────────────────────────────────────────────────────
 
-const MILESTONE_CATEGORIES: MilestoneCategory[] = ["QUEST", "SKILL", "BUILD", "WEALTH", "CHARACTER"];
+const MILESTONE_CATEGORIES: AdminMilestoneCategory[] = ["QUEST", "SKILL", "BUILD", "WEALTH", "CHARACTER"];
 
 function MilestonesTab() {
   const qc = useQueryClient();
@@ -808,13 +808,13 @@ function MilestonesTab() {
   const updateMilestone = useAdminUpdateMilestone();
   const deleteMilestone = useAdminDeleteMilestone();
 
-  const emptyForm = { name: "", description: "", icon: "🎯", category: "QUEST" as MilestoneCategory, threshold: "0", xpReward: "100" };
+  const emptyForm = { name: "", description: "", icon: "🎯", category: "QUEST" as AdminMilestoneCategory, threshold: "0", xpReward: "100" };
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [error, setError] = useState("");
 
-  function startEdit(m: AdminMilestoneResponse) {
+  function startEdit(m: AdminMilestone) {
     setEditingId(m.id);
     setForm({ name: m.name, description: m.description, icon: m.icon, category: m.category, threshold: String(m.threshold), xpReward: String(m.xpReward) });
   }
@@ -851,7 +851,7 @@ function MilestonesTab() {
   const grouped = MILESTONE_CATEGORIES.reduce((acc, cat) => {
     acc[cat] = milestones.filter(m => m.category === cat);
     return acc;
-  }, {} as Record<MilestoneCategory, AdminMilestoneResponse[]>);
+  }, {} as Record<AdminMilestoneCategory, AdminMilestone[]>);
 
   return (
     <div className="space-y-6">
@@ -946,7 +946,7 @@ function MilestonesTab() {
               </div>
               <div>
                 <label className="text-[10px] font-mono text-muted-foreground block mb-1">CATEGORY</label>
-                <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value as MilestoneCategory }))}
+                <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value as AdminMilestoneCategory }))}
                   className="w-full h-9 rounded border border-input bg-background px-2 text-sm font-mono">
                   {MILESTONE_CATEGORIES.map(c => <option key={c}>{c}</option>)}
                 </select>

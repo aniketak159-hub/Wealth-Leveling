@@ -1136,7 +1136,7 @@ components:
     # ─── Quests ────────────────────────────────────────────────────────────────
     Quest:
       type: object
-      required: [id, userId, title, category, targetAmount, currentAmount, xpReward, frequency, completed, createdAt]
+      required: [id, userId, title, category, targetAmount, currentAmount, xpReward, frequency, completed, completedAt, dataLink, createdAt]
       properties:
         id:            { type: integer }
         userId:        { type: integer }
@@ -1148,6 +1148,8 @@ components:
         xpReward:      { type: integer }
         frequency:     { type: string, enum: [DAILY, WEEKLY, MONTHLY, ONGOING] }
         completed:     { type: boolean }
+        completedAt:   { type: ["string", "null"], format: date-time }
+        dataLink:      { type: ["string", "null"], enum: [NET_WORTH, MONTHLY_SAVINGS, TOTAL_EXPENSES, null] }
         createdAt:     { type: string, format: date-time }
 
     QuestInput:
@@ -1160,6 +1162,7 @@ components:
         targetAmount: { type: number }
         xpReward:     { type: integer }
         frequency:    { type: string, enum: [DAILY, WEEKLY, MONTHLY, ONGOING] }
+        dataLink:     { type: string, enum: [NET_WORTH, MONTHLY_SAVINGS, TOTAL_EXPENSES] }
 
     QuestUpdate:
       type: object
@@ -1170,6 +1173,7 @@ components:
         currentAmount: { type: number }
         xpReward:      { type: integer }
         completed:     { type: boolean }
+        completedAt:   { type: ["string", "null"], format: date-time }
 
     QuestProgressInput:
       type: object

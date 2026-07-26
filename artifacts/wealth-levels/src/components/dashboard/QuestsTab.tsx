@@ -94,7 +94,7 @@ function CreateQuestDialog({ open, onOpenChange }: CreateQuestDialogProps) {
     if (!title.trim()) return;
 
     const targetNum = targetAmount ? parseFloat(targetAmount) : undefined;
-    const link = dataLink === "none" ? null : (dataLink as QuestDataLink);
+    const link = dataLink === "none" ? undefined : (dataLink as QuestDataLink);
 
     await createMutation.mutateAsync({
       data: {
@@ -104,7 +104,7 @@ function CreateQuestDialog({ open, onOpenChange }: CreateQuestDialogProps) {
         frequency: frequency as any,
         xpReward: parseInt(xpReward) || 100,
         targetAmount: targetNum,
-        dataLink: link,
+        ...(link ? { dataLink: link } : {}),
       },
     });
 

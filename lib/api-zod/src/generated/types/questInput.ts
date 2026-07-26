@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { QuestInputCategory } from './questInputCategory';
+import type { QuestInputDataLink } from './questInputDataLink';
 import type { QuestInputFrequency } from './questInputFrequency';
 
 export interface QuestInput {
@@ -16,4 +17,5 @@ export interface QuestInput {
   targetAmount?: number;
   xpReward: number;
   frequency: QuestInputFrequency;
+  dataLink?: QuestInputDataLink;
 }

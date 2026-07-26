@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { QuestCategory } from './questCategory';
+import type { QuestDataLink } from './questDataLink';
 import type { QuestFrequency } from './questFrequency';
 
 export interface Quest {
@@ -21,5 +22,9 @@ export interface Quest {
   xpReward: number;
   frequency: QuestFrequency;
   completed: boolean;
+  /** @nullable */
+  completedAt: Date | null;
+  /** @nullable */
+  dataLink: QuestDataLink;
   createdAt: Date;
 }
