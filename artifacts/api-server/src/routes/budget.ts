@@ -98,7 +98,12 @@ const CreateTxBody = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
 });
 
-const UpdateTxBody = CreateTxBody.partial();
+const UpdateTxBody = CreateTxBody.partial().refine(
+  (d) => Object.values(d).some((v) => v !== undefined),
+  { message: "At least one field must be provided" }
+);
+
+const TxIdParams = z.object({ id: z.coerce.number().int().positive() });
 
 // ── GET /api/budget/transactions ──────────────────────────────────────────────
 // Optional query: ?month=YYYY-MM  filters to that calendar month
@@ -163,8 +168,9 @@ router.post("/budget/transactions", requireAuth, async (req, res): Promise<void>
 // ── PATCH /api/budget/transactions/:id ────────────────────────────────────────
 router.patch("/budget/transactions/:id", requireAuth, async (req, res): Promise<void> => {
   const user = (req as any).dbUser;
-  const txId = parseInt(req.params.id as string, 10);
-  if (isNaN(txId)) { res.status(400).json({ error: "Invalid id" }); return; }
+  const idParsed = TxIdParams.safeParse(req.params);
+  if (!idParsed.success) { res.status(400).json({ error: idParsed.error.message }); return; }
+  const txId = idParsed.data.id;
 
   const parsed = UpdateTxBody.safeParse(req.body);
   if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
@@ -197,8 +203,9 @@ router.patch("/budget/transactions/:id", requireAuth, async (req, res): Promise<
 // ── DELETE /api/budget/transactions/:id ───────────────────────────────────────
 router.delete("/budget/transactions/:id", requireAuth, async (req, res): Promise<void> => {
   const user = (req as any).dbUser;
-  const txId = parseInt(req.params.id as string, 10);
-  if (isNaN(txId)) { res.status(400).json({ error: "Invalid id" }); return; }
+  const idParsed = TxIdParams.safeParse(req.params);
+  if (!idParsed.success) { res.status(400).json({ error: idParsed.error.message }); return; }
+  const txId = idParsed.data.id;
 
   const { budget } = await getOrCreateBudget(user.id);
 

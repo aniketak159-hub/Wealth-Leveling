@@ -1,4 +1,4 @@
-import express, { type Express } from "express";
+import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import pinoHttp from "pino-http";
@@ -57,5 +57,23 @@ app.use(
 );
 
 app.use("/api", router);
+
+// ── 404 handler ───────────────────────────────────────────────────────────────
+app.use((_req: Request, res: Response) => {
+  res.status(404).json({ error: "Not found" });
+});
+
+// ── Global error handler ──────────────────────────────────────────────────────
+// Catches any error thrown (or passed to next()) inside async route handlers.
+// Returns a clean JSON 500 instead of leaking a raw stack trace.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  logger.error({ err }, "Unhandled route error");
+  const message =
+    process.env.NODE_ENV === "development" && err instanceof Error
+      ? err.message
+      : "Internal server error";
+  res.status(500).json({ error: message });
+});
 
 export default app;
