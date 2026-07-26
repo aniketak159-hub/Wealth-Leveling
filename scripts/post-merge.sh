@@ -3,9 +3,8 @@ set -e
 pnpm install --frozen-lockfile
 pnpm --filter db push
 
-# Seed the test user (jagruthi1221@gmail.com) into the database.
-# This is idempotent — safe to run on every setup. All data lives in
-# scripts/seed-test-user/data.json and is restored via UPSERT so nothing
-# is overwritten if the user already exists with up-to-date data.
-echo "Seeding test user..."
-node scripts/seed-test-user/restore.mjs
+# Do not seed demo or test-user data here.
+# A fresh import should start with an empty vault. The optional snapshot can
+# still be restored manually with scripts/seed-test-user/restore.mjs when a
+# development fixture is needed.
+echo "Database schema ready; starting with an empty vault."

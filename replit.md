@@ -36,28 +36,21 @@ cd lib/db && pnpm run push
 
 Tables: `users`, `dashboards`, `quests`, `skills`, `builds`, `budgets`, `wealth`
 
-## Test user
+## Fresh database behavior
 
-Email: `jagruthi1221@gmail.com`
+Fresh imports start with an empty vault. The post-merge setup only installs
+dependencies and applies the database schema; it does not restore demo or
+test-user data.
 
-A pre-seeded test account is committed to the repo. Its full data (dashboard, quests, skills, builds, budget, wealth) lives in `scripts/seed-test-user/data.json` and is automatically restored into the database on every setup via `scripts/post-merge.sh`.
-
-### If the Clerk user is deleted and re-created
-
-1. Sign in with `jagruthi1221@gmail.com` — Clerk will assign a new ID.
-2. Find the new Clerk ID: open the browser console and run `fetch('/api/me').then(r=>r.json()).then(d=>console.log(d.clerkId))`, or check the Replit Auth pane.
-3. Run: `node scripts/seed-test-user/restore.mjs <new-clerk-id>`
-4. Update the snapshot so future restores use the new ID: `node scripts/seed-test-user/export.mjs`
-5. Commit `scripts/seed-test-user/data.json`.
-
-### Keeping the snapshot current
-
-Whenever you add quests, skills, or other progress you want preserved, run:
+An optional development snapshot remains available if you explicitly want
+fixture data:
 
 ```bash
-node scripts/seed-test-user/export.mjs
+node scripts/seed-test-user/restore.mjs <clerk-user-id>
 ```
 
-Then commit `scripts/seed-test-user/data.json`.
+Do not commit Clerk keys or other credentials. Replit-managed Clerk provisions
+`CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY`, and
+`VITE_CLERK_PUBLISHABLE_KEY` automatically for the Repl.
 
 ## User preferences
