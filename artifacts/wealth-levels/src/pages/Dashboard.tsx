@@ -83,7 +83,8 @@ export default function DashboardPage() {
   };
 
   const rankClass = dashboard.rank ? rankColorMap[dashboard.rank] : 'rank-e';
-  const xpPercent = (dashboard.xp / dashboard.xpToNext) * 100;
+  // Guard divide-by-zero when xpToNext is 0 (shouldn't happen but safe)
+  const xpPercent = dashboard.xpToNext > 0 ? (dashboard.xp / dashboard.xpToNext) * 100 : 0;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -116,7 +117,7 @@ export default function DashboardPage() {
               {/* Net worth — hidden on xs, shown sm+ */}
               <div className="hidden sm:block text-right mr-2">
                 <div className="text-[10px] font-mono text-muted-foreground tracking-widest">NET WORTH</div>
-                <div className="text-base font-mono text-primary hud-glow">₹{dashboard.netWorth.toLocaleString('en-IN')}</div>
+                <div className="text-base font-mono text-primary hud-glow">₹{(dashboard.netWorth ?? 0).toLocaleString('en-IN')}</div>
               </div>
               <div className="flex gap-1.5 border-l border-primary/30 pl-3">
                 <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setLocation("/profile")} title="My Profile">
@@ -146,7 +147,7 @@ export default function DashboardPage() {
             {/* Net worth inline on xs only */}
             <div className="sm:hidden text-right shrink-0">
               <div className="text-[10px] font-mono text-muted-foreground">NET WORTH</div>
-              <div className="text-sm font-mono text-primary hud-glow">₹{dashboard.netWorth.toLocaleString('en-IN')}</div>
+              <div className="text-sm font-mono text-primary hud-glow">₹{(dashboard.netWorth ?? 0).toLocaleString('en-IN')}</div>
             </div>
           </div>
         </div>

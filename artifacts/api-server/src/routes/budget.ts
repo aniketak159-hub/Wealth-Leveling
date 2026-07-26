@@ -4,6 +4,7 @@ import { eq, and, gte, lte, desc } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { GetBudgetResponse, UpdateBudgetBody, UpdateBudgetResponse } from "@workspace/api-zod";
 import { z } from "zod";
+import { safeFloat } from "../lib/numbers";
 
 const router: IRouter = Router();
 
@@ -21,12 +22,12 @@ function budgetToResponse(budget: typeof budgetsTable.$inferSelect, items: typeo
   return {
     id: budget.id,
     userId: budget.userId,
-    monthlyIncome: parseFloat(budget.monthlyIncome as string),
+    monthlyIncome: safeFloat(budget.monthlyIncome),
     items: items.map(i => ({
       id: i.id,
       label: i.label,
-      planned: parseFloat(i.planned as string),
-      actual: parseFloat(i.actual as string),
+      planned: safeFloat(i.planned),
+      actual: safeFloat(i.actual),
     })),
     updatedAt: budget.updatedAt.toISOString(),
   };
@@ -39,7 +40,7 @@ function txToResponse(tx: typeof transactionsTable.$inferSelect) {
     type: tx.type,
     category: tx.category,
     description: tx.description,
-    amount: parseFloat(tx.amount as string),
+    amount: safeFloat(tx.amount),
     date: tx.date,
     createdAt: tx.createdAt.toISOString(),
   };
@@ -244,7 +245,7 @@ router.get("/budget/analytics", requireAuth, async (req, res): Promise<void> => 
   for (const tx of rows) {
     const key = tx.date.slice(0, 7);
     if (!byMonth[key]) continue;
-    const amount = parseFloat(tx.amount as string);
+    const amount = safeFloat(tx.amount);
     if (tx.type === "income") byMonth[key].income += amount;
     else byMonth[key].expense += amount;
     byMonth[key].txCount++;
@@ -281,11 +282,11 @@ router.post("/budget/sync-wealth", requireAuth, async (req, res): Promise<void> 
   const allTx = await db.select().from(transactionsTable).where(eq(transactionsTable.budgetId, budget.id));
   let totalIncome = 0, totalExpense = 0;
   for (const tx of allTx) {
-    const amount = parseFloat(tx.amount as string);
+    const amount = safeFloat(tx.amount);
     if (tx.type === "income") totalIncome += amount;
     else totalExpense += amount;
   }
-  const surplus = parseFloat((totalIncome - totalExpense).toFixed(2));
+  const surplus = safeFloat((totalIncome - totalExpense).toFixed(2));
 
   // Get or create wealth record
   let [wealth] = await db.select().from(wealthTable).where(eq(wealthTable.userId, user.id));
@@ -310,7 +311,7 @@ router.post("/budget/sync-wealth", requireAuth, async (req, res): Promise<void> 
 
   // Recompute total net worth from all assets
   const updatedAssets = await db.select().from(wealthAssetsTable).where(eq(wealthAssetsTable.wealthId, wealth.id));
-  const newNetWorth = updatedAssets.reduce((s, a) => s + parseFloat(a.amount as string), 0);
+  const newNetWorth = updatedAssets.reduce((s, a) => s + safeFloat(a.amount), 0);
   const [updatedWealth] = await db
     .update(wealthTable)
     .set({ netWorth: String(newNetWorth) })
@@ -324,7 +325,7 @@ router.post("/budget/sync-wealth", requireAuth, async (req, res): Promise<void> 
 
   // Compute budget adherence for PER stat context (returned but not auto-applied)
   const items = await db.select().from(budgetItemsTable).where(eq(budgetItemsTable.budgetId, budget.id));
-  const totalPlanned = items.reduce((s, i) => s + parseFloat(i.planned as string), 0);
+  const totalPlanned = items.reduce((s, i) => s + safeFloat(i.planned), 0);
 
   // Current month actual expense
   const now = new Date().toISOString().slice(0, 7);
@@ -332,12 +333,12 @@ router.post("/budget/sync-wealth", requireAuth, async (req, res): Promise<void> 
   const monthEnd   = `${now}-31`;
   const monthTx = await db.select().from(transactionsTable)
     .where(and(eq(transactionsTable.budgetId, budget.id), gte(transactionsTable.date, monthStart), lte(transactionsTable.date, monthEnd)));
-  const monthExpense = monthTx.filter(t => t.type === "expense").reduce((s, t) => s + parseFloat(t.amount as string), 0);
+  const monthExpense = monthTx.filter(t => t.type === "expense").reduce((s, t) => s + safeFloat(t.amount), 0);
   const budgetAdherence = totalPlanned > 0 ? Math.min(100, Math.round((1 - Math.max(0, monthExpense - totalPlanned) / totalPlanned) * 100)) : 100;
 
   res.json({
     synced: surplus,
-    newNetWorth: parseFloat(updatedWealth.netWorth as string),
+    newNetWorth: safeFloat(updatedWealth.netWorth),
     assetId,
     budgetAdherence,
     totalIncome,

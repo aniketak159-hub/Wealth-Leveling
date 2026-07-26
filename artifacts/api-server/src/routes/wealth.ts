@@ -3,6 +3,7 @@ import { db, wealthTable, wealthAssetsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { GetWealthResponse, UpdateWealthBody, UpdateWealthResponse } from "@workspace/api-zod";
+import { safeFloat } from "../lib/numbers";
 
 const router: IRouter = Router();
 
@@ -19,11 +20,11 @@ function wealthToResponse(wealth: typeof wealthTable.$inferSelect, assets: typeo
   return {
     id: wealth.id,
     userId: wealth.userId,
-    netWorth: parseFloat(wealth.netWorth as string),
+    netWorth: safeFloat(wealth.netWorth),
     assets: assets.map(a => ({
       id: a.id,
       label: a.label,
-      amount: parseFloat(a.amount as string),
+      amount: safeFloat(a.amount),
       category: a.category as "STOCKS" | "MUTUAL_FUNDS" | "REAL_ESTATE" | "CASH" | "CRYPTO" | "OTHER",
     })),
     updatedAt: wealth.updatedAt.toISOString(),

@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db, dashboardsTable, questsTable, skillsTable, buildsTable } from "@workspace/db";
 import { eq, count, avg } from "drizzle-orm";
+import { safeFloat } from "../lib/numbers";
 import { requireAuth } from "../middlewares/auth";
 import {
   GetDashboardResponse,
@@ -55,8 +56,8 @@ function dashToResponse(d: typeof dashboardsTable.$inferSelect) {
     rank: d.rank,
     xp: d.xp,
     xpToNext: d.xpToNext,
-    netWorth: parseFloat(d.netWorth as string),
-    totalAssets: parseFloat(d.totalAssets as string),
+    netWorth: safeFloat(d.netWorth),
+    totalAssets: safeFloat(d.totalAssets),
     stats: {
       str: d.statStr,
       vit: d.statVit,
@@ -102,7 +103,7 @@ router.get("/dashboard/summary", requireAuth, async (req, res): Promise<void> =>
   res.json(GetDashboardSummaryResponse.parse({
     level: dash.level,
     rank: dash.rank,
-    netWorth: parseFloat(dash.netWorth as string),
+    netWorth: safeFloat(dash.netWorth),
     xp: dash.xp,
     xpToNext: dash.xpToNext,
     questCompletionRate: completionRate,

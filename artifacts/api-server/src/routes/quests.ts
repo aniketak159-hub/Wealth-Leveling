@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { db, questsTable, wealthTable, budgetsTable, budgetItemsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
+import { safeFloat } from "../lib/numbers";
 import {
   ListQuestsResponse,
   CreateQuestBody,
@@ -26,8 +27,8 @@ function questToResponse(q: typeof questsTable.$inferSelect, liveAmount?: number
     title: q.title,
     description: q.description ?? null,
     category: q.category as "SYSTEM" | "SELF",
-    targetAmount: q.targetAmount ? parseFloat(q.targetAmount as string) : null,
-    currentAmount: liveAmount !== undefined ? liveAmount : parseFloat(q.currentAmount as string),
+    targetAmount: q.targetAmount != null ? safeFloat(q.targetAmount) : null,
+    currentAmount: liveAmount !== undefined ? liveAmount : safeFloat(q.currentAmount),
     xpReward: q.xpReward,
     frequency: q.frequency as "DAILY" | "WEEKLY" | "MONTHLY" | "ONGOING",
     completed: q.completed,
@@ -41,17 +42,17 @@ function questToResponse(q: typeof questsTable.$inferSelect, liveAmount?: number
 async function getLiveAmount(userId: number, dataLink: string): Promise<number> {
   if (dataLink === "NET_WORTH") {
     const [row] = await db.select().from(wealthTable).where(eq(wealthTable.userId, userId));
-    return row ? parseFloat(row.netWorth as string) : 0;
+    return row ? safeFloat(row.netWorth) : 0;
   }
 
   if (dataLink === "MONTHLY_SAVINGS" || dataLink === "TOTAL_EXPENSES") {
     const [budget] = await db.select().from(budgetsTable).where(eq(budgetsTable.userId, userId));
     if (!budget) return 0;
     const items = await db.select().from(budgetItemsTable).where(eq(budgetItemsTable.budgetId, budget.id));
-    const totalExpenses = items.reduce((sum, item) => sum + parseFloat(item.actual as string), 0);
+    const totalExpenses = items.reduce((sum, item) => sum + safeFloat(item.actual), 0);
     if (dataLink === "TOTAL_EXPENSES") return totalExpenses;
     // MONTHLY_SAVINGS = income - expenses
-    const income = parseFloat(budget.monthlyIncome as string);
+    const income = safeFloat(budget.monthlyIncome);
     return Math.max(0, income - totalExpenses);
   }
 
@@ -192,8 +193,8 @@ router.post("/quests/:id/progress", requireAuth, async (req, res): Promise<void>
     return;
   }
 
-  const newAmount = parseFloat(existing.currentAmount as string) + parsed.data.amount;
-  const targetAmount = existing.targetAmount ? parseFloat(existing.targetAmount as string) : null;
+  const newAmount = safeFloat(existing.currentAmount) + parsed.data.amount;
+  const targetAmount = existing.targetAmount != null ? safeFloat(existing.targetAmount) : null;
   const nowCompleted = targetAmount !== null && newAmount >= targetAmount;
 
   const setValues: Record<string, unknown> = {
