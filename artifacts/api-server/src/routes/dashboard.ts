@@ -170,7 +170,9 @@ router.post("/dashboard/evaluation", requireAuth, async (req, res): Promise<void
   const newTitle = calcTitle(newLevel);
 
   // Calculate stat bonuses from evaluation
-  const statBonus = Math.floor(xpGained / 100);
+  // Grant 3 unspent points per level gained, minimum 1 per evaluation
+  const levelsGained = newLevel - dash.level;
+  const statBonus = levelsGained > 0 ? levelsGained * 3 : Math.max(1, Math.floor(xpGained / 100));
 
   const newNetWorth = data.netWorth;
   let logEntries = dash.systemLog;

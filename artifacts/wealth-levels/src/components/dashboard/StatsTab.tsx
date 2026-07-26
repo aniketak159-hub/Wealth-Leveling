@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { Dashboard } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Dashboard, getGetDashboardQueryKey } from "@workspace/api-client-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Shield, Plus } from "lucide-react";
 import { useUpdateStats } from "@workspace/api-client-react";
 
 export default function StatsTab({ dashboard }: { dashboard: Dashboard }) {
+  const queryClient = useQueryClient();
   const updateStats = useUpdateStats();
   const [allocations, setAllocations] = useState({
     str: 0, vit: 0, int: 0, agi: 0, per: 0, luk: 0
@@ -29,6 +31,7 @@ export default function StatsTab({ dashboard }: { dashboard: Dashboard }) {
     updateStats.mutate({ data: allocations }, {
       onSuccess: () => {
         setAllocations({ str: 0, vit: 0, int: 0, agi: 0, per: 0, luk: 0 });
+        queryClient.invalidateQueries({ queryKey: getGetDashboardQueryKey() });
       }
     });
   };

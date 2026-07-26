@@ -3,7 +3,7 @@
     "email": "jagruthi1221@gmail.com",
     "displayName": "jagruthi1221",
     "originalClerkId": "user_3GziYah19nbfrGP6mVGh242CTHc",
-    "exportedAt": "2026-07-25T12:33:58.844Z",
+    "exportedAt": "2026-07-26T06:21:33.142Z",
     "note": "If the Clerk user is deleted and re-created, run restore.mjs with the new Clerk ID. The new Clerk ID appears in the Replit Auth pane or in the /api/me response after signing in."
   },
   "user": {
@@ -18,31 +18,46 @@
   "dashboard": {
     "display_name": "jagruthi1221",
     "title": "Novice Wealth Hunter",
-    "level": 1,
+    "level": 3,
     "rank": "E",
-    "xp": 2,
-    "xp_to_next": 100,
-    "net_worth": "0.00",
-    "total_assets": "0.00",
+    "xp": 826,
+    "xp_to_next": 900,
+    "net_worth": "1000.00",
+    "total_assets": "1000.00",
     "stat_str": 10,
     "stat_vit": 10,
     "stat_int": 10,
     "stat_agi": 10,
     "stat_per": 10,
     "stat_luk": 10,
-    "unspent_points": 0,
-    "streak_days": 1,
-    "longest_streak": 1,
-    "last_activity_date": "2026-07-25",
+    "unspent_points": 6,
+    "streak_days": 2,
+    "longest_streak": 2,
+    "last_activity_date": "2026-07-26",
     "streak_shields": 0,
     "shields_used_total": 0,
-    "system_log": "The System has been installed.\nWelcome, Player.\nDay 1 streak started. The journey begins."
+    "system_log": "The System has been installed.\nWelcome, Player.\nDay 1 streak started. The journey begins.\nDay 2 streak maintained. +2 XP bonus.\nLevel up! Now Level 3.\nMonthly evaluation complete. +473 XP earned.\nMonthly evaluation complete. +349 XP earned."
   },
   "budget": {
-    "monthly_income": "0.00"
+    "monthly_income": "25000.00"
   },
   "budget_items": [],
-  "transactions": [],
+  "transactions": [
+    {
+      "type": "income",
+      "category": "Salary",
+      "description": "June 2026",
+      "amount": "25000.00",
+      "date": "2026-07-26"
+    },
+    {
+      "type": "expense",
+      "category": "Travrl",
+      "description": "Home to office",
+      "amount": "256.00",
+      "date": "2026-07-26"
+    }
+  ],
   "quests": [
     {
       "title": "Build a ₹1L Emergency Fund",
@@ -54,18 +69,6 @@
       "frequency": "ONGOING",
       "completed": false,
       "data_link": "NET_WORTH",
-      "completed_at": null
-    },
-    {
-      "title": "Save ₹5,000 This Month",
-      "description": "Put away a fixed amount before spending anything else. Pay yourself first.",
-      "category": "SELF",
-      "target_amount": "5000.00",
-      "current_amount": "2500.00",
-      "xp_reward": 150,
-      "frequency": "MONTHLY",
-      "completed": false,
-      "data_link": "MONTHLY_SAVINGS",
       "completed_at": null
     },
     {
@@ -139,12 +142,37 @@
       "completed": true,
       "data_link": null,
       "completed_at": "2026-07-15T12:33:01.372Z"
+    },
+    {
+      "title": "Save ₹5,000 This Month",
+      "description": "Put away a fixed amount before spending anything else. Pay yourself first.",
+      "category": "SELF",
+      "target_amount": "5000.00",
+      "current_amount": "2500.00",
+      "xp_reward": 150,
+      "frequency": "MONTHLY",
+      "completed": true,
+      "data_link": "MONTHLY_SAVINGS",
+      "completed_at": "2026-07-26T06:17:42.377Z"
     }
   ],
   "skills": [],
-  "skill_tree_unlocks": [],
+  "skill_tree_unlocks": [
+    {
+      "tree_skill_id": "inv-t1-01"
+    },
+    {
+      "tree_skill_id": "kno-t1-01"
+    },
+    {
+      "tree_skill_id": "kno-t1-02"
+    },
+    {
+      "tree_skill_id": "inv-t1-02"
+    }
+  ],
   "builds": [],
   "wealth": {
-    "net_worth": "0.00"
+    "net_worth": "24744.00"
   }
 }
