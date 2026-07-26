@@ -43,10 +43,22 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     if (!user) {
       // New user — fetch real name from Clerk
       const displayName = await resolveDisplayName(clerkId);
-      [user] = await db
+      const [insertedUser] = await db
         .insert(usersTable)
         .values({ clerkId, displayName })
+        .onConflictDoNothing({ target: usersTable.clerkId })
         .returning();
+      user = insertedUser;
+
+      // Multiple protected requests can arrive together on the first page
+      // load. If another request provisioned this Clerk identity first,
+      // re-read that row instead of surfacing a transient 503.
+      if (!user) {
+        [user] = await db
+          .select()
+          .from(usersTable)
+          .where(eq(usersTable.clerkId, clerkId));
+      }
     } else if (user.displayName === "Hunter" || user.displayName === "Player") {
       // Existing user with a placeholder name — backfill from Clerk
       const displayName = await resolveDisplayName(clerkId);
