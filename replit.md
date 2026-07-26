@@ -1,64 +1,52 @@
 # Wealth Leveling
 
-A gamified personal finance web app. Track your net worth like a power level — complete savings quests, allocate stats, and rise through the ranks from E-Tier Novice to S-Rank Titan.
+A gamified personal finance web app inspired by *Solo Leveling*. Track net worth like a power level — complete savings quests, allocate stat points, defeat debt dungeons, and rise through Hunter Ranks (E → S).
 
 ## Stack
 
-- **Frontend**: React + Vite + Tailwind v4 + shadcn/ui (`artifacts/wealth-levels`)
-- **Backend**: Express.js (`artifacts/api-server`)
-- **Database**: PostgreSQL via Drizzle ORM (`lib/db`)
-- **Auth**: Replit-managed Clerk (`@clerk/react` / `@clerk/express`)
-- **Monorepo**: pnpm workspaces
+- **Frontend**: React + Vite + Tailwind v4 + Wouter + TanStack Query (`artifacts/wealth-levels`)
+- **API Server**: Express + Clerk Auth + Drizzle ORM (`artifacts/api-server`)
+- **Database**: Replit PostgreSQL (Drizzle schema in `lib/db`)
+- **Auth**: Replit-managed Clerk (keys auto-provisioned, `pk_test` in dev is expected)
+- **Shared libs**: `lib/api-client-react` (generated OpenAPI client), `lib/api-zod` (Zod schemas), `lib/api-spec` (OpenAPI spec + codegen)
 
-## How to run
+## Running
 
-All three workflows are configured and start automatically:
+Three workflows run in parallel (managed by Replit):
 
-| Workflow | Command | Preview |
-|---|---|---|
-| `artifacts/wealth-levels: web` | `pnpm --filter @workspace/wealth-levels run dev` | `/` |
-| `artifacts/api-server: API Server` | `pnpm --filter @workspace/api-server run dev` | `/api` |
-| `artifacts/mockup-sandbox: Component Preview Server` | `pnpm --filter @workspace/mockup-sandbox run dev` | `/__mockup` |
+| Workflow | Command |
+|---|---|
+| Frontend | `pnpm --filter @workspace/wealth-levels run dev` |
+| API Server | `PORT=8080 pnpm --filter @workspace/api-server run dev` |
+| Mockup Sandbox | `pnpm --filter @workspace/mockup-sandbox run dev` |
 
-On a fresh checkout, shared library declarations are built before the
-dependent API and frontend checks run. This is also performed by the
-post-merge setup:
+## Database
 
-```bash
-pnpm run build:libs
-```
-
-## Environment
-
-The following are auto-managed by Replit — do not set manually:
-- `DATABASE_URL`, `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`
-- `CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY`, `VITE_CLERK_PUBLISHABLE_KEY`
-
-## Database schema
-
-Schema lives in `lib/db/src/schema/`. To push schema changes to the dev database:
+Schema is already pushed. To re-push after schema changes:
 
 ```bash
 cd lib/db && pnpm run push
 ```
 
-Tables: `users`, `dashboards`, `quests`, `skills`, `builds`, `budgets`, `wealth`
-
-## Fresh database behavior
-
-Fresh imports start with an empty vault. The post-merge setup only installs
-dependencies and applies the database schema; it does not restore demo or
-test-user data.
-
-An optional development snapshot remains available if you explicitly want
-fixture data:
+## Codegen (after OpenAPI spec changes)
 
 ```bash
-node scripts/seed-test-user/restore.mjs <clerk-user-id>
+pnpm run --filter @workspace/api-spec codegen
 ```
 
-Do not commit Clerk keys or other credentials. Replit-managed Clerk provisions
-`CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY`, and
-`VITE_CLERK_PUBLISHABLE_KEY` automatically for the Repl.
+## Type Check
 
-## User preferences
+```bash
+pnpm run typecheck        # all packages
+pnpm run typecheck:libs   # shared libraries only
+```
+
+## Auth Notes
+
+- Clerk keys are stored in Replit Secrets (`CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `VITE_CLERK_PUBLISHABLE_KEY`)
+- Dev and production Clerk environments are separate user stores — accounts don't cross over
+- The `pk_test` key in dev is expected and normal
+
+## User Preferences
+
+<!-- Add user preferences here -->
