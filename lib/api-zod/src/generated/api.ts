@@ -567,6 +567,7 @@ export const ListBuildsResponseItem = zod.object({
   "name": zod.string(),
   "description": zod.string(),
   "rank": zod.enum(['S', 'A', 'B', 'C', 'D', 'E']),
+  "status": zod.enum(['ACTIVE', 'ON_HOLD', 'CLEARED']),
   "revenue": zod.number(),
   "expenses": zod.number(),
   "netProfit": zod.number().optional(),
@@ -585,6 +586,7 @@ export const CreateBuildBody = zod.object({
   "name": zod.string().min(1),
   "description": zod.string(),
   "rank": zod.enum(['S', 'A', 'B', 'C', 'D', 'E']).optional(),
+  "status": zod.enum(['ACTIVE', 'ON_HOLD', 'CLEARED']).optional(),
   "revenue": zod.number().optional(),
   "expenses": zod.number().optional()
 })
@@ -595,6 +597,7 @@ export const CreateBuildResponse = zod.object({
   "name": zod.string(),
   "description": zod.string(),
   "rank": zod.enum(['S', 'A', 'B', 'C', 'D', 'E']),
+  "status": zod.enum(['ACTIVE', 'ON_HOLD', 'CLEARED']),
   "revenue": zod.number(),
   "expenses": zod.number(),
   "netProfit": zod.number().optional(),
@@ -616,6 +619,7 @@ export const UpdateBuildBody = zod.object({
   "name": zod.string().min(1).optional(),
   "description": zod.string().optional(),
   "rank": zod.enum(['S', 'A', 'B', 'C', 'D', 'E']).optional(),
+  "status": zod.enum(['ACTIVE', 'ON_HOLD', 'CLEARED']).optional(),
   "revenue": zod.number().optional(),
   "expenses": zod.number().optional()
 })
@@ -626,6 +630,7 @@ export const UpdateBuildResponse = zod.object({
   "name": zod.string(),
   "description": zod.string(),
   "rank": zod.enum(['S', 'A', 'B', 'C', 'D', 'E']),
+  "status": zod.enum(['ACTIVE', 'ON_HOLD', 'CLEARED']),
   "revenue": zod.number(),
   "expenses": zod.number(),
   "netProfit": zod.number().optional(),

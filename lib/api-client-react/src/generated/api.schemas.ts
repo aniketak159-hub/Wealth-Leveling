@@ -284,12 +284,21 @@ export const BuildRank = {
   E: 'E',
 } as const;
 
+export type BuildStatus = typeof BuildStatus[keyof typeof BuildStatus];
+
+export const BuildStatus = {
+  ACTIVE: 'ACTIVE',
+  ON_HOLD: 'ON_HOLD',
+  CLEARED: 'CLEARED',
+} as const;
+
 export interface Build {
   id: number;
   userId: number;
   name: string;
   description: string;
   rank: BuildRank;
+  status: BuildStatus;
   revenue: number;
   expenses: number;
   netProfit?: number;
@@ -313,6 +322,7 @@ export interface BuildInput {
   name: string;
   description: string;
   rank?: BuildInputRank;
+  status?: BuildStatus;
   revenue?: number;
   expenses?: number;
 }
@@ -334,6 +344,7 @@ export interface BuildUpdate {
   name?: string;
   description?: string;
   rank?: BuildUpdateRank;
+  status?: BuildStatus;
   revenue?: number;
   expenses?: number;
 }

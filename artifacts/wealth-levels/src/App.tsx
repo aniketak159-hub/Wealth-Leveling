@@ -19,6 +19,8 @@ import SecurityPage from "@/pages/Security";
 import NotFound from "@/pages/not-found";
 import PinLoginFlow from "@/components/PinLoginFlow";
 import PinSetupModal from "@/components/PinSetupModal";
+import PinGate from "@/components/PinGate";
+import { PinRecheckProvider, usePinRecheck } from "@/contexts/PinRecheckContext";
 
 const clerkPubKey = publishableKeyFromHost(
   window.location.hostname,
@@ -34,8 +36,55 @@ function stripBase(path: string): string {
     : path;
 }
 
-if (!clerkPubKey) {
-  throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY in .env file');
+function ClerkSetupRequired() {
+  return (
+    <div className="min-h-[100dvh] bg-[#080d1a] flex items-center justify-center p-6 hud-grid-bg">
+      <div className="max-w-lg w-full border border-[#00c8ff]/30 bg-[#080d1a] shadow-[0_0_30px_rgba(0,200,255,0.15)] p-8 relative">
+        {/* Corner accents */}
+        <span className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-[#00c8ff]" />
+        <span className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-[#00c8ff]" />
+        <span className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-[#00c8ff]" />
+        <span className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-[#00c8ff]" />
+
+        <p className="text-[#00c8ff]/50 font-['Share_Tech_Mono'] text-xs tracking-[0.3em] mb-6">
+          SYSTEM // INITIALIZATION REQUIRED
+        </p>
+
+        <h1 className="font-['Orbitron'] text-[#00c8ff] text-xl tracking-widest uppercase mb-2 drop-shadow-[0_0_8px_rgba(0,200,255,0.5)]">
+          Auth Not Configured
+        </h1>
+        <p className="text-[#66a3cc] font-['Share_Tech_Mono'] text-sm mb-8 leading-relaxed">
+          This project needs Replit-managed Clerk authentication to run.
+          Keys are provisioned automatically — no external account required.
+        </p>
+
+        <div className="space-y-3 mb-8">
+          {[
+            { step: "01", text: 'Open the Auth pane in the Replit toolbar (top of the page)' },
+            { step: "02", text: 'Enable Clerk — Replit sets all three keys automatically' },
+            { step: "03", text: 'Reload this preview — the app will start immediately' },
+          ].map(({ step, text }) => (
+            <div key={step} className="flex gap-4 items-start">
+              <span className="font-['Orbitron'] text-[#00c8ff] text-xs tracking-widest shrink-0 mt-0.5">
+                {step}
+              </span>
+              <span className="text-[#a0c8e0] font-['Share_Tech_Mono'] text-sm leading-relaxed">
+                {text}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div className="border border-[#00c8ff]/20 bg-[#00c8ff]/5 p-4">
+          <p className="text-[#66a3cc] font-['Share_Tech_Mono'] text-xs leading-relaxed">
+            <span className="text-[#00c8ff]">// NOTE</span> &nbsp;
+            The database schema and dependencies were already set up automatically
+            by the post-merge script. Auth is the only remaining step.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 const clerkAppearance = {
@@ -130,7 +179,9 @@ function DashboardProtect() {
   return (
     <>
       <Show when="signed-in">
-        <DashboardPage />
+        <PinGate>
+          <DashboardPage />
+        </PinGate>
       </Show>
       <Show when="signed-out">
         <Redirect to="/" />
@@ -143,7 +194,9 @@ function AdminProtect() {
   return (
     <>
       <Show when="signed-in">
-        <AdminPage />
+        <PinGate>
+          <AdminPage />
+        </PinGate>
       </Show>
       <Show when="signed-out">
         <Redirect to="/" />
@@ -156,7 +209,9 @@ function ProfileProtect() {
   return (
     <>
       <Show when="signed-in">
-        <ProfilePage />
+        <PinGate>
+          <ProfilePage />
+        </PinGate>
       </Show>
       <Show when="signed-out">
         <Redirect to="/" />
@@ -167,16 +222,19 @@ function ProfileProtect() {
 
 // Registers a global 401 handler so any expired-session API response
 // triggers an immediate sign-out + redirect instead of a broken UI.
+// Also clears the PIN re-check state on sign-out so re-login always re-prompts.
 function AuthWatcher() {
   const { signOut } = useClerk();
   const [, setLocation] = useLocation();
+  const { clearVerification } = usePinRecheck();
 
   useEffect(() => {
     setOnUnauthorized(() => {
+      clearVerification();
       signOut().finally(() => setLocation("/"));
     });
     return () => setOnUnauthorized(null);
-  }, [signOut, setLocation]);
+  }, [signOut, setLocation, clearVerification]);
 
   return null;
 }
@@ -252,10 +310,16 @@ function ClerkProviderWithRoutes() {
 }
 
 function App() {
+  if (!clerkPubKey) {
+    return <ClerkSetupRequired />;
+  }
+
   return (
     <WouterRouter base={basePath}>
-      <ClerkProviderWithRoutes />
-      <TechBootLoader />
+      <PinRecheckProvider>
+        <ClerkProviderWithRoutes />
+        <TechBootLoader />
+      </PinRecheckProvider>
     </WouterRouter>
   );
 }

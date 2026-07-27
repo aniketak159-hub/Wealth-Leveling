@@ -106,7 +106,11 @@ export default function PinLoginFlow({ onCancel }: Props) {
     const result = await clerk.client.signIn.create({ strategy: "ticket", ticket: token });
     if (result.status === "complete") {
       await clerk.setActive({ session: result.createdSessionId });
+      // User already has a PIN — no need to show the setup modal
+      localStorage.setItem("wl_pin_prompt_seen", "1");
       setStep("done");
+      // Navigate after the "Access Granted" animation plays
+      setTimeout(() => setLocation("/dashboard"), 1500);
     } else {
       setError("Authentication incomplete. Try the standard login.");
     }

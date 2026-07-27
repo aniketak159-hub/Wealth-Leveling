@@ -253,4 +253,31 @@ router.post("/auth/pin-login", async (req, res): Promise<void> => {
   }
 });
 
+// ── POST /api/auth/pin-verify — verify PIN for the authenticated user ────────
+// Used by the frontend PinGate on every protected-route re-entry.
+// The user is already signed in via Clerk; this only checks their PIN hash.
+router.post("/auth/pin-verify", requireAuth, async (req, res): Promise<void> => {
+  const user = (req as any).dbUser;
+
+  if (!user.pinHash) {
+    // No PIN set — nothing to verify; gate should pass through automatically.
+    res.json({ success: true, noPinSet: true });
+    return;
+  }
+
+  const { pin } = req.body;
+  if (!pin || typeof pin !== "string" || !/^\d{4,6}$/.test(pin)) {
+    res.status(400).json({ error: "PIN must be 4–6 digits." });
+    return;
+  }
+
+  const match = await bcrypt.compare(pin, user.pinHash);
+  if (!match) {
+    res.status(401).json({ error: "Incorrect PIN." });
+    return;
+  }
+
+  res.json({ success: true });
+});
+
 export default router;

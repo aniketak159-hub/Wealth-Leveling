@@ -7,7 +7,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { LogOut, LayoutDashboard, Database, Target, BookOpen, User, ShieldAlert, Cpu, BarChart } from "lucide-react";
+import { LogOut, LayoutDashboard, Database, Target, BookOpen, User, ShieldAlert, Cpu, BarChart, Swords } from "lucide-react";
 import { useClerk } from "@clerk/react";
 import StreakHUD, { type CheckinResult } from "@/components/dashboard/StreakHUD";
 import StreakShieldModal from "@/components/StreakShieldModal";
@@ -19,6 +19,8 @@ import WealthTab from "@/components/dashboard/WealthTab";
 import QuestsTab from "@/components/dashboard/QuestsTab";
 import BudgetTab from "@/components/dashboard/BudgetTab";
 import SkillsTab from "@/components/dashboard/SkillsTab";
+import BuildsTab from "@/components/dashboard/BuildsTab";
+import TabErrorBoundary from "@/components/dashboard/TabErrorBoundary";
 
 export default function DashboardPage() {
   const { data: me } = useGetMe();
@@ -177,6 +179,7 @@ export default function DashboardPage() {
               { value: "quests",   icon: Target,          label: "QUESTS" },
               { value: "budget",   icon: BarChart,        label: "BUDGET" },
               { value: "skills",   icon: BookOpen,        label: "SKILLS" },
+              { value: "builds",   icon: Swords,          label: "DUNGEONS" },
             ].map(({ value, icon: Icon, label }) => (
               <TabsTrigger key={value} value={value}
                 className="shrink-0 flex items-center gap-1.5 h-9 px-3 sm:px-4 text-[10px] sm:text-xs data-[state=active]:bg-primary/20 border border-primary/20 whitespace-nowrap">
@@ -187,22 +190,39 @@ export default function DashboardPage() {
 
           <div className="flex-1 w-full relative">
             <TabsContent value="overview" className="mt-0 h-full">
-              <OverviewTab dashboard={dashboard} />
+              <TabErrorBoundary tab="OVERVIEW">
+                <OverviewTab dashboard={dashboard} />
+              </TabErrorBoundary>
             </TabsContent>
             <TabsContent value="stats" className="mt-0 h-full">
-              <StatsTab dashboard={dashboard} />
+              <TabErrorBoundary tab="STATS">
+                <StatsTab dashboard={dashboard} />
+              </TabErrorBoundary>
             </TabsContent>
             <TabsContent value="wealth" className="mt-0 h-full">
-              <WealthTab />
+              <TabErrorBoundary tab="WEALTH">
+                <WealthTab />
+              </TabErrorBoundary>
             </TabsContent>
             <TabsContent value="quests" className="mt-0 h-full">
-              <QuestsTab />
+              <TabErrorBoundary tab="QUESTS">
+                <QuestsTab />
+              </TabErrorBoundary>
             </TabsContent>
             <TabsContent value="budget" className="mt-0 h-full">
-              <BudgetTab />
+              <TabErrorBoundary tab="BUDGET">
+                <BudgetTab />
+              </TabErrorBoundary>
             </TabsContent>
             <TabsContent value="skills" className="mt-0 h-full">
-              <SkillsTab />
+              <TabErrorBoundary tab="SKILLS">
+                <SkillsTab />
+              </TabErrorBoundary>
+            </TabsContent>
+            <TabsContent value="builds" className="mt-0 h-full">
+              <TabErrorBoundary tab="DUNGEONS">
+                <BuildsTab />
+              </TabErrorBoundary>
             </TabsContent>
           </div>
         </Tabs>
