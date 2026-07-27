@@ -1,7 +1,7 @@
 # 📋 Commit Log — Wealth Leveling
 
 All commits recorded in reverse-chronological order (newest first).
-Generated from `git log --all` on **2026-07-26**.
+Generated from `git log --all` on **2026-07-27**.
 
 ---
 
@@ -21,6 +21,29 @@ Generated from `git log --all` on **2026-07-26**.
 ---
 
 ## Commits
+
+---
+
+### `4d7a68b` · 2026-07-26 13:08 UTC
+**Author:** Replit Agent
+**Message:** Update project documentation and dependency configurations
+
+#### What changed
+- 🔧 **Root build scripts (`package.json`)** — added an explicit `build:libs` step for emitting shared TypeScript declarations; `typecheck:libs` now uses the same build path
+- 🔧 **API and frontend package scripts** — API and Wealth Levels typechecks build shared libraries first instead of relying on cached `dist/` declarations
+- 🔧 **`scripts/post-merge.sh`** — builds shared libraries during fresh-environment setup before applying the database schema
+- 📄 **`README.md` and `replit.md`** — documented the cold-checkout build order and fresh-import setup behavior
+- 📄 **Agent memory** — recorded the shared-library declaration requirement for future cold imports
+
+#### Files touched
+`package.json` · `artifacts/api-server/package.json` · `artifacts/wealth-levels/package.json` · `scripts/post-merge.sh` · `README.md` · `replit.md` · `.agents/memory/MEMORY.md` · `.agents/memory/cold-start-library-build.md`
+
+**8 files changed · +39 / −4**
+
+#### Verification
+- Cold-start API and frontend typechecks passed after removing generated declarations
+- Full workspace typecheck passed
+- All 31 API tests passed
 
 ---
 
@@ -298,13 +321,13 @@ Generated from `git log --all` on **2026-07-26**.
 | Date | Commits | Files Changed | Lines Added | Lines Removed |
 |------|---------|---------------|-------------|---------------|
 | 2026-07-25 | 8 | ~340 | ~42,650 | ~90 |
-| 2026-07-26 | 9 | ~65 | ~2,310 | ~620 |
-| **Total** | **17** | **~405** | **~44,960** | **~710** |
+| 2026-07-26 | 10 | ~73 | ~2,349 | ~624 |
+| **Total** | **18** | **~413** | **~44,999** | **~714** |
 
 ## Contributors
 
 | Author | Commits | Role |
 |--------|---------|------|
-| Replit Agent | 9 | Automated tooling, config, codegen, documentation |
+| Replit Agent | 10 | Automated tooling, config, codegen, documentation |
 | aniketak159-hub | 4 | Feature development, bug fixes, hardening |
 | Xoyav80800 | 4 | Feature development, quest system, dev tooling |
