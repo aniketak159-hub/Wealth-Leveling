@@ -19,6 +19,8 @@ import SecurityPage from "@/pages/Security";
 import NotFound from "@/pages/not-found";
 import PinLoginFlow from "@/components/PinLoginFlow";
 import PinSetupModal from "@/components/PinSetupModal";
+import PinGate from "@/components/PinGate";
+import { PinRecheckProvider, usePinRecheck } from "@/contexts/PinRecheckContext";
 
 const clerkPubKey = publishableKeyFromHost(
   window.location.hostname,
@@ -177,7 +179,9 @@ function DashboardProtect() {
   return (
     <>
       <Show when="signed-in">
-        <DashboardPage />
+        <PinGate>
+          <DashboardPage />
+        </PinGate>
       </Show>
       <Show when="signed-out">
         <Redirect to="/" />
@@ -190,7 +194,9 @@ function AdminProtect() {
   return (
     <>
       <Show when="signed-in">
-        <AdminPage />
+        <PinGate>
+          <AdminPage />
+        </PinGate>
       </Show>
       <Show when="signed-out">
         <Redirect to="/" />
@@ -203,7 +209,9 @@ function ProfileProtect() {
   return (
     <>
       <Show when="signed-in">
-        <ProfilePage />
+        <PinGate>
+          <ProfilePage />
+        </PinGate>
       </Show>
       <Show when="signed-out">
         <Redirect to="/" />
@@ -214,16 +222,19 @@ function ProfileProtect() {
 
 // Registers a global 401 handler so any expired-session API response
 // triggers an immediate sign-out + redirect instead of a broken UI.
+// Also clears the PIN re-check state on sign-out so re-login always re-prompts.
 function AuthWatcher() {
   const { signOut } = useClerk();
   const [, setLocation] = useLocation();
+  const { clearVerification } = usePinRecheck();
 
   useEffect(() => {
     setOnUnauthorized(() => {
+      clearVerification();
       signOut().finally(() => setLocation("/"));
     });
     return () => setOnUnauthorized(null);
-  }, [signOut, setLocation]);
+  }, [signOut, setLocation, clearVerification]);
 
   return null;
 }
@@ -305,8 +316,10 @@ function App() {
 
   return (
     <WouterRouter base={basePath}>
-      <ClerkProviderWithRoutes />
-      <TechBootLoader />
+      <PinRecheckProvider>
+        <ClerkProviderWithRoutes />
+        <TechBootLoader />
+      </PinRecheckProvider>
     </WouterRouter>
   );
 }
