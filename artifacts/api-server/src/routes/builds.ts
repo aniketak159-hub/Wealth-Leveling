@@ -14,6 +14,8 @@ import {
 
 const router: IRouter = Router();
 
+type BuildStatus = "ACTIVE" | "ON_HOLD" | "CLEARED";
+
 function buildToResponse(b: typeof buildsTable.$inferSelect) {
   const revenue = parseFloat(b.revenue as string);
   const expenses = parseFloat(b.expenses as string);
@@ -23,6 +25,7 @@ function buildToResponse(b: typeof buildsTable.$inferSelect) {
     name: b.name,
     description: b.description,
     rank: b.rank as "S" | "A" | "B" | "C" | "D" | "E",
+    status: (b.status ?? "ACTIVE") as BuildStatus,
     revenue,
     expenses,
     netProfit: revenue - expenses,
@@ -51,6 +54,7 @@ router.post("/builds", requireAuth, async (req, res): Promise<void> => {
       name: parsed.data.name,
       description: parsed.data.description ?? "",
       rank: parsed.data.rank ?? "D",
+      status: parsed.data.status ?? "ACTIVE",
       revenue: parsed.data.revenue ? String(parsed.data.revenue) : "0",
       expenses: parsed.data.expenses ? String(parsed.data.expenses) : "0",
     })
@@ -77,6 +81,7 @@ router.patch("/builds/:id", requireAuth, async (req, res): Promise<void> => {
   if (parsed.data.name !== undefined) updates.name = parsed.data.name;
   if (parsed.data.description !== undefined) updates.description = parsed.data.description;
   if (parsed.data.rank !== undefined) updates.rank = parsed.data.rank;
+  if (parsed.data.status !== undefined) updates.status = parsed.data.status;
   if (parsed.data.revenue !== undefined) updates.revenue = String(parsed.data.revenue);
   if (parsed.data.expenses !== undefined) updates.expenses = String(parsed.data.expenses);
 

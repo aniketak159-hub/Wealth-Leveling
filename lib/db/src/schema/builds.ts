@@ -8,6 +8,7 @@ export const buildsTable = pgTable("builds", {
   name: text("name").notNull(),
   description: text("description").notNull().default(""),
   rank: text("rank").notNull().default("D"), // S|A|B|C|D|E
+  status: text("status").notNull().default("ACTIVE"), // ACTIVE|ON_HOLD|CLEARED
   revenue: numeric("revenue", { precision: 15, scale: 2 }).notNull().default("0"),
   expenses: numeric("expenses", { precision: 15, scale: 2 }).notNull().default("0"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
