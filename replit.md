@@ -32,7 +32,13 @@ pnpm run build:libs
 
 The following are auto-managed by Replit — do not set manually:
 - `DATABASE_URL`, `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`
+
+The following are stored as **Replit Secrets** (never committed to git):
 - `CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY`, `VITE_CLERK_PUBLISHABLE_KEY`
+
+`VITE_CLERK_PROXY_URL` is set to empty via Replit env vars so the dev server
+does not try to route through the production Clerk proxy. In production this
+value is populated automatically by the Replit infrastructure.
 
 ## Database schema
 
