@@ -126,14 +126,14 @@ pnpm --filter db push        # push Drizzle schema to the database
 The Replit PostgreSQL database is pre-provisioned — no manual DB setup needed.
 
 ### One manual step — Clerk auth
-Clerk keys are never committed to the repo (they're provisioned per-Repl). Two options:
+Clerk keys are never committed to the repo. They are stored as **Replit Secrets**:
+- `CLERK_PUBLISHABLE_KEY`
+- `CLERK_SECRET_KEY`
+- `VITE_CLERK_PUBLISHABLE_KEY`
 
-**Option A — Auth pane (recommended for production use)**
-1. Open the **Auth** pane in the Replit workspace toolbar
-2. Enable Clerk — Replit sets `CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY`, and `VITE_CLERK_PUBLISHABLE_KEY` automatically
+Add these via the **Secrets** pane in the Replit workspace before running the app.
 
-**Option B — Committed dev keys (already done)**
-The `.env` files at `artifacts/wealth-levels/.env` and `artifacts/api-server/.env` contain the development Clerk keys from the original Repl. On import these travel with the repo and the app starts immediately — all sign-ups go into the same dev Clerk tenant. Suitable for testing; swap for provisioned keys before going to production.
+> **Note:** Replit auto-injects `VITE_CLERK_PROXY_URL` when Clerk secrets are present. In development this must be overridden to empty (`VITE_CLERK_PROXY_URL=`) via the shared env-var settings, otherwise the Clerk JS bundle fails to load. This is already configured in this Repl.
 
 ---
 
