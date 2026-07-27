@@ -41,9 +41,22 @@ pnpm run typecheck        # all packages
 pnpm run typecheck:libs   # shared libraries only
 ```
 
+## Importing this project from GitHub
+
+Everything except auth is fully automatic on import:
+- `scripts/post-merge.sh` installs dependencies, builds shared libs, and pushes the DB schema automatically.
+- The Replit PostgreSQL database is pre-provisioned — no setup needed.
+
+**The one manual step — Clerk auth:**
+1. Open the **Auth** pane in the Replit workspace toolbar
+2. Enable Clerk — Replit sets all three keys automatically (`CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `VITE_CLERK_PUBLISHABLE_KEY`)
+3. Reload the preview
+
+If auth is not configured, the app shows a setup screen with these instructions instead of crashing.
+
 ## Auth Notes
 
-- Clerk keys are stored in Replit Secrets (`CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `VITE_CLERK_PUBLISHABLE_KEY`)
+- Clerk keys are stored in Replit Secrets (auto-provisioned via the Auth pane)
 - Dev and production Clerk environments are separate user stores — accounts don't cross over
 - The `pk_test` key in dev is expected and normal
 
