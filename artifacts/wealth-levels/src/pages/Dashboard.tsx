@@ -19,6 +19,7 @@ import WealthTab from "@/components/dashboard/WealthTab";
 import QuestsTab from "@/components/dashboard/QuestsTab";
 import BudgetTab from "@/components/dashboard/BudgetTab";
 import SkillsTab from "@/components/dashboard/SkillsTab";
+import TabErrorBoundary from "@/components/dashboard/TabErrorBoundary";
 
 export default function DashboardPage() {
   const { data: me } = useGetMe();
@@ -187,22 +188,34 @@ export default function DashboardPage() {
 
           <div className="flex-1 w-full relative">
             <TabsContent value="overview" className="mt-0 h-full">
-              <OverviewTab dashboard={dashboard} />
+              <TabErrorBoundary tab="OVERVIEW">
+                <OverviewTab dashboard={dashboard} />
+              </TabErrorBoundary>
             </TabsContent>
             <TabsContent value="stats" className="mt-0 h-full">
-              <StatsTab dashboard={dashboard} />
+              <TabErrorBoundary tab="STATS">
+                <StatsTab dashboard={dashboard} />
+              </TabErrorBoundary>
             </TabsContent>
             <TabsContent value="wealth" className="mt-0 h-full">
-              <WealthTab />
+              <TabErrorBoundary tab="WEALTH">
+                <WealthTab />
+              </TabErrorBoundary>
             </TabsContent>
             <TabsContent value="quests" className="mt-0 h-full">
-              <QuestsTab />
+              <TabErrorBoundary tab="QUESTS">
+                <QuestsTab />
+              </TabErrorBoundary>
             </TabsContent>
             <TabsContent value="budget" className="mt-0 h-full">
-              <BudgetTab />
+              <TabErrorBoundary tab="BUDGET">
+                <BudgetTab />
+              </TabErrorBoundary>
             </TabsContent>
             <TabsContent value="skills" className="mt-0 h-full">
-              <SkillsTab />
+              <TabErrorBoundary tab="SKILLS">
+                <SkillsTab />
+              </TabErrorBoundary>
             </TabsContent>
           </div>
         </Tabs>
