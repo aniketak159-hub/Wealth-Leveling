@@ -6,7 +6,7 @@ import { Switch, Route, Redirect, useLocation, Router as WouterRouter } from 'wo
 import { queryClient } from "@/lib/queryClient";
 import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { setOnUnauthorized } from "@workspace/api-client-react";
-import { KeyRound } from "lucide-react";
+import { KeyRound, Lock } from "lucide-react";
 import TechBootLoader from "@/components/TechBootLoader";
 
 import Home from "@/pages/Home";
@@ -147,6 +147,10 @@ function SignInPage() {
             <KeyRound className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
             Login with Secret PIN
           </button>
+          <div className="flex items-center gap-1.5 text-[#00c8ff]/25 font-mono text-[10px] tracking-widest mt-3">
+            <Lock className="w-3 h-3" />
+            Data encrypted at rest &amp; in transit
+          </div>
         </div>
       )}
     </div>
@@ -158,6 +162,10 @@ function SignUpPage() {
     <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4 relative hud-grid-bg">
       <div className="absolute top-4 left-4 text-[#00c8ff]/30 font-mono text-xs tracking-widest">PLAYER REGISTRATION // STANDBY</div>
       <SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} />
+      <div className="flex items-center gap-1.5 text-[#00c8ff]/25 font-mono text-[10px] tracking-widest mt-1">
+        <Lock className="w-3 h-3" />
+        Data encrypted at rest &amp; in transit
+      </div>
     </div>
   );
 }

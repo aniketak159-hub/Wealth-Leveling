@@ -1009,6 +1009,10 @@ export default function ProfilePage() {
               <PasswordCard passwordEnabled={passwordEnabled} />
               <PinCard />
               <TotpCard />
+              <div className="flex items-center gap-1.5 text-primary/30 font-mono text-[10px] tracking-widest px-1 pt-1">
+                <Lock className="w-3 h-3" />
+                Data encrypted at rest &amp; in transit
+              </div>
             </motion.div>
 
             {/* Account info */}

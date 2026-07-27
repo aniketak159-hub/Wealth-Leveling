@@ -8,7 +8,7 @@ import { useState } from "react";
 import { useClerk } from "@clerk/react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { KeyRound, Eye, EyeOff, ChevronLeft, ArrowRight, ShieldCheck, Smartphone } from "lucide-react";
+import { KeyRound, Eye, EyeOff, ChevronLeft, ArrowRight, ShieldCheck, Smartphone, Lock } from "lucide-react";
 
 const BASE_URL = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -301,6 +301,11 @@ export default function PinLoginFlow({ onCancel }: Props) {
         )}
 
       </AnimatePresence>
+
+      <div className="flex items-center justify-center gap-1.5 text-[#00c8ff]/25 font-mono text-[10px] tracking-widest pt-4 border-t border-[#00c8ff]/10 mt-2">
+        <Lock className="w-3 h-3" />
+        Data encrypted at rest &amp; in transit
+      </div>
     </motion.div>
   );
 }
