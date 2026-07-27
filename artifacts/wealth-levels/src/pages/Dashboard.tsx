@@ -7,7 +7,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { LogOut, LayoutDashboard, Database, Target, BookOpen, User, ShieldAlert, Cpu, BarChart } from "lucide-react";
+import { LogOut, LayoutDashboard, Database, Target, BookOpen, User, ShieldAlert, Cpu, BarChart, Swords } from "lucide-react";
 import { useClerk } from "@clerk/react";
 import StreakHUD, { type CheckinResult } from "@/components/dashboard/StreakHUD";
 import StreakShieldModal from "@/components/StreakShieldModal";
@@ -19,6 +19,7 @@ import WealthTab from "@/components/dashboard/WealthTab";
 import QuestsTab from "@/components/dashboard/QuestsTab";
 import BudgetTab from "@/components/dashboard/BudgetTab";
 import SkillsTab from "@/components/dashboard/SkillsTab";
+import BuildsTab from "@/components/dashboard/BuildsTab";
 import TabErrorBoundary from "@/components/dashboard/TabErrorBoundary";
 
 export default function DashboardPage() {
@@ -178,6 +179,7 @@ export default function DashboardPage() {
               { value: "quests",   icon: Target,          label: "QUESTS" },
               { value: "budget",   icon: BarChart,        label: "BUDGET" },
               { value: "skills",   icon: BookOpen,        label: "SKILLS" },
+              { value: "builds",   icon: Swords,          label: "DUNGEONS" },
             ].map(({ value, icon: Icon, label }) => (
               <TabsTrigger key={value} value={value}
                 className="shrink-0 flex items-center gap-1.5 h-9 px-3 sm:px-4 text-[10px] sm:text-xs data-[state=active]:bg-primary/20 border border-primary/20 whitespace-nowrap">
@@ -215,6 +217,11 @@ export default function DashboardPage() {
             <TabsContent value="skills" className="mt-0 h-full">
               <TabErrorBoundary tab="SKILLS">
                 <SkillsTab />
+              </TabErrorBoundary>
+            </TabsContent>
+            <TabsContent value="builds" className="mt-0 h-full">
+              <TabErrorBoundary tab="DUNGEONS">
+                <BuildsTab />
               </TabErrorBoundary>
             </TabsContent>
           </div>
