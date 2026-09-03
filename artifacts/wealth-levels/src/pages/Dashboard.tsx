@@ -15,6 +15,7 @@ import WealthTab from "@/components/dashboard/WealthTab";
 import QuestsTab from "@/components/dashboard/QuestsTab";
 import BudgetTab from "@/components/dashboard/BudgetTab";
 import SkillsTab from "@/components/dashboard/SkillsTab";
+import TabErrorBoundary from "@/components/dashboard/TabErrorBoundary";
 
 export default function DashboardPage() {
   const { data: me } = useGetMe();
@@ -118,22 +119,34 @@ export default function DashboardPage() {
 
           <div className="flex-1 w-full relative">
             <TabsContent value="overview" className="mt-0 h-full">
-              <OverviewTab dashboard={dashboard} />
+              <TabErrorBoundary tabName="Overview">
+                <OverviewTab dashboard={dashboard} />
+              </TabErrorBoundary>
             </TabsContent>
             <TabsContent value="stats" className="mt-0 h-full">
-              <StatsTab dashboard={dashboard} />
+              <TabErrorBoundary tabName="Stats">
+                <StatsTab dashboard={dashboard} />
+              </TabErrorBoundary>
             </TabsContent>
             <TabsContent value="wealth" className="mt-0 h-full">
-              <WealthTab />
+              <TabErrorBoundary tabName="Wealth">
+                <WealthTab />
+              </TabErrorBoundary>
             </TabsContent>
             <TabsContent value="quests" className="mt-0 h-full">
-              <QuestsTab />
+              <TabErrorBoundary tabName="Quests">
+                <QuestsTab />
+              </TabErrorBoundary>
             </TabsContent>
             <TabsContent value="budget" className="mt-0 h-full">
-              <BudgetTab />
+              <TabErrorBoundary tabName="Budget">
+                <BudgetTab />
+              </TabErrorBoundary>
             </TabsContent>
             <TabsContent value="skills" className="mt-0 h-full">
-              <SkillsTab />
+              <TabErrorBoundary tabName="Skills">
+                <SkillsTab />
+              </TabErrorBoundary>
             </TabsContent>
           </div>
         </Tabs>
