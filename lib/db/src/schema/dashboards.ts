@@ -6,7 +6,7 @@ export const dashboardsTable = pgTable("dashboards", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().unique(),
   displayName: text("display_name").notNull(),
-  title: text("title").notNull().default("Novice Wealth Hunter"),
+  title: text("title").notNull().default("Novice Wealth Player"),
   level: integer("level").notNull().default(1),
   rank: text("rank").notNull().default("E"),
   xp: integer("xp").notNull().default(0),
@@ -22,7 +22,7 @@ export const dashboardsTable = pgTable("dashboards", {
   statLuk: integer("stat_luk").notNull().default(10),
   unspentPoints: integer("unspent_points").notNull().default(0),
   // System log stored as newline-separated text
-  systemLog: text("system_log").notNull().default("The System has been installed.\nWelcome, Hunter."),
+  systemLog: text("system_log").notNull().default("The System has been installed.\nWelcome, Player."),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });
