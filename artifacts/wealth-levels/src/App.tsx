@@ -11,6 +11,7 @@ import DashboardPage from "@/pages/Dashboard";
 import AdminPage from "@/pages/Admin";
 import ProfilePage from "@/pages/Profile";
 import NotFound from "@/pages/not-found";
+import PinGate from "@/components/PinGate";
 
 const clerkPubKey = publishableKeyFromHost(
   window.location.hostname,
@@ -105,7 +106,9 @@ function DashboardProtect() {
   return (
     <>
       <Show when="signed-in">
-        <DashboardPage />
+        <PinGate>
+          <DashboardPage />
+        </PinGate>
       </Show>
       <Show when="signed-out">
         <Redirect to="/" />
@@ -118,7 +121,9 @@ function AdminProtect() {
   return (
     <>
       <Show when="signed-in">
-        <AdminPage />
+        <PinGate>
+          <AdminPage />
+        </PinGate>
       </Show>
       <Show when="signed-out">
         <Redirect to="/" />
@@ -131,7 +136,9 @@ function ProfileProtect() {
   return (
     <>
       <Show when="signed-in">
-        <ProfilePage />
+        <PinGate>
+          <ProfilePage />
+        </PinGate>
       </Show>
       <Show when="signed-out">
         <Redirect to="/" />

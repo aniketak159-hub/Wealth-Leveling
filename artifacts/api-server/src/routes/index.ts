@@ -8,6 +8,7 @@ import buildsRouter from "./builds";
 import budgetRouter from "./budget";
 import wealthRouter from "./wealth";
 import adminRouter from "./admin";
+import pinRouter from "./pin";
 
 const router: IRouter = Router();
 
@@ -20,5 +21,6 @@ router.use(buildsRouter);
 router.use(budgetRouter);
 router.use(wealthRouter);
 router.use(adminRouter);
+router.use(pinRouter);
 
 export default router;
