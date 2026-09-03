@@ -57,7 +57,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Top HUD Header */}
       <header className="w-full border-b border-primary/30 bg-black/40 backdrop-blur-md sticky top-0 z-50 p-4">
-        <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="w-full max-w-[1400px] min-[2000px]:max-w-none mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 border-2 border-primary hud-glow-box bg-primary/10 flex items-center justify-center p-1">
@@ -76,7 +76,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="flex-1 w-full max-w-md mx-8 flex flex-col gap-1">
+          <div className="flex-1 w-full max-w-[clamp(18rem,40vw,48rem)] mx-8 flex flex-col gap-1">
             <div className="flex justify-between text-xs font-mono tracking-widest">
               <span className="text-primary">LVL {dashboard.level}</span>
               <span className="text-primary/70">{dashboard.xp} / {dashboard.xpToNext} XP</span>
@@ -107,7 +107,7 @@ export default function DashboardPage() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 w-full max-w-[1400px] mx-auto p-4 md:p-6 overflow-hidden">
+      <main className="flex-1 w-full max-w-[1400px] min-[2000px]:max-w-none mx-auto p-4 md:p-6 overflow-hidden">
         <Tabs defaultValue="overview" className="w-full h-full flex flex-col">
            <TabsList className="grid grid-cols-3 md:grid-cols-7 mb-6 bg-transparent border-0 h-auto p-0 gap-2">
             <TabsTrigger value="overview" className="h-10 data-[state=active]:bg-primary/20 border border-primary/20"><LayoutDashboard className="w-4 h-4 mr-2 hidden md:block" /> OVERVIEW</TabsTrigger>
