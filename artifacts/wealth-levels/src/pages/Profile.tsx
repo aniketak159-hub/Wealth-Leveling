@@ -208,7 +208,7 @@ function buildAchievements(params: {
       rarity: "uncommon",
     },
     {
-      id: "elite_hunter",
+      id: "elite_player",
       label: "Elite Player",
       description: "Reached Level 10",
       Icon: Award,
@@ -669,6 +669,7 @@ export default function ProfilePage() {
   const handleNameSave = useCallback(async (name: string) => {
     await updateMe({ data: { displayName: name } });
     queryClient.invalidateQueries({ queryKey: ["/api/users/me"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/dashboard"] });
   }, [updateMe, queryClient]);
 
   if (!clerkLoaded || !me) {

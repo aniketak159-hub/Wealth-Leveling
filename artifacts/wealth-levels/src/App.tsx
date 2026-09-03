@@ -181,7 +181,7 @@ function ClerkProviderWithRoutes() {
         },
         signUp: {
           start: {
-            title: "INITIALIZE HUNTER",
+            title: "INITIALIZE PLAYER",
             subtitle: "REGISTER CREDENTIALS TO BEGIN",
           },
         },

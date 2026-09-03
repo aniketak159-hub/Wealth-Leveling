@@ -127,7 +127,7 @@ function OverviewTab() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-8 text-[10px]">#</TableHead>
-                  <TableHead className="text-[10px]">HUNTER</TableHead>
+                  <TableHead className="text-[10px]">PLAYER</TableHead>
                   <TableHead className="text-right text-[10px]">LVL</TableHead>
                 </TableRow>
               </TableHeader>
@@ -275,7 +275,7 @@ function PlayersTab() {
           <TableHeader>
             <TableRow className="border-primary/20">
               <TableHead className="text-[10px] w-8"></TableHead>
-              <TableHead className="text-[10px]">HUNTER</TableHead>
+              <TableHead className="text-[10px]">PLAYER</TableHead>
               <TableHead className="text-[10px]">RANK</TableHead>
               <TableHead className="text-right text-[10px]">NET WORTH</TableHead>
               <TableHead className="text-right text-[10px]">Q / S / B</TableHead>
@@ -338,7 +338,7 @@ function PlayersTab() {
                         {/* Edit form */}
                         {editingId === u.id && (
                           <div className="border border-primary/30 bg-primary/5 rounded p-4 space-y-3">
-                            <div className="text-xs font-mono text-primary mb-2">// EDIT HUNTER</div>
+                            <div className="text-xs font-mono text-primary mb-2">// EDIT PLAYER</div>
                             <div className="flex items-center gap-3 flex-wrap">
                               <div className="flex-1 min-w-[180px]">
                                 <label className="text-[10px] font-mono text-muted-foreground block mb-1">DISPLAY NAME</label>
@@ -1054,7 +1054,7 @@ export default function AdminPage() {
       {/* Content */}
       <main className="flex-1 p-6 overflow-auto">
         {activeTab === "OVERVIEW" && <OverviewTab />}
-        {activeTab === "HUNTERS" && <HuntersTab />}
+        {activeTab === "PLAYERS" && <PlayersTab />}
         {activeTab === "QUEST DISPATCH" && <QuestDispatchTab />}
         {activeTab === "BADGES" && <BadgesTab />}
         {activeTab === "MILESTONES" && <MilestonesTab />}

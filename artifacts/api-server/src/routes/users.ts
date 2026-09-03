@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, usersTable } from "@workspace/db";
+import { db, usersTable, dashboardsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { GetMeResponse, UpdateMeBody, UpdateMeResponse } from "@workspace/api-zod";
@@ -35,6 +35,13 @@ router.patch("/users/me", requireAuth, async (req, res): Promise<void> => {
     .set(updates)
     .where(eq(usersTable.id, user.id))
     .returning();
+
+  if (parsed.data.displayName !== undefined) {
+    await db
+      .update(dashboardsTable)
+      .set({ displayName: updated.displayName })
+      .where(eq(dashboardsTable.userId, user.id));
+  }
 
   res.json(UpdateMeResponse.parse({
     id: updated.id,
