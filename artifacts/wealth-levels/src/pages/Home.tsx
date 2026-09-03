@@ -38,7 +38,7 @@ export default function Home() {
         </div>
         <div className="flex gap-4">
           <Link href="/sign-in" className="inline-flex items-center justify-center whitespace-nowrap text-sm font-heading font-medium uppercase tracking-widest border border-primary/30 bg-transparent hover:bg-primary/10 text-primary h-9 px-4 py-2 transition-all">Sign In</Link>
-          <Link href="/sign-up" className="inline-flex items-center justify-center whitespace-nowrap text-sm font-heading font-medium uppercase tracking-widest hud-button h-9 px-4 py-2">Initialize Hunter</Link>
+          <Link href="/sign-up" className="inline-flex items-center justify-center whitespace-nowrap text-sm font-heading font-medium uppercase tracking-widest hud-button h-9 px-4 py-2">Initialize Player</Link>
         </div>
       </nav>
 
@@ -87,7 +87,7 @@ export default function Home() {
       <section className="w-full py-16 bg-primary/5 border-y border-primary/20 overflow-hidden relative">
         <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
           {[
-            { label: "Total Hunters", val: "14,204" },
+            { label: "Total Players", val: "14,204" },
             { label: "Active Quests", val: "89,112" },
             { label: "Avg Net Worth", val: "₹1.4M" },
             { label: "System Status", val: "OPTIMAL" },

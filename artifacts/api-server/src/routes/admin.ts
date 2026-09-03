@@ -219,7 +219,7 @@ router.post("/admin/quests/push", requireAuth, requireAdmin, async (req, res): P
 
   res.json(AdminPushQuestResponse.parse({
     pushed: insertValues.length,
-    message: userId ? `Quest pushed to user #${userId}` : `Quest pushed to all ${insertValues.length} hunters`,
+    message: userId ? `Quest pushed to user #${userId}` : `Quest pushed to all ${insertValues.length} players`,
   }));
 });
 

@@ -82,7 +82,7 @@ function SignInPage() {
 function SignUpPage() {
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4 relative hud-grid-bg">
-      <div className="absolute top-4 left-4 text-[#00c8ff]/30 font-mono text-xs tracking-widest">HUNTER REGISTRATION // STANDBY</div>
+      <div className="absolute top-4 left-4 text-[#00c8ff]/30 font-mono text-xs tracking-widest">PLAYER REGISTRATION // STANDBY</div>
       <SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} />
     </div>
   );

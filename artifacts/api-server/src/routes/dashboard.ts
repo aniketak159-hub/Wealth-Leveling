@@ -29,9 +29,9 @@ function calcTitle(level: number): string {
   if (level >= 50) return "Sovereign Wealth Master";
   if (level >= 30) return "Elite Financial Commander";
   if (level >= 20) return "Wealth Architect";
-  if (level >= 10) return "Seasoned Wealth Hunter";
-  if (level >= 5) return "Apprentice Wealth Hunter";
-  return "Novice Wealth Hunter";
+  if (level >= 10) return "Seasoned Wealth Player";
+  if (level >= 5) return "Apprentice Wealth Player";
+  return "Novice Wealth Player";
 }
 
 async function getOrCreateDashboard(userId: number, displayName: string) {

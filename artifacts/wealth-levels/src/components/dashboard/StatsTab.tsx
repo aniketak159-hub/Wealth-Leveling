@@ -48,7 +48,7 @@ export default function StatsTab({ dashboard }: { dashboard: Dashboard }) {
         <CardContent className="p-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
             <h3 className="font-heading text-lg text-warning tracking-widest font-bold">UNSPENT POINTS: <span className="text-3xl ml-2">{remainingPoints}</span></h3>
-            <p className="text-xs text-warning/70 mt-1">Allocate points carefully. Stats influence your overall Hunter Tier.</p>
+            <p className="text-xs text-warning/70 mt-1">Allocate points carefully. Stats influence your overall Player Tier.</p>
           </div>
           <Button 
             onClick={handleCommit} 

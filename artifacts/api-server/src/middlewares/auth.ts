@@ -18,7 +18,7 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     const displayName =
       (auth as any)?.sessionClaims?.fullName ||
       (auth as any)?.sessionClaims?.firstName ||
-      "Hunter";
+      "Player";
     [user] = await db
       .insert(usersTable)
       .values({ clerkId, displayName })
