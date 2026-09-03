@@ -6,7 +6,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { LogOut, LayoutDashboard, Database, Target, BookOpen, User, ShieldAlert, Cpu, BarChart } from "lucide-react";
+import { LogOut, LayoutDashboard, Database, Target, BookOpen, User, ShieldAlert, Cpu, BarChart, Landmark } from "lucide-react";
 import { useClerk } from "@clerk/react";
 
 import OverviewTab from "@/components/dashboard/OverviewTab";
@@ -15,6 +15,7 @@ import WealthTab from "@/components/dashboard/WealthTab";
 import QuestsTab from "@/components/dashboard/QuestsTab";
 import BudgetTab from "@/components/dashboard/BudgetTab";
 import SkillsTab from "@/components/dashboard/SkillsTab";
+import BuildsTab from "@/components/dashboard/BuildsTab";
 import TabErrorBoundary from "@/components/dashboard/TabErrorBoundary";
 
 export default function DashboardPage() {
@@ -108,13 +109,14 @@ export default function DashboardPage() {
       {/* Main Content */}
       <main className="flex-1 w-full max-w-[1400px] mx-auto p-4 md:p-6 overflow-hidden">
         <Tabs defaultValue="overview" className="w-full h-full flex flex-col">
-          <TabsList className="grid grid-cols-3 md:grid-cols-6 mb-6 bg-transparent border-0 h-auto p-0 gap-2">
+           <TabsList className="grid grid-cols-3 md:grid-cols-7 mb-6 bg-transparent border-0 h-auto p-0 gap-2">
             <TabsTrigger value="overview" className="h-10 data-[state=active]:bg-primary/20 border border-primary/20"><LayoutDashboard className="w-4 h-4 mr-2 hidden md:block" /> OVERVIEW</TabsTrigger>
             <TabsTrigger value="stats" className="h-10 data-[state=active]:bg-primary/20 border border-primary/20"><Cpu className="w-4 h-4 mr-2 hidden md:block" /> STATS</TabsTrigger>
             <TabsTrigger value="wealth" className="h-10 data-[state=active]:bg-primary/20 border border-primary/20"><Database className="w-4 h-4 mr-2 hidden md:block" /> WEALTH</TabsTrigger>
             <TabsTrigger value="quests" className="h-10 data-[state=active]:bg-primary/20 border border-primary/20"><Target className="w-4 h-4 mr-2 hidden md:block" /> QUESTS</TabsTrigger>
             <TabsTrigger value="budget" className="h-10 data-[state=active]:bg-primary/20 border border-primary/20"><BarChart className="w-4 h-4 mr-2 hidden md:block" /> BUDGET</TabsTrigger>
             <TabsTrigger value="skills" className="h-10 data-[state=active]:bg-primary/20 border border-primary/20"><BookOpen className="w-4 h-4 mr-2 hidden md:block" /> SKILLS</TabsTrigger>
+             <TabsTrigger value="builds" className="h-10 data-[state=active]:bg-primary/20 border border-primary/20" data-testid="tab-dungeons"><Landmark className="w-4 h-4 mr-2 hidden md:block" /> DUNGEONS</TabsTrigger>
           </TabsList>
 
           <div className="flex-1 w-full relative">
@@ -146,6 +148,11 @@ export default function DashboardPage() {
             <TabsContent value="skills" className="mt-0 h-full">
               <TabErrorBoundary tabName="Skills">
                 <SkillsTab />
+              </TabErrorBoundary>
+            </TabsContent>
+            <TabsContent value="builds" className="mt-0 h-full">
+              <TabErrorBoundary tabName="Dungeons">
+                <BuildsTab />
               </TabErrorBoundary>
             </TabsContent>
           </div>
